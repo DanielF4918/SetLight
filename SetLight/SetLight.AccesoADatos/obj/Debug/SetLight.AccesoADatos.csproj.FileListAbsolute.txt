@@ -1,0 +1,14 @@
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll.config
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.xml
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.AssemblyReference.cache
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.CoreCompileInputs.cache
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.31911824.Up2Date
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb

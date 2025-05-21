@@ -1,0 +1,14 @@
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.csproj.AssemblyReference.cache
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.csproj.CoreCompileInputs.cache
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.LogicaDeNegocio.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.LogicaDeNegocio.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.AccesoADatos.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.AccesoADatos.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.AccesoADatos.dll.config
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.xml
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.0FE7D236.Up2Date
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.pdb
