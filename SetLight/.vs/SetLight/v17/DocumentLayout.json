@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\AMD\\Desktop\\SetLight\\SetLight\\",
+  "WorkspaceRootPath": "C:\\Users\\AMD\\Documents\\GitHub\\SetLight\\SetLight\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C3B7D29A-84AF-47EE-B05D-E2B5503BBE14}|SetLight.Abstracciones\\SetLight.Abstracciones.csproj|c:\\users\\amd\\desktop\\setlight\\setlight\\setlight.abstracciones\\modelosparaui\\equipment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C3B7D29A-84AF-47EE-B05D-E2B5503BBE14}|SetLight.Abstracciones\\SetLight.Abstracciones.csproj|c:\\users\\amd\\documents\\github\\setlight\\setlight\\setlight.abstracciones\\modelosparaui\\equipment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C3B7D29A-84AF-47EE-B05D-E2B5503BBE14}|SetLight.Abstracciones\\SetLight.Abstracciones.csproj|solutionrelative:setlight.abstracciones\\modelosparaui\\equipment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -24,9 +24,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Equipment.cs",
-              "DocumentMoniker": "C:\\Users\\AMD\\Desktop\\SetLight\\SetLight\\SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
+              "DocumentMoniker": "C:\\Users\\AMD\\Documents\\GitHub\\SetLight\\SetLight\\SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
               "RelativeDocumentMoniker": "SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
-              "ToolTip": "C:\\Users\\AMD\\Desktop\\SetLight\\SetLight\\SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
+              "ToolTip": "C:\\Users\\AMD\\Documents\\GitHub\\SetLight\\SetLight\\SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
               "RelativeToolTip": "SetLight.Abstracciones\\ModelosParaUI\\Equipment.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

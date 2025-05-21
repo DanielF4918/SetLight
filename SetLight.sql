@@ -4,34 +4,21 @@ GO
 USE SetLight;
 GO
 
-
-CREATE DATABASE SetLight;
-GO
-
-USE SetLight;
-GO
-
 -- Tabla de usuarios del sistema
 CREATE TABLE Users (
     UserId INT PRIMARY KEY IDENTITY(1,1),
-    FirstName NVARCHAR(100) NOT NULL,
-    LastName NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(100) NOT NULL
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL
 );
 
 -- Tabla de clientes
 CREATE TABLE Clients (
     ClientId INT PRIMARY KEY IDENTITY(1,1),
-    FirstName NVARCHAR(100) NOT NULL,
-    LastName NVARCHAR(100) NOT NULL,
-    Phone NVARCHAR(20),
-    Email NVARCHAR(100)
-);
-
--- Catálogo de estados de órdenes
-CREATE TABLE OrderStatuses (
-    OrderStatusId INT PRIMARY KEY IDENTITY(1,1),
-    StatusName NVARCHAR(50) NOT NULL
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Phone VARCHAR(20),
+    Email VARCHAR(100)
 );
 
 -- Tabla de órdenes de alquiler
@@ -40,39 +27,31 @@ CREATE TABLE RentalOrders (
     OrderDate DATE NOT NULL,
     StartDate DATE NOT NULL,
     EndDate DATE NOT NULL,
-    StatusOrderId INT NOT NULL,
+    StatusOrder INT NOT NULL,         
     ClientId INT NOT NULL,
-    FOREIGN KEY (StatusOrderId) REFERENCES OrderStatuses(OrderStatusId),
     FOREIGN KEY (ClientId) REFERENCES Clients(ClientId)
 );
 
 -- Tabla de categorías de equipos
 CREATE TABLE EquipmentCategories (
     CategoryId INT PRIMARY KEY IDENTITY(1,1),
-    CategoryName NVARCHAR(100) NOT NULL
-);
-
--- Catálogo de estados de equipo
-CREATE TABLE EquipmentStatuses (
-    StatusId INT PRIMARY KEY IDENTITY(1,1),
-    StatusName NVARCHAR(50) NOT NULL
+    CategoryName VARCHAR(100) NOT NULL
 );
 
 -- Tabla de equipos
 CREATE TABLE Equipment (
     EquipmentId INT PRIMARY KEY IDENTITY(1,1),
-    EquipmentName NVARCHAR(100) NOT NULL,
-    Brand NVARCHAR(100) NOT NULL,
-    Model NVARCHAR(100) NOT NULL,
-    SerialNumber NVARCHAR(100) NOT NULL,
-    Description NVARCHAR(MAX) NOT NULL,
+    EquipmentName VARCHAR(100) NOT NULL,
+    Brand VARCHAR(100) NOT NULL,
+    Model VARCHAR(100) NOT NULL,
+    SerialNumber VARCHAR(100) NOT NULL,
+    Description VARCHAR(MAX) NOT NULL,
     CategoryId INT NOT NULL,
-    StatusId INT NOT NULL,
-    FOREIGN KEY (CategoryId) REFERENCES EquipmentCategories(CategoryId),
-    FOREIGN KEY (StatusId) REFERENCES EquipmentStatuses(StatusId)
+    Status INT NOT NULL,              
+    FOREIGN KEY (CategoryId) REFERENCES EquipmentCategories(CategoryId)
 );
 
--- Detalles de cada orden (qué equipos incluye)
+-- Detalles de cada orden
 CREATE TABLE OrderDetails (
     DetailId INT PRIMARY KEY IDENTITY(1,1),
     OrderId INT NOT NULL,
@@ -82,22 +61,22 @@ CREATE TABLE OrderDetails (
     FOREIGN KEY (EquipmentId) REFERENCES Equipment(EquipmentId)
 );
 
--- Historial de uso/cambios de los equipos
+-- Historial de equipos
 CREATE TABLE EquipmentHistory (
     HistoryId INT PRIMARY KEY IDENTITY(1,1),
     EquipmentId INT NOT NULL,
     ChangeDate DATE NOT NULL,
-    Notes NVARCHAR(MAX),
+    Notes VARCHAR(MAX),
     FOREIGN KEY (EquipmentId) REFERENCES Equipment(EquipmentId)
 );
 
--- Registro de mantenimientos realizados a los equipos
+-- Mantenimiento de equipos
 CREATE TABLE Maintenance (
     MaintenanceId INT PRIMARY KEY IDENTITY(1,1),
     StartDate DATE NOT NULL,
     EndDate DATE NOT NULL,
-    MaintenanceType INT NOT NULL,       
-    MaintenanceStatus INT NOT NULL,    
+    MaintenanceType INT NOT NULL,     
+    MaintenanceStatus INT NOT NULL,  
     EquipmentId INT NOT NULL,
     FOREIGN KEY (EquipmentId) REFERENCES Equipment(EquipmentId)
 );
