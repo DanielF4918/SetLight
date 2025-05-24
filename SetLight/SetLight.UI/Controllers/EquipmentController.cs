@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
+using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.LogicaDeNegocio.Equipment.ListarEquipment;
+using SetLight.LogicaDeNegocio.Equipment.ObtenerEqPorID;
 
 namespace SetLight.UI.Controllers
 {
@@ -14,10 +19,13 @@ namespace SetLight.UI.Controllers
     {
    private IListarEquipmentLN _listarEquipmentLN;
         private IObtenerEqPorIDLN _ObtenerEqPorIDLN;
+        private ICrearEquipmentLN _crearEquipmentLN;
 
         public EquipmentController()
         {
             _listarEquipmentLN = new ListarEquipmentLN();
+            _crearEquipmentLN = new CrearEquipmentLN();
+            _ObtenerEqPorIDLN = new ObtenerEqPorIDLN();
         }
     
         // GET: Equipment
@@ -35,26 +43,30 @@ namespace SetLight.UI.Controllers
         }
 
         // GET: Equipment/Create
-        public ActionResult Create()
+        public ActionResult CrearEquipment()
         {
             return View();
         }
 
         // POST: Equipment/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public async Task<ActionResult> CrearEquipment(EquipmentDto equipmentguardar)
         {
+            if (!ModelState.IsValid)
+                return View(equipmentguardar);
+
             try
             {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
+                await _crearEquipmentLN.Guardar(equipmentguardar);
+                return RedirectToAction("ListarEquipment");
             }
-            catch
+            catch(Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Error al guardar: " + ex.Message);
+                return View(equipmentguardar);
             }
         }
+
 
         // GET: Equipment/Edit/5
         public ActionResult Edit(int id)
