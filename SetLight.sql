@@ -80,3 +80,5 @@ CREATE TABLE Maintenance (
     EquipmentId INT NOT NULL,
     FOREIGN KEY (EquipmentId) REFERENCES Equipment(EquipmentId)
 );
+
+
