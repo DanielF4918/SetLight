@@ -31,7 +31,7 @@ namespace SetLight.AccesoADatos.Equipment.ListarEquipment
                                                               Model = equipment.Model,
                                                               SerialNumber = equipment.SerialNumber,
                                                               Description = equipment.Description,
-                                                              CategoryId = equipment.CategoryId.ToString(),
+                                                              CategoryId = equipment.CategoryId,
                                                               Status = equipment.Status
                                                           }).ToList();
 

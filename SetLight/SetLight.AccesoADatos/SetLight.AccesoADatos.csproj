@@ -10,11 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SetLight.AccesoADatos</RootNamespace>
     <AssemblyName>SetLight.AccesoADatos</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contexto.cs" />
+    <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentAD.cs" />
     <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDAD.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />

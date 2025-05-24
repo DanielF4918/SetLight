@@ -30,7 +30,7 @@ namespace SetLight.AccesoADatos.Equipment.ObtenerEqPorID
                                                            SerialNumber = elEquipment.SerialNumber,
                                                            Description = elEquipment.Description,
                                                            Status = elEquipment.Status,
-                                                           CategoryId = elEquipment.CategoryId.ToString()
+                                                           CategoryId = elEquipment.CategoryId
 
 
                                                        }).FirstOrDefault();
