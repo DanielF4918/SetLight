@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Contexto.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentAD.cs" />
+    <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDAD.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -66,6 +67,7 @@
       <Name>SetLight.Abstracciones</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.LogicaDeNegocio.Equipment.ListarEquipment;
@@ -12,6 +13,7 @@ namespace SetLight.UI.Controllers
     public class EquipmentController : Controller
     {
    private IListarEquipmentLN _listarEquipmentLN;
+        private IObtenerEqPorIDLN _ObtenerEqPorIDLN;
 
         public EquipmentController()
         {

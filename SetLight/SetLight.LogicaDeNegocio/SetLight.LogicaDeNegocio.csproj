@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentLN.cs" />
+    <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
