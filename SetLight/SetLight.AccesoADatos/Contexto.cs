@@ -16,5 +16,6 @@ namespace SetLight.AccesoADatos
         }
 
         public DbSet<EquipmentDA> Equipment { get; set; }
+        public DbSet<EqCategoryDA> EqCategory { get; set; }
     }
 }
