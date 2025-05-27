@@ -9,6 +9,7 @@ using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.AccesoADatos;
 using SetLight.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.LogicaDeNegocio.Equipment.ObtenerEqPorID;
@@ -17,7 +18,7 @@ namespace SetLight.UI.Controllers
 {
     public class EquipmentController : Controller
     {
-   private IListarEquipmentLN _listarEquipmentLN;
+        private IListarEquipmentLN _listarEquipmentLN;
         private IObtenerEqPorIDLN _ObtenerEqPorIDLN;
         private ICrearEquipmentLN _crearEquipmentLN;
 
@@ -45,8 +46,21 @@ namespace SetLight.UI.Controllers
         // GET: Equipment/Create
         public ActionResult CrearEquipment()
         {
+            using (var contexto = new Contexto())
+            {
+                var categorias = contexto.EqCategory
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.CategoryId.ToString(),
+                        Text = c.CategoryName
+                    }).ToList();
+
+                ViewBag.Categorias = categorias;
+            }
+
             return View();
         }
+
 
         // POST: Equipment/Create
         [HttpPost]
