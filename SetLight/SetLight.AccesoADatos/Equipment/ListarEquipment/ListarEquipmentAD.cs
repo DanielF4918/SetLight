@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SetLight.Abstracciones.AccesoADatos.Equipment.ListarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
@@ -20,20 +17,22 @@ namespace SetLight.AccesoADatos.Equipment.ListarEquipment
 
         public List<EquipmentDto> Obtener()
         {
-            List<EquipmentDA> listaDeEquipment = _contexto.Equipment.ToList();
-
-            List<EquipmentDto> listaDeEquipmentARetornar = (from equipment in _contexto.Equipment
-                                                          select new EquipmentDto
-                                                          {
-                                                              EquipmentId = equipment.EquipmentId,
-                                                              EquipmentName =equipment.EquipmentName,
-                                                              Brand = equipment.Brand,
-                                                              Model = equipment.Model,
-                                                              SerialNumber = equipment.SerialNumber,
-                                                              Description = equipment.Description,
-                                                              CategoryId = equipment.CategoryId,
-                                                              Status = equipment.Status
-                                                          }).ToList();
+            var listaDeEquipmentARetornar = (
+                from equipment in _contexto.Equipment
+                join categoria in _contexto.EqCategory
+                on equipment.CategoryId equals categoria.CategoryId
+                select new EquipmentDto
+                {
+                    EquipmentId = equipment.EquipmentId,
+                    EquipmentName = equipment.EquipmentName,
+                    Brand = equipment.Brand,
+                    Model = equipment.Model,
+                    SerialNumber = equipment.SerialNumber,
+                    Description = equipment.Description,
+                    CategoryId = equipment.CategoryId,
+                    Status = equipment.Status,
+                    CategoriaNombre = categoria.CategoryName
+                }).ToList();
 
             return listaDeEquipmentARetornar;
         }

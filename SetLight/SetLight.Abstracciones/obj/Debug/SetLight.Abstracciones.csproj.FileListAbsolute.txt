@@ -10,3 +10,5 @@ C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstraccion
 C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
 C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
 C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
