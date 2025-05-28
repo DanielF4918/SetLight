@@ -35,5 +35,8 @@ namespace SetLight.AccesoADatos.Modelos
 
         [Column("Status")]
         public int Status { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public virtual EqCategoryDA Category { get; set; }
     }
 }

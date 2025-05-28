@@ -4,7 +4,7 @@
     ViewBag.Title = "ListarEquipment";
 }
 
-<h2>ListarEquipment</h2>
+<h2>Equipos</h2>
 
 <p>
     @Html.ActionLink("Crear Nuevo Equipo", "CrearEquipment")
@@ -12,7 +12,6 @@
     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalEqCategory">
         Crear Nueva categoría
     </button>
-
 </p>
 
 <table class="table">
@@ -23,8 +22,8 @@
         <th>@Html.DisplayNameFor(model => model.Model)</th>
         <th>@Html.DisplayNameFor(model => model.SerialNumber)</th>
         <th>@Html.DisplayNameFor(model => model.Description)</th>
-        <th>@Html.DisplayNameFor(model => model.Status)</th>
-        <th>@Html.DisplayNameFor(model => model.CategoryId)</th>
+        <th>Estado</th>
+        <th>Categoría</th> <!-- Cambio aquí -->
         <th></th>
     </tr>
 
@@ -37,8 +36,8 @@
             <td>@Html.DisplayFor(modelItem => item.Model)</td>
             <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
             <td>@Html.DisplayFor(modelItem => item.Description)</td>
-            <td>@Html.DisplayFor(modelItem => item.Status)</td>
-            <td>@Html.DisplayFor(modelItem => item.CategoryId)</td>
+            <td>@item.EstadoEnTexto</td>
+            <td>@item.CategoriaNombre</td> 
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
                 @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
