@@ -7,10 +7,12 @@ using System.Web.Mvc;
 using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
+using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos;
 using SetLight.LogicaDeNegocio.Equipment.CrearEquipment;
+using SetLight.LogicaDeNegocio.Equipment.EditarEquipment;
 using SetLight.LogicaDeNegocio.Equipment.ListarEquipment;
 using SetLight.LogicaDeNegocio.Equipment.ObtenerEqPorID;
 
@@ -21,12 +23,14 @@ namespace SetLight.UI.Controllers
         private IListarEquipmentLN _listarEquipmentLN;
         private IObtenerEqPorIDLN _ObtenerEqPorIDLN;
         private ICrearEquipmentLN _crearEquipmentLN;
+        private IEquipmentLN _equipmentLN;
 
         public EquipmentController()
         {
             _listarEquipmentLN = new ListarEquipmentLN();
             _crearEquipmentLN = new CrearEquipmentLN();
             _ObtenerEqPorIDLN = new ObtenerEqPorIDLN();
+            _equipmentLN = new EditarEquipmentLN();
         }
     
         // GET: Equipment
@@ -85,22 +89,36 @@ namespace SetLight.UI.Controllers
         // GET: Equipment/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            EquipmentDto elEquipment = _ObtenerEqPorIDLN.Obtener(id);
+
+            using (var contexto = new Contexto())
+            {
+                var categorias = contexto.EqCategory
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.CategoryId.ToString(),
+                        Text = c.CategoryName,
+                        Selected = (c.CategoryId == elEquipment.CategoryId)
+                    }).ToList();
+
+                ViewBag.Categorias = categorias;
+            }
+
+            return View("EditEquipment", elEquipment);
         }
 
         // POST: Equipment/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(EquipmentDto elEquipment)
         {
             try
             {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
+                int seGuardo = _equipmentLN.Actualizar(elEquipment);
+                return RedirectToAction("ListarEquipment");
             }
             catch
             {
-                return View();
+                return View(elEquipment);
             }
         }
 

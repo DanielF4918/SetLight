@@ -190,6 +190,7 @@
     <Content Include="Views\Equipment\ListarEquipment.cshtml" />
     <Content Include="Views\Equipment\CrearEquipment.cshtml" />
     <Content Include="Views\EqCategory\CrearEqCategory.cshtml" />
+    <Content Include="Views\Equipment\EditEquipment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

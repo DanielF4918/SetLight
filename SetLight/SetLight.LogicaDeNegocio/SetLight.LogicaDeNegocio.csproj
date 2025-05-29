@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentLN.cs" />
+    <Compile Include="Equipment\EditarEquipment\EditarEquipmentLN.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentLN.cs" />
     <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
