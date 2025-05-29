@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SetLight.LogicaDeNegocio</RootNamespace>
     <AssemblyName>SetLight.LogicaDeNegocio</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,7 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />
+    <Compile Include="Equipment\CrearEquipment\CrearEquipmentLN.cs" />
+    <Compile Include="Equipment\EditarEquipment\EditarEquipmentLN.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentLN.cs" />
+    <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -54,5 +59,6 @@
       <Name>SetLight.AccesoADatos</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
