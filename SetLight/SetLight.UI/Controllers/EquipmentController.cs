@@ -32,12 +32,46 @@ namespace SetLight.UI.Controllers
             _ObtenerEqPorIDLN = new ObtenerEqPorIDLN();
             _equipmentLN = new EditarEquipmentLN();
         }
-    
+
         // GET: Equipment
-        public ActionResult ListarEquipment()
+        public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado)
         {
-            List<EquipmentDto> LaListaEquipment = _listarEquipmentLN.Obtener();
-            return View(LaListaEquipment);
+            var lista = _listarEquipmentLN.Obtener();
+
+            // Filtros
+            if (!string.IsNullOrWhiteSpace(Nombre))
+                lista = lista.Where(e => e.EquipmentName != null &&
+                                         e.EquipmentName.ToLower().Contains(Nombre.ToLower())).ToList();
+
+            if (CategoriaId.HasValue && CategoriaId.Value != 0)
+                lista = lista.Where(e => e.CategoryId == CategoriaId).ToList();
+
+            if (Estado.HasValue && Estado.Value != 0)
+                lista = lista.Where(e => e.Status == Estado).ToList();
+
+            // ViewBags para combos
+            using (var contexto = new Contexto())
+            {
+                ViewBag.Categorias = contexto.EqCategory
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.CategoryId.ToString(),
+                        Text = c.CategoryName,
+                        Selected = (CategoriaId.HasValue && CategoriaId == c.CategoryId)
+                    }).ToList();
+            }
+
+            ViewBag.Estados = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "0", Text = "Todos", Selected = Estado == null || Estado == 0 },
+        new SelectListItem { Value = "1", Text = "Activo", Selected = Estado == 1 },
+        new SelectListItem { Value = "2", Text = "Agotado", Selected = Estado == 2 },
+        new SelectListItem { Value = "3", Text = "Inactivo", Selected = Estado == 3 }
+    };
+
+            ViewBag.NombreBuscado = Nombre;
+
+            return View(lista);
         }
 
         // GET: Equipment/Details/5
