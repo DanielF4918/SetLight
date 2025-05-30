@@ -13,17 +13,16 @@
         Crear Nueva categoría
     </button>
 </p>
-
 <table class="table">
     <tr>
-        <th>@Html.DisplayNameFor(model => model.EquipmentId)</th>
+        
         <th>@Html.DisplayNameFor(model => model.EquipmentName)</th>
         <th>@Html.DisplayNameFor(model => model.Brand)</th>
         <th>@Html.DisplayNameFor(model => model.Model)</th>
         <th>@Html.DisplayNameFor(model => model.SerialNumber)</th>
         <th>@Html.DisplayNameFor(model => model.Description)</th>
         <th>Estado</th>
-        <th>Categoría</th> <!-- Cambio aquí -->
+        <th>Categoría</th> 
         <th></th>
     </tr>
 
@@ -39,9 +38,18 @@
             <td>@item.EstadoEnTexto</td>
             <td>@item.CategoriaNombre</td> 
             <td>
-                @Html.ActionLink("Edit", "Edit", new {id=item.EquipmentId}) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @if (item.Status == 1)
+                {
+                    @Html.ActionLink("Inactivar", "Inactivar", new { id = item.EquipmentId }, new { @class = "btn btn-warning btn-sm" })
+                }
+                else
+                {
+                    @Html.ActionLink("Activar", "Activar", new { id = item.EquipmentId }, new { @class = "btn btn-success btn-sm" })
+                }
+
+                @Html.ActionLink("Edit", "Edit", new { id = item.EquipmentId }) |
+                @Html.ActionLink("Details", "Details", new { id = item.EquipmentId }) |
+               
             </td>
         </tr>
     }

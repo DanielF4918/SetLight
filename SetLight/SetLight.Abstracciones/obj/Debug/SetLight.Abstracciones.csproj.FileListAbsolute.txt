@@ -20,3 +20,11 @@ C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstr
 C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
 C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
