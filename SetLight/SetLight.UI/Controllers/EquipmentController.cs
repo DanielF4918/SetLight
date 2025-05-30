@@ -143,5 +143,22 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
+        // GET: Equipment/Activar/5
+        public ActionResult Activar(int id)
+        {
+            var equipo = _ObtenerEqPorIDLN.Obtener(id);
+            equipo.Status = 1; // Activo
+            _equipmentLN.Actualizar(equipo);
+            return RedirectToAction("ListarEquipment");
+        }
+
+        // GET: Equipment/Inactivar/5
+        public ActionResult Inactivar(int id)
+        {
+            var equipo = _ObtenerEqPorIDLN.Obtener(id);
+            equipo.Status = 3; // Inactivo
+            _equipmentLN.Actualizar(equipo);
+            return RedirectToAction("ListarEquipment");
+        }
     }
 }
