@@ -6,37 +6,57 @@
 
 <h2>Equipos</h2>
 
+<!-- ✅ Formulario de filtros -->
+@using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
+{
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label>Nombre del equipo</label>
+            <input type="text" name="Nombre" class="form-control" value="@ViewBag.NombreBuscado" placeholder="Canon, Sony..." />
+        </div>
+
+        <div class="col-md-3">
+            <label>Tipo</label>
+            @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-3">
+            <label>Estado</label>
+            @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <input type="submit" value="Filtrar" class="btn btn-primary" />
+        </div>
+    </div>
+}
+
 <p>
     @Html.ActionLink("Crear Nuevo Equipo", "CrearEquipment")
-
-    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalEqCategory">
-        Crear Nueva categoría
-    </button>
 </p>
+
 <table class="table">
     <tr>
-        
         <th>@Html.DisplayNameFor(model => model.EquipmentName)</th>
         <th>@Html.DisplayNameFor(model => model.Brand)</th>
         <th>@Html.DisplayNameFor(model => model.Model)</th>
         <th>@Html.DisplayNameFor(model => model.SerialNumber)</th>
         <th>@Html.DisplayNameFor(model => model.Description)</th>
         <th>Estado</th>
-        <th>Categoría</th> 
+        <th>Categoría</th>
         <th></th>
     </tr>
 
     @foreach (var item in Model)
     {
         <tr>
-            <td>@Html.DisplayFor(modelItem => item.EquipmentId)</td>
             <td>@Html.DisplayFor(modelItem => item.EquipmentName)</td>
             <td>@Html.DisplayFor(modelItem => item.Brand)</td>
             <td>@Html.DisplayFor(modelItem => item.Model)</td>
             <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
             <td>@Html.DisplayFor(modelItem => item.Description)</td>
             <td>@item.EstadoEnTexto</td>
-            <td>@item.CategoriaNombre</td> 
+            <td>@item.CategoriaNombre</td>
             <td>
                 @if (item.Status == 1)
                 {
@@ -48,23 +68,8 @@
                 }
 
                 @Html.ActionLink("Edit", "Edit", new { id = item.EquipmentId }) |
-                @Html.ActionLink("Details", "Details", new { id = item.EquipmentId }) |
-               
+                @Html.ActionLink("Details", "Details", new { id = item.EquipmentId })
             </td>
         </tr>
     }
 </table>
-
-<div class="modal fade" id="modalEqCategory" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" id="modal-content-category">
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/jqueryval")
-    @Scripts.Render("~/bundles/jqueryunobtrusive")
-    <script src="~/Scripts/Modals/EqCategory/EqCategoryModal.js"></script>
-}

@@ -46,5 +46,15 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
         public int CategoryId { get; set; }
         public int Status { get; set; }
+
+
     }
+
+    public class EquipmentFiltroDto
+    {
+        public string Nombre { get; set; }
+        public int? CategoriaId { get; set; }
+        public int? Estado { get; set; }
+    }
+
 }
