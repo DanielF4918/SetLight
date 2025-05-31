@@ -26,6 +26,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Display(Name = "Descripción")]
         public string Description { get; set; }
 
+        [Display(Name = "Valor de Alquiler")]
+        public decimal RentalValue { get; set; }
+
         [Display(Name = "Categoría")]
         public string CategoriaNombre { get; set; }
 
