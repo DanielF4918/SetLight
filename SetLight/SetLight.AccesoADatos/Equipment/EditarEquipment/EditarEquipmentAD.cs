@@ -25,6 +25,7 @@ namespace SetLight.AccesoADatos.Equipment.EditarEquipment
             elEquipmentEnBaseDeDatos.Model = elEquipmentParaActualizar.Model;
             elEquipmentEnBaseDeDatos.SerialNumber = elEquipmentParaActualizar.SerialNumber;
             elEquipmentEnBaseDeDatos.Description = elEquipmentParaActualizar.Description;
+            elEquipmentEnBaseDeDatos.RentalValue = elEquipmentParaActualizar.RentalValue;
             elEquipmentEnBaseDeDatos.CategoryId = elEquipmentParaActualizar.CategoryId;
 
             elEquipmentEnBaseDeDatos.Status = elEquipmentParaActualizar.Status;

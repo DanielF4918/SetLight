@@ -26,6 +26,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Display(Name = "Descripción")]
         public string Description { get; set; }
 
+        [Display(Name = "Valor de Alquiler")]
+        public decimal RentalValue { get; set; }
+
         [Display(Name = "Categoría")]
         public string CategoriaNombre { get; set; }
 
@@ -46,5 +49,15 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
         public int CategoryId { get; set; }
         public int Status { get; set; }
+
+
     }
+
+    public class EquipmentFiltroDto
+    {
+        public string Nombre { get; set; }
+        public int? CategoriaId { get; set; }
+        public int? Estado { get; set; }
+    }
+
 }
