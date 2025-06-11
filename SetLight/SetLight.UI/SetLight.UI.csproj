@@ -127,6 +127,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ClientController.cs" />
     <Compile Include="Controllers\EqCategoryController.cs" />
     <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -191,6 +192,8 @@
     <Content Include="Views\Equipment\CrearEquipment.cshtml" />
     <Content Include="Views\EqCategory\CrearEqCategory.cshtml" />
     <Content Include="Views\Equipment\EditEquipment.cshtml" />
+    <Content Include="Views\Client\ListarClient.cshtml" />
+    <Content Include="Views\Client\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
