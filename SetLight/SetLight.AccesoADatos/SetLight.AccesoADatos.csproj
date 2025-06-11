@@ -52,12 +52,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\CreateClient\CrearClientAD .cs" />
+    <Compile Include="Client\ListClient\ListarClientAD.cs" />
     <Compile Include="Contexto.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryAD.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />
     <Compile Include="Equipment\EditarEquipment\EditarEquipmentAD.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentAD.cs" />
     <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDAD.cs" />
+    <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EqCategoryDA.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\CreateClient\CreateClientLN.cs" />
+    <Compile Include="Client\ListClient\ListarClientLN.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentLN.cs" />
     <Compile Include="Equipment\EditarEquipment\EditarEquipmentLN.cs" />
