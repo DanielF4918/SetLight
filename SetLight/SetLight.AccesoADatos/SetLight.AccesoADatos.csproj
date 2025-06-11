@@ -63,6 +63,7 @@
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EqCategoryDA.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
+    <Compile Include="Modelos\RentalOrderDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -75,7 +76,9 @@
       <Name>SetLight.Abstracciones</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="RentalOrder\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
