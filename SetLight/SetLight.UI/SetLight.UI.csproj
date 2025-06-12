@@ -176,6 +176,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
+    <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -195,11 +196,11 @@
     <Content Include="Views\Equipment\EditEquipment.cshtml" />
     <Content Include="Views\Client\ListarClient.cshtml" />
     <Content Include="Views\Client\Create.cshtml" />
+    <Content Include="Views\RentalOrder\History.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
-    <Folder Include="Views\RentalOrder\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

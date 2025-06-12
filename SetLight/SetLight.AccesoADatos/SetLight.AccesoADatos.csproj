@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Client\CreateClient\CrearClientAD .cs" />
     <Compile Include="Client\ListClient\ListarClientAD.cs" />
+    <Compile Include="Client\ObtenerClPorID\ObtenerClPorIDAD.cs" />
     <Compile Include="Contexto.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryAD.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EqCategoryDA.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
+    <Compile Include="Modelos\OrderDetailDA.cs" />
     <Compile Include="Modelos\RentalOrderDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
