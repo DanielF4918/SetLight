@@ -18,3 +18,227 @@ select,
 textarea {
     max-width: 280px;
 }
+
+
+.table-inventario {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #dee2e6;
+}
+
+    .table-inventario thead {
+        background-color: #f5f5f5;
+        font-weight: bold;
+    }
+
+    .table-inventario th,
+    .table-inventario td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table-inventario tr:hover {
+        background-color: #f0f0f0;
+    }
+
+.btn-ver {
+    background-color: black;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-editar {
+    background-color: black;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-eliminar {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-trazabilidad {
+    background-color: black;
+    color: yellow;
+    padding: 6px 12px;
+    border: none;
+}
+
+
+.filtros-inventario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+    .filtros-inventario input,
+    .filtros-inventario select {
+        padding: 5px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .filtros-inventario button {
+        padding: 6px 12px;
+        background-color: #eee;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Bootstrap override: prevent dt truncation */
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Limit form element width */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* Tabla de inventario */
+.table-inventario {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #dee2e6;
+}
+
+    .table-inventario thead {
+        background-color: #f5f5f5;
+        font-weight: bold;
+    }
+
+    .table-inventario th,
+    .table-inventario td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table-inventario tr:hover {
+        background-color: #f0f0f0;
+    }
+
+/* Botones */
+.btn-ver {
+    background-color: black;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-editar {
+    background-color: black;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-eliminar {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    margin-right: 5px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.btn-success {
+    background-color: #198754;
+    border: none;
+}
+
+.btn-dark {
+    background-color: #212529;
+    color: white;
+    border: none;
+}
+
+
+/* Filtros superiores */
+.filtros-inventario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+    .filtros-inventario input,
+    .filtros-inventario select {
+        padding: 5px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .filtros-inventario button {
+        padding: 6px 12px;
+        background-color: #eee;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+/* estilo para formularios (crear/editar/detalle) */
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+
+    .form-card .form-label {
+        font-weight: bold;
+    }
+
+    .form-card .form-control {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .form-card .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-card .btn {
+        min-width: 140px;
+    }

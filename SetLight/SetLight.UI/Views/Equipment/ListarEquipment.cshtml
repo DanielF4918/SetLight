@@ -1,75 +1,82 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
 
 @{
-    ViewBag.Title = "ListarEquipment";
+    ViewBag.Title = "Equipos";
 }
 
-<h2>ListarEquipment</h2>
+<div class="container-inventario">
+    <h2 class="titulo-inventario">Inventario</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.EquipmentId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.EquipmentName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Brand)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Model)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.SerialNumber)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Description)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CategoryId)
-        </th>
-        <th></th>
-    </tr>
+    @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
+    {
+        <div class="row filtro-inventario mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Nombre del equipo</label>
+                <input type="text" name="Nombre" class="form-control" value="@ViewBag.NombreBuscado" placeholder="Canon, Sony..." />
+            </div>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.EquipmentId)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.EquipmentName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Brand)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Model)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.SerialNumber)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Status)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CategoryId)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-        </td>
-    </tr>
-}
+            <div class="col-md-3">
+                <label class="form-label">Tipo</label>
+                @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
+            </div>
 
-</table>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <input type="submit" value="Filtrar" class="btn btn-dark btn-sm" />
+
+            </div>
+        </div>
+    }
+
+<div class="mb-3">
+    @Html.ActionLink("+ Registrar nuevo equipo", "CrearEquipment", null, new { @class = "btn btn-success btn-sm mb-3" })
+</div>
+
+    <table class="table table-striped table-bordered tabla-inventario">
+        <thead>
+            <tr>
+                <th>Nombre del Equipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Número de Serie</th>
+                <th>Descripción</th>
+                <th>Valor de Alquiler</th>
+                <th>Estado</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.EquipmentName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Brand)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Model)</td>
+                    <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@item.RentalValue.ToString("C")</td>
+                    <td>@item.EstadoEnTexto</td>
+                    <td>@item.CategoriaNombre</td>
+                    <td class="acciones">
+                        @if (item.Status == 1)
+                        {
+                            @Html.ActionLink("Inactivar", "Inactivar", new { id = item.EquipmentId }, new { @class = "btn btn-warning btn-sm" })
+                        }
+                        else
+                        {
+                            @Html.ActionLink("Activar", "Activar", new { id = item.EquipmentId }, new { @class = "btn btn-success btn-sm" })
+                        }
+
+                        @Html.ActionLink("Editar", "Edit", new { id = item.EquipmentId }, new { @class = "btn btn-dark btn-sm ms-1" })
+                        @Html.ActionLink("Detalles", "Details", new { id = item.EquipmentId }, new { @class = "btn btn-dark btn-sm ms-1" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

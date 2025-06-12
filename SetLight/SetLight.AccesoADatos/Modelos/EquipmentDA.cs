@@ -30,10 +30,16 @@ namespace SetLight.AccesoADatos.Modelos
         [Column("Description")]
         public string Description { get; set; }
 
+        [Column("RentalValue")]
+        public decimal RentalValue { get; set; }
+
         [Column("CategoryId")]
         public int CategoryId { get; set; }
 
         [Column("Status")]
         public int Status { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public virtual EqCategoryDA Category { get; set; }
     }
 }

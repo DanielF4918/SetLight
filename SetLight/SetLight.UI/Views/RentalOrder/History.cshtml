@@ -1,0 +1,98 @@
+﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+
+@{
+    ViewBag.Title = "Historial de órdenes";
+}
+
+<h2>Historial de órdenes de @ViewBag.ClientName</h2>
+
+@if (!Model.Any())
+{
+    <p>Este cliente no tiene órdenes registradas.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th># Orden</th>
+                <th>Fecha de Orden</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th>Equipos</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                    <td>@order.StartDate.ToShortDateString()</td>
+                    <td>@order.EndDate.ToShortDateString()</td>
+                    <td>@order.StatusOrder</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" type="button" onclick="mostrarEquiposModal(@order.OrderId)">
+                            Ver equipos
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    foreach (var order in Model)
+    {
+        <div class="modal fade" id="modalEquipos-@order.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@order.OrderId" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabel-@order.OrderId">Equipos de la orden #@order.OrderId</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Cantidad</th>
+                                    <th>Valor Unitario</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in order.Details)
+                                {
+                                    <tr>
+                                        <td>@detalle.EquipmentName</td>
+                                        <td>@detalle.Brand</td>
+                                        <td>@detalle.Model</td>
+                                        <td>@detalle.Quantity</td>
+                                        <td>₡@detalle.RentalValue.ToString("N2")</td>
+                                        <td>₡@(detalle.RentalValue * detalle.Quantity)
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<p>
+    @Html.ActionLink("Volver al listado de clientes", "Index", "Client", null, new { @class = "btn btn-secondary" })
+</p>
+
+@section Scripts {
+    <script src="~/Scripts/Modals/HistoryOrder/HistoryOrder.js"></script>
+}

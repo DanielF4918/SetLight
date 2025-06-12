@@ -4,3 +4,35 @@ C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\AVANCE FINAL\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\PROYECTO SETLIGHT 12 6 2026\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb

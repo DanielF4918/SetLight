@@ -5,12 +5,12 @@ USE SetLight;
 GO
 
 -- Tabla de usuarios del sistema
-CREATE TABLE Users (
-    UserId INT PRIMARY KEY IDENTITY(1,1),
-    FirstName VARCHAR(100) NOT NULL,
-    LastName VARCHAR(100) NOT NULL,
-    Email VARCHAR(100) NOT NULL
-);
+--CREATE TABLE Users (
+--    UserId INT PRIMARY KEY IDENTITY(1,1),
+--    FirstName VARCHAR(100) NOT NULL,
+--    LastName VARCHAR(100) NOT NULL,
+ --   Email VARCHAR(100) NOT NULL
+--);
 
 -- Tabla de clientes
 CREATE TABLE Clients (
@@ -46,6 +46,7 @@ CREATE TABLE Equipment (
     Model VARCHAR(100) NOT NULL,
     SerialNumber VARCHAR(100) NOT NULL,
     Description VARCHAR(MAX) NOT NULL,
+	RentalValue DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     CategoryId INT NOT NULL,
     Status INT NOT NULL,              
     FOREIGN KEY (CategoryId) REFERENCES EquipmentCategories(CategoryId)
