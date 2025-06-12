@@ -1,0 +1,41 @@
+﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+
+@{
+    ViewBag.Title = "Órdenes de Alquiler";
+}
+
+<h2>Órdenes de Alquiler Registradas</h2>
+
+<div class="text-right mb-3">
+    @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
+</div>
+
+<table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th># Orden</th>
+            <th>Cliente</th>
+            <th>Fecha Orden</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var orden in Model)
+        {
+            <tr>
+                <td>@orden.OrderId</td>
+                <td>@orden.ClientName</td>
+                <td>@orden.OrderDate.ToShortDateString()</td>
+                <td>@orden.StartDate.ToShortDateString()</td>
+                <td>@orden.EndDate.ToShortDateString()</td>
+                <td>@(orden.StatusOrder == 1 ? "Activa" : "Inactiva")</td>
+                <td>
+                    @Html.ActionLink("Ver Detalles", "History", new { clientId = orden.ClientId }, new { @class = "btn btn-info btn-sm" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
