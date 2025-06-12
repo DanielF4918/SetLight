@@ -42,7 +42,6 @@ else
         </tbody>
     </table>
 
-    <!-- Modales -->
     foreach (var order in Model)
     {
         <div class="modal fade" id="modalEquipos-@order.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@order.OrderId" aria-hidden="true">
@@ -75,7 +74,7 @@ else
                                         <td>@detalle.Model</td>
                                         <td>@detalle.Quantity</td>
                                         <td>₡@detalle.RentalValue.ToString("N2")</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity).ToString("N2")</td>
+                                        <td>₡@(detalle.RentalValue * detalle.Quantity)
                                     </tr>
                                 }
                             </tbody>

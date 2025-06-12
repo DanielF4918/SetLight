@@ -197,6 +197,8 @@
     <Content Include="Views\Client\ListarClient.cshtml" />
     <Content Include="Views\Client\Create.cshtml" />
     <Content Include="Views\RentalOrder\History.cshtml" />
+    <Content Include="Views\RentalOrder\Create.cshtml" />
+    <Content Include="Views\RentalOrder\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
