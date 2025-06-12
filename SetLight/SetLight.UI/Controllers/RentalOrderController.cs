@@ -3,11 +3,65 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.AccesoADatos;
+using SetLight.AccesoADatos.Clientes.ObtenerClPorID;
 
 namespace SetLight.UI.Controllers
 {
     public class RentalOrderController : Controller
     {
+        private Contexto _contexto;
+        private ObtenerClPorIDAD _obtenerClPorID;
+
+        public RentalOrderController()
+        {
+            _contexto = new Contexto();
+            _obtenerClPorID = new ObtenerClPorIDAD();
+        }
+
+        // GET: RentalOrder/History/5
+        public ActionResult History(int clientId)
+        {
+            ClientDto cliente = _obtenerClPorID.Obtener(clientId);
+
+            if (cliente == null)
+            {
+                return HttpNotFound("Cliente no encontrado");
+            }
+
+            // Consultar órdenes con sus detalles y equipos
+            var historial = (from orden in _contexto.RentalOrders
+                             where orden.ClientId == clientId
+                             select new RentalOrderDto
+                             {
+                                 OrderId = orden.OrderId,
+                                 OrderDate = orden.OrderDate,
+                                 StartDate = orden.StartDate,
+                                 EndDate = orden.EndDate,
+                                 StatusOrder = orden.StatusOrder,
+                                 ClientId = orden.ClientId,
+                                 ClientName = cliente.FirstName + " " + cliente.LastName,
+
+                                 Details = (from detalle in _contexto.OrderDetails
+                                            join equipo in _contexto.Equipment
+                                            on detalle.EquipmentId equals equipo.EquipmentId
+                                            where detalle.OrderId == orden.OrderId
+                                            select new OrderDetailDto
+                                            {
+                                                EquipmentName = equipo.EquipmentName,
+                                                Brand = equipo.Brand,
+                                                Model = equipo.Model,
+                                                RentalValue = equipo.RentalValue,
+                                                Quantity = detalle.Quantity
+                                            }).ToList()
+                             }).ToList();
+
+            ViewBag.ClientName = cliente.FirstName + " " + cliente.LastName;
+            return View(historial);
+        }
+
+
         // GET: RentalOrder
         public ActionResult Index()
         {
@@ -85,5 +139,8 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
+
+        
+
     }
 }

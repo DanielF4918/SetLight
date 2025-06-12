@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
 
 namespace SetLight.AccesoADatos
@@ -17,6 +18,8 @@ namespace SetLight.AccesoADatos
         public DbSet<EquipmentDA> Equipment { get; set; }
         public DbSet<EqCategoryDA> EqCategory { get; set; }
          public DbSet<ClientDa> Clients { get; set; }
+        public DbSet<RentalOrderDA> RentalOrders { get; set; }
+        public DbSet<OrderDetailDA> OrderDetails { get; set; }
 
     }
 }
