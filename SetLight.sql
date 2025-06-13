@@ -83,3 +83,5 @@ CREATE TABLE Maintenance (
 );
 
 
+ALTER TABLE Equipment
+ADD Stock INT NOT NULL DEFAULT 0;
