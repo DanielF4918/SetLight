@@ -14,5 +14,8 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string Model { get; set; }
         public decimal RentalValue { get; set; }
         public int Quantity { get; set; }
+
+
+        public int Stock { get; set; }
     }
 }

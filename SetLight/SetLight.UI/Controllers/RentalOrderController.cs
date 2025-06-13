@@ -6,6 +6,8 @@ using SetLight.AccesoADatos;
 using SetLight.AccesoADatos.Clientes.ObtenerClPorID;
 using SetLight.AccesoADatos.RentalOrder;
 using SetLight.Abstracciones.AccesoADatos.RentalOrder.CrearRentalOrder;
+using SetLight.Abstracciones.ViewModels;
+using System.Threading.Tasks;
 
 namespace SetLight.UI.Controllers
 {
@@ -24,7 +26,6 @@ namespace SetLight.UI.Controllers
             _crearOrdenAD = new CrearRentalOrderAD();
         }
 
-        // Historial de órdenes de un cliente
         public ActionResult History(int clientId)
         {
             ClientDto cliente = _obtenerClPorID.Obtener(clientId);
@@ -80,6 +81,7 @@ namespace SetLight.UI.Controllers
                 }).ToList();
 
             var equipos = _contexto.Equipment
+                .Where(e => e.Status == 1 && e.Stock > 0)
                 .Select(e => new OrderDetailDto
                 {
                     EquipmentId = e.EquipmentId,
@@ -87,7 +89,8 @@ namespace SetLight.UI.Controllers
                     Brand = e.Brand,
                     Model = e.Model,
                     RentalValue = e.RentalValue,
-                    Quantity = 0
+                    Quantity = 0,
+                    Stock = e.Stock
                 }).ToList();
 
             var model = new CrearRentalOrderViewModel
@@ -102,13 +105,15 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
+
+
         // Crear orden (POST)
         [HttpPost]
-        public ActionResult Create(CrearRentalOrderViewModel model)
+        public async Task<ActionResult> Create(CrearRentalOrderViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var equiposSeleccionados = model.EquiposDisponibles?.Where(e => e.Quantity > 0).ToList();
+                var equiposSeleccionados = model.EquiposSeleccionados?.Where(e => e.Quantity > 0).ToList();
 
                 if (equiposSeleccionados == null || !equiposSeleccionados.Any())
                 {
@@ -120,6 +125,18 @@ namespace SetLight.UI.Controllers
                         FirstName = c.FirstName,
                         LastName = c.LastName
                     }).ToList();
+
+                    model.EquiposDisponibles = _contexto.Equipment
+                        .Where(e => e.Status == 1 && e.Stock > 0)
+                        .Select(e => new OrderDetailDto
+                        {
+                            EquipmentId = e.EquipmentId,
+                            EquipmentName = e.EquipmentName,
+                            Brand = e.Brand,
+                            Model = e.Model,
+                            RentalValue = e.RentalValue,
+                            Quantity = 0
+                        }).ToList();
 
                     return View(model);
                 }
@@ -142,7 +159,7 @@ namespace SetLight.UI.Controllers
                 };
 
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
-                crearLN.Guardar(nuevaOrden);
+                await crearLN.Guardar(nuevaOrden); 
 
                 return RedirectToAction("Index");
             }
@@ -154,7 +171,23 @@ namespace SetLight.UI.Controllers
                 LastName = c.LastName
             }).ToList();
 
+            model.EquiposDisponibles = _contexto.Equipment
+                .Where(e => e.Status == 1 && e.Stock > 0)
+                .Select(e => new OrderDetailDto
+                {
+                    EquipmentId = e.EquipmentId,
+                    EquipmentName = e.EquipmentName,
+                    Brand = e.Brand,
+                    Model = e.Model,
+                    RentalValue = e.RentalValue,
+                    Quantity = 0,
+
+                     Stock = e.Stock
+                }).ToList();
+
             return View(model);
         }
+
+
     }
 }

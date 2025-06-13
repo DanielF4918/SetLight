@@ -32,6 +32,10 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Display(Name = "Categoría")]
         public string CategoriaNombre { get; set; }
 
+        [Display(Name = "Stock Disponible")]
+        public int Stock { get; set; }
+
+
         [Display(Name = "Estado")]
         public string EstadoEnTexto
         {

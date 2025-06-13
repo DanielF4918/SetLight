@@ -20,5 +20,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string ClientName { get; set; }
 
         public List<OrderDetailDto> Details { get; set; } = new List<OrderDetailDto>();
+
+
     }
 }

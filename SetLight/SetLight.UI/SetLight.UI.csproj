@@ -175,6 +175,7 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\Modals\CreateOrder\CreateOrder.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
     <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
@@ -199,6 +200,7 @@
     <Content Include="Views\RentalOrder\History.cshtml" />
     <Content Include="Views\RentalOrder\Create.cshtml" />
     <Content Include="Views\RentalOrder\Index.cshtml" />
+    <Content Include="Views\RentalOrder\_SeleccionarEquipos.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
