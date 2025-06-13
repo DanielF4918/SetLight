@@ -30,6 +30,7 @@ namespace SetLight.AccesoADatos.Equipment.ListarEquipment
                     SerialNumber = equipment.SerialNumber,
                     Description = equipment.Description,
                     RentalValue = equipment.RentalValue,
+                    Stock = equipment.Stock,
                     CategoryId = equipment.CategoryId,
                     Status = equipment.Status,
                     CategoriaNombre = categoria.CategoryName

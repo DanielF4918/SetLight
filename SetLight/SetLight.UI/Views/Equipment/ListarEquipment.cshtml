@@ -27,14 +27,13 @@
 
             <div class="col-md-3 d-flex align-items-end">
                 <input type="submit" value="Filtrar" class="btn btn-dark btn-sm" />
-
             </div>
         </div>
     }
 
-<div class="mb-3">
-    @Html.ActionLink("+ Registrar nuevo equipo", "CrearEquipment", null, new { @class = "btn btn-success btn-sm mb-3" })
-</div>
+    <div class="mb-3">
+        @Html.ActionLink("+ Registrar nuevo equipo", "CrearEquipment", null, new { @class = "btn btn-success btn-sm mb-3" })
+    </div>
 
     <table class="table table-striped table-bordered tabla-inventario">
         <thead>
@@ -45,6 +44,7 @@
                 <th>Número de Serie</th>
                 <th>Descripción</th>
                 <th>Valor de Alquiler</th>
+                <th>Stock</th> <!-- Nuevo -->
                 <th>Estado</th>
                 <th>Categoría</th>
                 <th>Acciones</th>
@@ -60,6 +60,7 @@
                     <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
                     <td>@item.RentalValue.ToString("C")</td>
+                    <td>@item.Stock</td> <!-- Nuevo -->
                     <td>@item.EstadoEnTexto</td>
                     <td>@item.CategoriaNombre</td>
                     <td class="acciones">

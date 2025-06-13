@@ -36,6 +36,9 @@ namespace SetLight.AccesoADatos.Modelos
         [Column("CategoryId")]
         public int CategoryId { get; set; }
 
+        [Column("Stock")]
+        public int Stock { get; set; }
+
         [Column("Status")]
         public int Status { get; set; }
 
