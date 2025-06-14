@@ -286,22 +286,18 @@ namespace SetLight.UI.Controllers
             {
                 try
                 {
-                    // Obtener orden original
                     var orden = _contexto.RentalOrders.Find(id);
                     if (orden == null)
                         return HttpNotFound();
 
-                    // Actualizar datos de cabecera
                     orden.ClientId = model.ClientId;
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
                     orden.StatusOrder = model.StatusOrder;
                     orden.OrderDate = DateTime.Now;
 
-                    // Obtener detalles actuales
                     var detallesAntiguos = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
-                    // Revertir stock de los detalles anteriores
                     foreach (var detalle in detallesAntiguos)
                     {
                         var equipo = _contexto.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
@@ -309,17 +305,14 @@ namespace SetLight.UI.Controllers
                         {
                             equipo.Stock += detalle.Quantity;
 
-                            // Si vuelve a estar disponible, activar
                             if (equipo.Stock > 0 && equipo.Status == 2)
                                 equipo.Status = 1;
                         }
                     }
 
-                    // Eliminar detalles viejos
                     _contexto.OrderDetails.RemoveRange(detallesAntiguos);
                     await _contexto.SaveChangesAsync();
 
-                    // Agregar nuevos detalles
                     foreach (var nuevo in model.EquiposSeleccionados)
                     {
                         _contexto.OrderDetails.Add(new OrderDetailDA
@@ -357,7 +350,6 @@ namespace SetLight.UI.Controllers
                 }
             }
 
-            // Recargar combos en caso de error
             model.Clientes = _contexto.Clients.Select(c => new ClientDto
             {
                 ClientId = c.ClientId,
