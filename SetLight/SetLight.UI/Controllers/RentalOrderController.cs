@@ -8,6 +8,9 @@ using SetLight.AccesoADatos.RentalOrder;
 using SetLight.Abstracciones.AccesoADatos.RentalOrder.CrearRentalOrder;
 using SetLight.Abstracciones.ViewModels;
 using System.Threading.Tasks;
+using SetLight.AccesoADatos.rentalorder.EditRentalOrder;
+using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
+using SetLight.AccesoADatos.Modelos;
 
 namespace SetLight.UI.Controllers
 {
@@ -17,6 +20,8 @@ namespace SetLight.UI.Controllers
         private ObtenerClPorIDAD _obtenerClPorID;
         private ListarRentalOrderAD _listarOrdenesAD;
         private CrearRentalOrderAD _crearOrdenAD;
+        private EditRentalOrderAD _editarOrdenAD;
+        private ObtenerROPorIdAD _obtenerROPorIdAD;
 
         public RentalOrderController()
         {
@@ -24,6 +29,8 @@ namespace SetLight.UI.Controllers
             _obtenerClPorID = new ObtenerClPorIDAD();
             _listarOrdenesAD = new ListarRentalOrderAD();
             _crearOrdenAD = new CrearRentalOrderAD();
+            _editarOrdenAD = new EditRentalOrderAD();
+            _obtenerROPorIdAD = new ObtenerROPorIdAD();
         }
 
         public ActionResult History(int clientId)
@@ -187,6 +194,186 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
+        // GET: RentalOrder/Edit/5
+        public ActionResult Edit(int id)
+        {
+
+            var orden = _contexto.RentalOrders.FirstOrDefault(o => o.OrderId == id);
+            if (orden == null)
+                return HttpNotFound();
+
+            var detalles = (from detalle in _contexto.OrderDetails
+                            where detalle.OrderId == id && detalle.Quantity > 0
+                            join equipo in _contexto.Equipment
+                            on detalle.EquipmentId equals equipo.EquipmentId
+                            select new OrderDetailDto
+                            {
+                                EquipmentId = equipo.EquipmentId,
+                                EquipmentName = equipo.EquipmentName,
+                                Brand = equipo.Brand,
+                                Model = equipo.Model,
+                                RentalValue = equipo.RentalValue,
+                                Quantity = detalle.Quantity,
+                                Stock = equipo.Stock
+                            }).ToList();
+
+
+            var viewModel = new CrearRentalOrderViewModel
+            {
+                OrderId = orden.OrderId,
+                ClientId = orden.ClientId,
+                StartDate = orden.StartDate,
+                EndDate = orden.EndDate,
+                StatusOrder = orden.StatusOrder,
+                EquiposSeleccionados = detalles,
+                Clientes = _contexto.Clients.Select(c => new ClientDto
+                {
+                    ClientId = c.ClientId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                }).ToList()
+            };
+
+            viewModel.EquiposDisponibles = _contexto.Equipment
+            .Where(e => e.Status == 1 && e.Stock > 0)
+            .Select(e => new OrderDetailDto
+            {
+                EquipmentId = e.EquipmentId,
+                EquipmentName = e.EquipmentName,
+                Brand = e.Brand,
+                Model = e.Model,
+                RentalValue = e.RentalValue,
+                Stock = e.Stock,
+                Quantity = 0
+            }).ToList();
+
+
+            return View(viewModel);
+        }
+
+        //POST: RentalOrder/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(int id, CrearRentalOrderViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Recargar combos por si hay error
+                model.Clientes = _contexto.Clients.Select(c => new ClientDto
+                {
+                    ClientId = c.ClientId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                }).ToList();
+
+                model.EquiposDisponibles = _contexto.Equipment
+                    .Where(e => e.Status == 1 && e.Stock > 0)
+                    .Select(e => new OrderDetailDto
+                    {
+                        EquipmentId = e.EquipmentId,
+                        EquipmentName = e.EquipmentName,
+                        Brand = e.Brand,
+                        Model = e.Model,
+                        RentalValue = e.RentalValue,
+                        Stock = e.Stock
+                    }).ToList();
+
+                return View(model);
+            }
+
+            using (var transaction = _contexto.Database.BeginTransaction())
+            {
+                try
+                {
+                    var orden = _contexto.RentalOrders.Find(id);
+                    if (orden == null)
+                        return HttpNotFound();
+
+                    orden.ClientId = model.ClientId;
+                    orden.StartDate = model.StartDate;
+                    orden.EndDate = model.EndDate;
+                    orden.StatusOrder = model.StatusOrder;
+                    orden.OrderDate = DateTime.Now;
+
+                    var detallesAntiguos = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
+
+                    foreach (var detalle in detallesAntiguos)
+                    {
+                        var equipo = _contexto.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
+                        if (equipo != null)
+                        {
+                            equipo.Stock += detalle.Quantity;
+
+                            if (equipo.Stock > 0 && equipo.Status == 2)
+                                equipo.Status = 1;
+                        }
+                    }
+
+                    _contexto.OrderDetails.RemoveRange(detallesAntiguos);
+                    await _contexto.SaveChangesAsync();
+
+                    foreach (var nuevo in model.EquiposSeleccionados)
+                    {
+                        _contexto.OrderDetails.Add(new OrderDetailDA
+                        {
+                            OrderId = orden.OrderId,
+                            EquipmentId = nuevo.EquipmentId,
+                            Quantity = nuevo.Quantity
+                        });
+
+                        var equipo = _contexto.Equipment.FirstOrDefault(e => e.EquipmentId == nuevo.EquipmentId);
+                        if (equipo != null)
+                        {
+                            if (equipo.Stock < nuevo.Quantity)
+                                throw new InvalidOperationException($"Stock insuficiente para {equipo.EquipmentName}");
+
+                            equipo.Stock -= nuevo.Quantity;
+
+                            if (equipo.Stock <= 0)
+                            {
+                                equipo.Stock = 0;
+                                equipo.Status = 2;
+                            }
+                        }
+                    }
+
+                    await _contexto.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    ModelState.AddModelError("", "Ocurrió un error al guardar los cambios: " + ex.Message);
+                }
+            }
+
+            model.Clientes = _contexto.Clients.Select(c => new ClientDto
+            {
+                ClientId = c.ClientId,
+                FirstName = c.FirstName,
+                LastName = c.LastName
+            }).ToList();
+
+            model.EquiposDisponibles = _contexto.Equipment
+                .Where(e => e.Status == 1 && e.Stock > 0)
+                .Select(e => new OrderDetailDto
+                {
+                    EquipmentId = e.EquipmentId,
+                    EquipmentName = e.EquipmentName,
+                    Brand = e.Brand,
+                    Model = e.Model,
+                    RentalValue = e.RentalValue,
+                    Stock = e.Stock
+                }).ToList();
+
+            return View(model);
+        }
+
+
+
 
 
     }

@@ -1,0 +1,92 @@
+﻿@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
+
+@{
+    ViewBag.Title = "Editar Orden";
+}
+
+<h2>Editar Orden</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ClientId)
+        @Html.DropDownListFor(m => m.ClientId, new SelectList(Model.Clientes, "ClientId", "FirstName"), "Seleccione un cliente", new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.StartDate)
+        @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.EndDate)
+        @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
+    </div>
+
+
+    <div class="form-group">
+        <label>Equipos</label><br />
+        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalSeleccionarEquipos">
+            Seleccionar equipos
+        </button>
+    </div>
+
+    <div id="equiposSeleccionadosContainer" class="mt-3">
+        <h5>Equipos seleccionados</h5>
+        <table class="table table-bordered" id="tablaResumenEquipos">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Valor Renta</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.EquiposSeleccionados.Count; i++)
+                {
+                    <tr>
+                        <td>@Model.EquiposSeleccionados[i].EquipmentName</td>
+                        <td>@Model.EquiposSeleccionados[i].Brand</td>
+                        <td>@Model.EquiposSeleccionados[i].Model</td>
+                        <td>₡@Model.EquiposSeleccionados[i].RentalValue.ToString("N2")</td>
+                        <td>@Model.EquiposSeleccionados[i].Quantity</td>
+                    </tr>
+
+                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentId" value="@Model.EquiposSeleccionados[i].EquipmentId" />
+                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentName" value="@Model.EquiposSeleccionados[i].EquipmentName" />
+                    <input type="hidden" name="EquiposSeleccionados[@i].Brand" value="@Model.EquiposSeleccionados[i].Brand" />
+                    <input type="hidden" name="EquiposSeleccionados[@i].Model" value="@Model.EquiposSeleccionados[i].Model" />
+                    <input type="hidden" name="EquiposSeleccionados[@i].RentalValue" value="@Model.EquiposSeleccionados[i].RentalValue" />
+                    <input type="hidden" name="EquiposSeleccionados[@i].Quantity" value="@Model.EquiposSeleccionados[i].Quantity" />
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Guardar cambios" class="btn btn-primary" />
+        @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary ms-2" })
+    </div>
+}
+
+<div class="modal fade" id="modalSeleccionarEquipos" tabindex="-1" role="dialog" aria-labelledby="modalLabelEquipos" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleccionar equipos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalBodyEquipos">
+                @Html.Partial("_SeleccionarEquipos", Model.EquiposDisponibles)
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/Modals/EditOrder/EditOrder.js"></script>
+}

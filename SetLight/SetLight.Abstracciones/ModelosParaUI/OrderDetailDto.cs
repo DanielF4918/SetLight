@@ -8,6 +8,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
 {
     public class OrderDetailDto
     {
+        public int OrderId { get; set; }
         public int EquipmentId { get; set; }
         public string EquipmentName { get; set; }
         public string Brand { get; set; }
