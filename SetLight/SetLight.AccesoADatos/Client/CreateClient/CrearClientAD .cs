@@ -33,7 +33,8 @@ namespace SetLight.AccesoADatos.Client.CreateClient
                 FirstName = client.FirstName,
                 LastName = client.LastName,
                 Phone = client.Phone,
-                Email = client.Email
+                Email = client.Email,
+                Status = client.Status
             };
         }
     }

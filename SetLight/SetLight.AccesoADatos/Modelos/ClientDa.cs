@@ -28,6 +28,9 @@ namespace SetLight.AccesoADatos.Modelos
         [Column("Email")]
         public string Email { get; set; }
 
+        [Column("Status")]
+        public int Status { get; set; }
+
 
     }
 }

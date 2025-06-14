@@ -9,6 +9,37 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+
+@using (Html.BeginForm("ListarClient", "Client", FormMethod.Get))
+{
+    <div class="row filtro-Client mb-4">
+        <div class="col-md-3">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" name="nombre" value="@ViewBag.NombreBuscado" class="form-control" placeholder="Ej: Daniel Fuentes" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado" class="form-control" placeholder="Ej: 8888-8888" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Correo</label>
+            <input type="text" name="correo" value="@ViewBag.CorreoBuscado" class="form-control" placeholder="Ej: correo@ejemplo.com" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Estado</label>
+            @Html.DropDownList("status", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+            <input type="submit" value="Filtrar" class="btn btn-dark btn-sm w-100" />
+        </div>
+    </div>
+}
+
+
 <table class="table">
     <tr>
         <th>
@@ -26,34 +57,45 @@
         <th>
             @Html.DisplayNameFor(model => model.Email)
         </th>
-        <th></th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.ClientId)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.FirstName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.LastName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Phone)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Email)
-        </td>
-        <td>
-        <td>
-            @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-sm btn-warning" })
-            @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-sm btn-info" })
-        </td>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ClientId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @if (item.Status == 1)
+                {
+                    <span class="badge bg-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Inactivo</span>
+                }
+            <td>
+                @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-sm btn-warning" })
+                @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-sm btn-info" })
+            </td>
 
-        </td>
-    </tr>
-}
+            </td>
+        </tr>
+    }
 
 </table>

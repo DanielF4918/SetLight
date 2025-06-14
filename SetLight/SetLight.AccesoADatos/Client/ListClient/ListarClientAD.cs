@@ -27,7 +27,8 @@ namespace SetLight.AccesoADatos.Client.ListClient
                     FirstName = cliente.FirstName,
                     LastName = cliente.LastName,
                     Phone = cliente.Phone,
-                    Email = cliente.Email
+                    Email = cliente.Email,
+                    Status = cliente.Status
                 }).ToList();
 
             return listaDeClientesARetornar;
