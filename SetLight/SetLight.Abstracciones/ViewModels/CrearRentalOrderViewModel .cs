@@ -6,6 +6,8 @@ namespace SetLight.Abstracciones.ViewModels
 {
     public class CrearRentalOrderViewModel
     {
+        public int OrderId { get; set; }  
+
         public int ClientId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

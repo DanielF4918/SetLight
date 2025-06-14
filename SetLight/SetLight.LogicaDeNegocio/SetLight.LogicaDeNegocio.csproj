@@ -52,7 +52,9 @@
     <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rentalorder\CrearRentalOrder\CrearRentalOrderLN.cs" />
+    <Compile Include="rentalorder\EditRentalOrder\EditRentalOrderLN.cs" />
     <Compile Include="rentalorder\ListarRentalOrder\ListarRentalOrderLN.cs" />
+    <Compile Include="rentalorder\ObtenerROPorId\ObtenerROPorIdLN.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SetLight.Abstracciones\SetLight.Abstracciones.csproj">
