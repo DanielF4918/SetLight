@@ -1,4 +1,8 @@
 .vs/
 **/bin/
 **/obj/
-
+*.dll
+*.pdb
+*.cache
+*.csproj.FileListAbsolute.txt
+.vs/
