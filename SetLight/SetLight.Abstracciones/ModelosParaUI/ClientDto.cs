@@ -13,8 +13,8 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string LastName { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
+        public int Status { get; set; } 
         
-
     }
 }
 

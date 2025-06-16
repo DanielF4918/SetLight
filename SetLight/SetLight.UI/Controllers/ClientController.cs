@@ -27,24 +27,53 @@ namespace SetLight.UI.Controllers
 
 
 
-
         // GET: Client/ListarClient
-        public ActionResult ListarClient(string nombre)
+        public ActionResult ListarClient(string nombre, string telefono, string correo, string status)
         {
             var lista = _listarClientLN.Obtener();
 
             if (!string.IsNullOrWhiteSpace(nombre))
             {
+                string nombreLower = nombre.ToLower();
                 lista = lista.Where(c =>
-                    (c.FirstName != null && c.FirstName.ToLower().Contains(nombre.ToLower())) ||
-                    (c.LastName != null && c.LastName.ToLower().Contains(nombre.ToLower()))
+                    ((c.FirstName + " " + c.LastName)?.ToLower().Contains(nombreLower) ?? false)
                 ).ToList();
             }
 
+            if (!string.IsNullOrWhiteSpace(telefono))
+            {
+                string telefonoLower = telefono.ToLower();
+                lista = lista.Where(c =>
+                    c.Phone != null && c.Phone.ToLower().Contains(telefonoLower)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(correo))
+            {
+                string correoLower = correo.ToLower();
+                lista = lista.Where(c =>
+                    c.Email != null && c.Email.ToLower().Contains(correoLower)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && int.TryParse(status, out int estadoInt))
+            {
+                lista = lista.Where(c => c.Status == estadoInt).ToList();
+            }
+
             ViewBag.NombreBuscado = nombre;
+            ViewBag.TelefonoBuscado = telefono;
+            ViewBag.CorreoBuscado = correo;
+            ViewBag.Estados = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Activo", Value = "1", Selected = (status == "1") },
+        new SelectListItem { Text = "Inactivo", Value = "0", Selected = (status == "0") }
+    };
 
             return View(lista);
         }
+
+
 
 
         // GET: Client/Details/5
