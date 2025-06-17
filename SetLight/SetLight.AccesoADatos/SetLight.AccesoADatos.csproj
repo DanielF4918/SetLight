@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\CreateClient\CrearClientAD .cs" />
+    <Compile Include="Client\EditClient\EditClientAD.cs" />
     <Compile Include="Client\ListClient\ListarClientAD.cs" />
     <Compile Include="Client\ObtenerClPorID\ObtenerClPorIDAD.cs" />
     <Compile Include="Contexto.cs" />

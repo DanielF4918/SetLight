@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\CreateClient\CreateClientLN.cs" />
+    <Compile Include="Client\EditClient\EditClientLN.cs" />
     <Compile Include="Client\ListClient\ListarClientLN.cs" />
     <Compile Include="Client\ObtenerClPorIDLN\ObtenerClPorIDLN.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />

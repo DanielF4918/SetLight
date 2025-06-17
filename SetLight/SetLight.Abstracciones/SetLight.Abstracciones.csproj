@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccesoADatos\Client\CreateClient\ICreateClientAD.cs" />
+    <Compile Include="AccesoADatos\Client\EditClient\IEditClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ListClient\IListClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ObtenerClPorId\IObtenerClPorIDAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="AccesoADatos\RentalOrder\ListarRentalOrder\IListarRentalOrder.cs" />
     <Compile Include="AccesoADatos\RentalOrder\ObtenerROPorID\IObtenerROPorIdAD.cs" />
     <Compile Include="LogicaDeNegocio\Client\CreateClient\ICrearClientLN.cs" />
+    <Compile Include="LogicaDeNegocio\Client\EditClient\IEditClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />

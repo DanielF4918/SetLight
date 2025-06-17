@@ -27,7 +27,8 @@ namespace SetLight.AccesoADatos.Clientes.ObtenerClPorID
                                               FirstName = c.FirstName,
                                               LastName = c.LastName,
                                               Phone = c.Phone,
-                                              Email = c.Email
+                                              Email = c.Email,
+                                              Status = c.Status
                                           }).FirstOrDefault();
 
             return clienteARetornar;
