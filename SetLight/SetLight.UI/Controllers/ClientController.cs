@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.CreateClient;
+using SetLight.Abstracciones.LogicaDeNegocio.Client.EditClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient;
+using SetLight.Abstracciones.LogicaDeNegocio.Client.ObtenerClPorId;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.LogicaDeNegocio.Client.CreateClient;
+using SetLight.LogicaDeNegocio.Client.EditClient;
 using SetLight.LogicaDeNegocio.Client.ListClient;
+using SetLight.LogicaDeNegocio.Client.ObtenerClPorIDLN;
 
 
 namespace SetLight.UI.Controllers
@@ -16,13 +20,18 @@ namespace SetLight.UI.Controllers
     public class ClientController : Controller
     {
 
-        private readonly IListarClientLN _listarClientLN;
-        private readonly ICrearClientLN _crearClientLN;
+        private IListarClientLN _listarClientLN;
+        private ICrearClientLN _crearClientLN;
+        private IObtenerClPorIDLN _obtenerClPorIDLN;
+        private IEditClientLN _editClientLN;
+
 
         public ClientController()
         {
             _listarClientLN = new ListarClientLN();
             _crearClientLN = new CrearClientLN();
+            _obtenerClPorIDLN = new ObtenerClPorIDLN();
+            _editClientLN = new EditClientLN();
         }
 
 
@@ -108,24 +117,30 @@ namespace SetLight.UI.Controllers
         // GET: Client/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var cliente = _obtenerClPorIDLN.Obtener(id);
+            if (cliente == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View("EditClient", cliente);
         }
 
         // POST: Client/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(ClientDto model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // TODO: Add update logic here
+                return View("EditClient", model);
+            }
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            _editClientLN.Actualizar(model);
+
+
+            return RedirectToAction("ListarClient"); 
         }
+    
 
         // GET: Client/Delete/5
         public ActionResult Delete(int id)
