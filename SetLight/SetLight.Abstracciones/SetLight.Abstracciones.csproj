@@ -55,7 +55,9 @@
     <Compile Include="AccesoADatos\Equipment\ListarEquipment\IListarEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\ObtenerEqPorID\IObtenerEqPorIDAD.cs" />
     <Compile Include="AccesoADatos\RentalOrder\CrearRentalOrder\ICrearRentalOrderAD.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\EditRentalOrder\IEditRentalOrderAD.cs" />
     <Compile Include="AccesoADatos\RentalOrder\ListarRentalOrder\IListarRentalOrder.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\ObtenerROPorID\IObtenerROPorIdAD.cs" />
     <Compile Include="LogicaDeNegocio\Client\CreateClient\ICrearClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
@@ -65,7 +67,9 @@
     <Compile Include="LogicaDeNegocio\Equipment\IObtenerEqPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\ListarEquipment\IListarEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\rentalorder\CrearRentalOrder\ICrearRentalOrderLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\EditRentalOrder\IEditRentalOrderLN.cs" />
     <Compile Include="LogicaDeNegocio\rentalorder\ListarRentalOrder\IListarRentalOrderLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\ObtenerROPorID\IObtenerROPorIdLN.cs" />
     <Compile Include="ModelosParaUI\ClientDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
