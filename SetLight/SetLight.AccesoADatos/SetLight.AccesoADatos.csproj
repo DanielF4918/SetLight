@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\CreateClient\CrearClientAD .cs" />
+    <Compile Include="Client\EditClient\EditClientAD.cs" />
     <Compile Include="Client\ListClient\ListarClientAD.cs" />
     <Compile Include="Client\ObtenerClPorID\ObtenerClPorIDAD.cs" />
     <Compile Include="Contexto.cs" />
@@ -68,7 +69,9 @@
     <Compile Include="Modelos\RentalOrderDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rentalorder\CrearRentalOrder\CrearRentalOrderAD.cs" />
+    <Compile Include="rentalorder\EditRentalOrder\EditRentalOrderAD.cs" />
     <Compile Include="rentalorder\ListarRentalOrder\ListarRentalOderAD.cs" />
+    <Compile Include="rentalorder\ObtenerROPorID\ObtenerROPorIdAD.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

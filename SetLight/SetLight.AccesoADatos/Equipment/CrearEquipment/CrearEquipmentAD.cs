@@ -36,6 +36,7 @@ namespace SetLight.AccesoADatos.Equipment.CrearEquipment
                 SerialNumber = equipment.SerialNumber,
                 Description = equipment.Description,
                 RentalValue = equipment.RentalValue,
+                Stock = equipment.Stock,
                 CategoryId = equipment.CategoryId,
                 Status = equipment.Status
             };

@@ -36,6 +36,21 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                 var equipo = db.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
                 if (equipo != null)
                 {
+                    Console.WriteLine($"Equipo: {equipo.EquipmentName} | Stock actual: {equipo.Stock} | Cantidad alquilada: {detalle.Quantity}");
+
+
+                    if (equipo.Stock < detalle.Quantity)
+                    {
+                        throw new InvalidOperationException($"No hay suficiente stock para el equipo: {equipo.EquipmentName}");
+                    }
+
+                    equipo.Stock -= detalle.Quantity;
+
+                    if (equipo.Stock <= 0)
+                    {
+                        equipo.Stock = 0;
+                        equipo.Status = 2; 
+                    }
                 }
             }
 
