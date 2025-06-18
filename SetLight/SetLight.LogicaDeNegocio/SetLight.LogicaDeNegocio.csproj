@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\CreateClient\CreateClientLN.cs" />
+    <Compile Include="Client\EditClient\EditClientLN.cs" />
     <Compile Include="Client\ListClient\ListarClientLN.cs" />
     <Compile Include="Client\ObtenerClPorIDLN\ObtenerClPorIDLN.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />
@@ -52,7 +53,9 @@
     <Compile Include="Equipment\ObtenerEqPorID\ObtenerEqPorIDLN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rentalorder\CrearRentalOrder\CrearRentalOrderLN.cs" />
+    <Compile Include="rentalorder\EditRentalOrder\EditRentalOrderLN.cs" />
     <Compile Include="rentalorder\ListarRentalOrder\ListarRentalOrderLN.cs" />
+    <Compile Include="rentalorder\ObtenerROPorID\ObtenerROPorIdLN.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SetLight.Abstracciones\SetLight.Abstracciones.csproj">
