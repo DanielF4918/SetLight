@@ -13,8 +13,20 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string LastName { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-        public int Status { get; set; } 
-        
+        public int Status { get; set; }
+        public string EstadoEnTexto
+        {
+            get
+            {
+                switch (Status)
+                {
+                    case 1: return "Activo";
+                    case 2: return "Agotado";
+                    case 3: return "Inactivo";
+                    default: return "Desconocido";
+                }
+            }
+        }
     }
 }
 

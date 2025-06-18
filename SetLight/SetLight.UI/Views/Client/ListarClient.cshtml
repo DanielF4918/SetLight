@@ -83,13 +83,13 @@
             <td>
                 @if (item.Status == 1)
                 {
-                    <span class="badge bg-success">Activo</span>
+                    @Html.ActionLink("Inactivar", "Inactivar", new { id = item.ClientId }, new { @class = "btn btn-warning btn-sm" })
                 }
                 else
                 {
-                    <span class="badge bg-danger">Inactivo</span>
+                    @Html.ActionLink("Activar", "Activar", new { id = item.ClientId }, new { @class = "btn btn-success btn-sm" })
                 }
-            <td>
+<td>
                 @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-sm btn-warning" })
                 @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-sm btn-info" })
             </td>
