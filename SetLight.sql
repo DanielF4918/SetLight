@@ -82,6 +82,25 @@ CREATE TABLE Maintenance (
     FOREIGN KEY (EquipmentId) REFERENCES Equipment(EquipmentId)
 );
 
+--Devolucion de Ordenes
+CREATE TABLE dbo.ReturnDetails (
+    ReturnDetailId INT IDENTITY(1,1) PRIMARY KEY,
+    OrderId INT NOT NULL,
+    EquipmentId INT NOT NULL,
+    ReturnDate DATE NOT NULL DEFAULT GETDATE(),
+    ConditionReport NVARCHAR(255),
+    IsReturned BIT NOT NULL DEFAULT 0,
+    RequiresMaintenance BIT NOT NULL DEFAULT 0,
+
+    CONSTRAINT FK_ReturnDetails_RentalOrders FOREIGN KEY (OrderId) REFERENCES dbo.RentalOrders(OrderId),
+    CONSTRAINT FK_ReturnDetails_Equipment FOREIGN KEY (EquipmentId) REFERENCES dbo.Equipment(EquipmentId)
+);
+
+
 
 ALTER TABLE Equipment
 ADD Stock INT NOT NULL DEFAULT 0;
+
+
+ALTER TABLE Clients
+ADD Status INT NOT NULL;
