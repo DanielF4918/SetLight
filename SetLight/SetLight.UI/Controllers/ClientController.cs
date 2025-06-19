@@ -8,6 +8,7 @@ using SetLight.Abstracciones.LogicaDeNegocio.Client.CreateClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.EditClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ObtenerClPorId;
+using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.LogicaDeNegocio.Client.CreateClient;
 using SetLight.LogicaDeNegocio.Client.EditClient;
@@ -162,6 +163,24 @@ namespace SetLight.UI.Controllers
             {
                 return View();
             }
+        }
+
+        // GET: Equipment/Activar/5
+        public ActionResult Activar(int id)
+        {
+            var equipo = _obtenerClPorIDLN.Obtener(id);
+            equipo.Status = 1; // Activo
+            _editClientLN.Actualizar(equipo);
+            return RedirectToAction("ListarClient");
+        }
+
+        // GET: Equipment/Inactivar/5
+        public ActionResult Inactivar(int id)
+        {
+            var equipo = _obtenerClPorIDLN.Obtener(id);
+            equipo.Status = 3; // Inactivo
+            _editClientLN.Actualizar(equipo);
+            return RedirectToAction("ListarClient");
         }
     }
 }
