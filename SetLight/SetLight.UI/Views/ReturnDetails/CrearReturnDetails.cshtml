@@ -1,0 +1,57 @@
+﻿@model SetLight.Abstracciones.ViewModels.EquipmentReturnViewModel
+
+@{
+    ViewBag.Title = "Registrar Devolución";
+}
+
+<h2>Registrar devolución - Orden @Model.OrderId</h2>
+
+<h4>Cliente: @Model.ClientName</h4>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.OrderId)
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Equipo</th>
+                <th>Cantidad alquilada</th>
+                <th>Cantidad en buen estado</th>
+                <th>Cantidad dañada</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(m => m.Items[i].EquipmentName)
+                        @Html.HiddenFor(m => m.Items[i].EquipmentId)
+                        @Html.HiddenFor(m => m.Items[i].EquipmentName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => m.Items[i].Quantity)
+                        @Html.HiddenFor(m => m.Items[i].Quantity)
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Items[i].Observaciones, new { @class = "form-control" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="form-group">
+        <input type="submit" value="Registrar devolución" class="btn btn-primary" />
+        @Html.ActionLink("Volver al listado", "Index", "RentalOrders", null, new { @class = "btn btn-secondary" })
+    </div>
+}

@@ -17,9 +17,11 @@ namespace SetLight.AccesoADatos
         }
         public DbSet<EquipmentDA> Equipment { get; set; }
         public DbSet<EqCategoryDA> EqCategory { get; set; }
-         public DbSet<ClientDa> Clients { get; set; }
+        public DbSet<ClientDa> Clients { get; set; }
         public DbSet<RentalOrderDA> RentalOrders { get; set; }
         public DbSet<OrderDetailDA> OrderDetails { get; set; }
+
+        public DbSet<ReturnDetailDa> ReturnDetails { get; set; }
 
     }
 }
