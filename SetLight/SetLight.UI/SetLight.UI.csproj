@@ -206,6 +206,7 @@
     <Content Include="Views\RentalOrder\Edit.cshtml" />
     <Content Include="Views\Client\EditClient.cshtml" />
     <Content Include="Views\ReturnDetails\CrearReturnDetails.cshtml" />
+    <Content Include="Views\ReturnDetails\DetallesDevolucion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
