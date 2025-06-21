@@ -28,5 +28,9 @@ namespace SetLight.AccesoADatos.Modelos
 
         [Column("RequiresMaintenance")]
         public bool RequiresMaintenance { get; set; }
+
+
+        public virtual EquipmentDA Equipment { get; set; }
+
     }
 }
