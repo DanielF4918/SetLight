@@ -21,11 +21,33 @@ namespace SetLight.UI.Controllers
         {
             _createReturnDetailsAD = new CreateReturnDetailsAD();
         }
-        // GET: ReturnDetails
-        public ActionResult Index()
+        public ActionResult DetallesDevolucion(int orderId)
         {
-            return View();
+            using (var contexto = new Contexto())
+            {
+                var devoluciones = contexto.ReturnDetails
+                    .Include("Equipment")
+                    .Where(d => d.OrderId == orderId)
+                    .ToList();
+
+                if (!devoluciones.Any())
+                    return HttpNotFound("No hay devoluciones registradas para esta orden.");
+
+                var viewModel = devoluciones.Select(d => new ReturnDetailsDto
+                {
+                    EquipmentName = d.Equipment.EquipmentName,
+                    ReturnDate = d.ReturnDate,
+                    ConditionReport = d.ConditionReport,
+                    IsReturned = d.IsReturned,
+                    RequiresMaintenance = d.RequiresMaintenance
+                }).ToList();
+
+                ViewBag.OrderId = orderId;
+                return View(viewModel);
+            }
         }
+
+
 
         // GET: ReturnDetails/Details/5
         public ActionResult Details(int id)
@@ -156,7 +178,7 @@ namespace SetLight.UI.Controllers
                         var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
                         if (orden != null)
                         {
-                            orden.StatusOrder = 3; 
+                            orden.StatusOrder = 2; 
                             contexto.SaveChanges();
                         }
                     }

@@ -260,7 +260,6 @@ namespace SetLight.UI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Recargar combos por si hay error
                 model.Clientes = _contexto.Clients.Select(c => new ClientDto
                 {
                     ClientId = c.ClientId,
@@ -294,7 +293,6 @@ namespace SetLight.UI.Controllers
                     orden.ClientId = model.ClientId;
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
-                    orden.StatusOrder = model.StatusOrder;
                     orden.OrderDate = DateTime.Now;
 
                     var detallesAntiguos = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
@@ -372,6 +370,7 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
 
 
 
