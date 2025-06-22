@@ -30,5 +30,6 @@ namespace SetLight.AccesoADatos.Modelos
         public virtual ClientDa Client { get; set; }
 
         public virtual ICollection<OrderDetailDA> OrderDetails { get; set; }
+        public string RutaComprobante { get; set; }
     }
 }
