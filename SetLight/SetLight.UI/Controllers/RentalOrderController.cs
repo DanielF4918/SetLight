@@ -12,6 +12,7 @@ using SetLight.AccesoADatos.rentalorder.EditRentalOrder;
 using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
 using SetLight.AccesoADatos.Modelos;
 using SetLight.AccesoADatos.Equipment.ObtenerEqPorID;
+using SetLight.LogicaDeNegocio.Services;
 
 namespace SetLight.UI.Controllers
 {
@@ -52,6 +53,7 @@ namespace SetLight.UI.Controllers
                                  StatusOrder = orden.StatusOrder,
                                  ClientId = orden.ClientId,
                                  ClientName = cliente.FirstName + " " + cliente.LastName,
+                                 RutaComprobante = orden.RutaComprobante,
                                  Details = (from detalle in _contexto.OrderDetails
                                             join equipo in _contexto.Equipment
                                             on detalle.EquipmentId equals equipo.EquipmentId
@@ -168,6 +170,29 @@ namespace SetLight.UI.Controllers
 
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
                 await crearLN.Guardar(nuevaOrden);
+
+                var ordenGuardada = _contexto.RentalOrders
+                    .OrderByDescending(o => o.OrderId)
+                    .FirstOrDefault(o => o.ClientId == model.ClientId && o.StartDate == model.StartDate);
+
+                if (ordenGuardada != null && (ordenGuardada.StatusOrder == 1 || ordenGuardada.StatusOrder == 2))
+                {
+                    var cliente = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
+                    var ordenParaPDF = new RentalOrderDto
+                    {
+                        OrderId = ordenGuardada.OrderId,
+                        OrderDate = ordenGuardada.OrderDate,
+                        StartDate = ordenGuardada.StartDate,
+                        EndDate = ordenGuardada.EndDate,
+                        ClientName = cliente.FirstName + " " + cliente.LastName,
+                        Details = equiposSeleccionados
+                    };
+
+                    byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(ordenParaPDF);
+                    string fileName = $"Orden_{ordenParaPDF.OrderId}.pdf";
+                    ordenGuardada.RutaComprobante = fileName;
+                    await _contexto.SaveChangesAsync();
+                }
 
                 return RedirectToAction("Index");
             }
@@ -371,10 +396,39 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
+        //GET: VerComprobante
+        public ActionResult VerComprobante(int id)
+        {
+            var orden = _contexto.RentalOrders.Find(id);
+            if (orden == null)
+                return HttpNotFound("Orden no encontrada");
 
+            var cliente = _contexto.Clients.FirstOrDefault(c => c.ClientId == orden.ClientId);
+            var detalles = (from detalle in _contexto.OrderDetails
+                            join equipo in _contexto.Equipment
+                            on detalle.EquipmentId equals equipo.EquipmentId
+                            where detalle.OrderId == orden.OrderId
+                            select new OrderDetailDto
+                            {
+                                EquipmentName = equipo.EquipmentName,
+                                Brand = equipo.Brand,
+                                Model = equipo.Model,
+                                RentalValue = equipo.RentalValue,
+                                Quantity = detalle.Quantity
+                            }).ToList();
 
+            var dto = new RentalOrderDto
+            {
+                OrderId = orden.OrderId,
+                OrderDate = orden.OrderDate,
+                StartDate = orden.StartDate,
+                EndDate = orden.EndDate,
+                ClientName = cliente.FirstName + " " + cliente.LastName,
+                Details = detalles
+            };
 
-
-
+            byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
+            return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
+        }
     }
 }
