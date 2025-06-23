@@ -14,6 +14,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public DateTime EndDate { get; set; }
         public int StatusOrder { get; set; }
         public int ClientId { get; set; }
+        public string RutaComprobante { get; set; }
 
 
 

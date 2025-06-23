@@ -132,6 +132,7 @@
     <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\RentalOrderController.cs" />
+    <Compile Include="Controllers\ReturnDetailsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -204,6 +205,8 @@
     <Content Include="Views\RentalOrder\_SeleccionarEquipos.cshtml" />
     <Content Include="Views\RentalOrder\Edit.cshtml" />
     <Content Include="Views\Client\EditClient.cshtml" />
+    <Content Include="Views\ReturnDetails\CrearReturnDetails.cshtml" />
+    <Content Include="Views\ReturnDetails\DetallesDevolucion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

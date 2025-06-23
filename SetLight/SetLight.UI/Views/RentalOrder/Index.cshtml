@@ -1,4 +1,4 @@
-﻿﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
 
 @{
     ViewBag.Title = "Órdenes de Alquiler";
@@ -31,10 +31,37 @@
                 <td>@orden.OrderDate.ToShortDateString()</td>
                 <td>@orden.StartDate.ToShortDateString()</td>
                 <td>@orden.EndDate.ToShortDateString()</td>
-                <td>@(orden.StatusOrder == 1 ? "Activa" : "Inactiva")</td>
+                <td>
+                    @{
+                        string estado = orden.StatusOrder == 1 ? "Activa" :
+                                        orden.StatusOrder == 2 ? "Completada" :
+                                        "Cancelada";
+                    }
+                    @estado
+                </td>
                 <td>
                     @Html.ActionLink("Ver Detalles", "History", new { clientId = orden.ClientId }, new { @class = "btn btn-info btn-sm" })
-                    @Html.ActionLink("Editar", "Edit", new { id = orden.OrderId }, new { @class = "btn btn-warning btn-sm" })
+
+                    @if (orden.StatusOrder == 1)
+                    {
+                        @Html.ActionLink("Editar", "Edit", new { id = orden.OrderId }, new { @class = "btn btn-warning btn-sm" })
+                        @Html.ActionLink("Registrar devolución", "CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-dark btn-sm" })
+                    }
+
+                    @if (orden.StatusOrder == 2)
+                    {
+                        @Html.ActionLink("Ver devolución", "DetallesDevolucion", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-outline-secondary btn-sm" })
+                    }
+                    @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
+                    {
+                        <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })" class="btn btn-sm btn-success">
+                            Descargar comprobante
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No disponible</span>
+                    }
 
                 </td>
             </tr>
