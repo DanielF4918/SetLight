@@ -40,7 +40,9 @@
                     @estado
                 </td>
                 <td>
-                    @Html.ActionLink("Ver Detalles", "History", new { clientId = orden.ClientId }, new { @class = "btn btn-info btn-sm" })
+                    <button class="btn btn-sm btn-info" type="button" onclick="mostrarEquiposModal(@orden.OrderId)">
+                        Ver equipos
+                    </button>
 
                     @if (orden.StatusOrder == 1)
                     {
@@ -68,3 +70,57 @@
         }
     </tbody>
 </table>
+
+@foreach (var orden in Model)
+{
+    <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Cantidad</th>
+                                <th>Valor Unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in orden.Details)
+                            {
+                                <tr>
+                                    <td>@detalle.EquipmentName</td>
+                                    <td>@detalle.Brand</td>
+                                    <td>@detalle.Model</td>
+                                    <td>@detalle.Quantity</td>
+                                    <td>₡@detalle.RentalValue.ToString("N2")</td>
+                                    <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function mostrarEquiposModal(orderId) {
+            $('#modalEquipos-' + orderId).modal('show');
+        }
+    </script>
+}
