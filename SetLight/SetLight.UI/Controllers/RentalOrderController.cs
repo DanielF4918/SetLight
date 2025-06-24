@@ -75,14 +75,41 @@ namespace SetLight.UI.Controllers
         // Listado de órdenes
         public ActionResult Index()
         {
-            var ordenes = _listarOrdenesAD.Obtener();
+            var ordenes = (from orden in _contexto.RentalOrders
+                           join cliente in _contexto.Clients on orden.ClientId equals cliente.ClientId
+                           select new RentalOrderDto
+                           {
+                               OrderId = orden.OrderId,
+                               OrderDate = orden.OrderDate,
+                               StartDate = orden.StartDate,
+                               EndDate = orden.EndDate,
+                               StatusOrder = orden.StatusOrder,
+                               ClientId = orden.ClientId,
+                               ClientName = cliente.FirstName + " " + cliente.LastName,
+                               RutaComprobante = orden.RutaComprobante,
+                               Details = (from detalle in _contexto.OrderDetails
+                                          join equipo in _contexto.Equipment
+                                          on detalle.EquipmentId equals equipo.EquipmentId
+                                          where detalle.OrderId == orden.OrderId
+                                          select new OrderDetailDto
+                                          {
+                                              EquipmentName = equipo.EquipmentName,
+                                              Brand = equipo.Brand,
+                                              Model = equipo.Model,
+                                              RentalValue = equipo.RentalValue,
+                                              Quantity = detalle.Quantity
+                                          }).ToList()
+                           }).ToList();
+
             return View(ordenes);
         }
+
 
         // Crear orden (GET)
         public ActionResult Create()
         {
             var clientes = _contexto.Clients
+                .Where(c => c.Status == 1)
                 .Select(c => new ClientDto
                 {
                     ClientId = c.ClientId,
@@ -129,7 +156,9 @@ namespace SetLight.UI.Controllers
                 {
                     ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
 
-                    model.Clientes = _contexto.Clients.Select(c => new ClientDto
+                    model.Clientes = _contexto.Clients
+                        .Where(c => c.Status == 1)
+                        .Select(c => new ClientDto
                     {
                         ClientId = c.ClientId,
                         FirstName = c.FirstName,
