@@ -5,10 +5,15 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.CreateClient;
+using SetLight.Abstracciones.LogicaDeNegocio.Client.EditClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient;
+using SetLight.Abstracciones.LogicaDeNegocio.Client.ObtenerClPorId;
+using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.LogicaDeNegocio.Client.CreateClient;
+using SetLight.LogicaDeNegocio.Client.EditClient;
 using SetLight.LogicaDeNegocio.Client.ListClient;
+using SetLight.LogicaDeNegocio.Client.ObtenerClPorIDLN;
 
 
 namespace SetLight.UI.Controllers
@@ -16,35 +21,69 @@ namespace SetLight.UI.Controllers
     public class ClientController : Controller
     {
 
-        private readonly IListarClientLN _listarClientLN;
-        private readonly ICrearClientLN _crearClientLN;
+        private IListarClientLN _listarClientLN;
+        private ICrearClientLN _crearClientLN;
+        private IObtenerClPorIDLN _obtenerClPorIDLN;
+        private IEditClientLN _editClientLN;
+
 
         public ClientController()
         {
             _listarClientLN = new ListarClientLN();
             _crearClientLN = new CrearClientLN();
+            _obtenerClPorIDLN = new ObtenerClPorIDLN();
+            _editClientLN = new EditClientLN();
         }
 
 
 
-
         // GET: Client/ListarClient
-        public ActionResult ListarClient(string nombre)
+        public ActionResult ListarClient(string nombre, string telefono, string correo, string status)
         {
             var lista = _listarClientLN.Obtener();
 
             if (!string.IsNullOrWhiteSpace(nombre))
             {
+                string nombreLower = nombre.ToLower();
                 lista = lista.Where(c =>
-                    (c.FirstName != null && c.FirstName.ToLower().Contains(nombre.ToLower())) ||
-                    (c.LastName != null && c.LastName.ToLower().Contains(nombre.ToLower()))
+                    ((c.FirstName + " " + c.LastName)?.ToLower().Contains(nombreLower) ?? false)
                 ).ToList();
             }
 
+            if (!string.IsNullOrWhiteSpace(telefono))
+            {
+                string telefonoLower = telefono.ToLower();
+                lista = lista.Where(c =>
+                    c.Phone != null && c.Phone.ToLower().Contains(telefonoLower)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(correo))
+            {
+                string correoLower = correo.ToLower();
+                lista = lista.Where(c =>
+                    c.Email != null && c.Email.ToLower().Contains(correoLower)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && int.TryParse(status, out int estadoInt))
+            {
+                lista = lista.Where(c => c.Status == estadoInt).ToList();
+            }
+
             ViewBag.NombreBuscado = nombre;
+            ViewBag.TelefonoBuscado = telefono;
+            ViewBag.CorreoBuscado = correo;
+            ViewBag.Estados = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Activo", Value = "1", Selected = (status == "1") },
+        new SelectListItem { Text = "Inactivo", Value = "0", Selected = (status == "0") }
+    };
 
             return View(lista);
         }
+
+
 
 
         // GET: Client/Details/5
@@ -79,24 +118,30 @@ namespace SetLight.UI.Controllers
         // GET: Client/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var cliente = _obtenerClPorIDLN.Obtener(id);
+            if (cliente == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View("EditClient", cliente);
         }
 
         // POST: Client/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(ClientDto model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // TODO: Add update logic here
+                return View("EditClient", model);
+            }
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            _editClientLN.Actualizar(model);
+
+
+            return RedirectToAction("ListarClient"); 
         }
+    
 
         // GET: Client/Delete/5
         public ActionResult Delete(int id)
@@ -118,6 +163,24 @@ namespace SetLight.UI.Controllers
             {
                 return View();
             }
+        }
+
+        // GET: Equipment/Activar/5
+        public ActionResult Activar(int id)
+        {
+            var equipo = _obtenerClPorIDLN.Obtener(id);
+            equipo.Status = 1; // Activo
+            _editClientLN.Actualizar(equipo);
+            return RedirectToAction("ListarClient");
+        }
+
+        // GET: Equipment/Inactivar/5
+        public ActionResult Inactivar(int id)
+        {
+            var equipo = _obtenerClPorIDLN.Obtener(id);
+            equipo.Status = 3; // Inactivo
+            _editClientLN.Actualizar(equipo);
+            return RedirectToAction("ListarClient");
         }
     }
 }

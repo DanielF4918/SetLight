@@ -47,23 +47,42 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccesoADatos\Client\CreateClient\ICreateClientAD.cs" />
+    <Compile Include="AccesoADatos\Client\EditClient\IEditClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ListClient\IListClientAD.cs" />
+    <Compile Include="AccesoADatos\Client\ObtenerClPorId\IObtenerClPorIDAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
     <Compile Include="AccesoADatos\Equipment\CrearEquipment\ICrearEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\EditarEquipment\IEditarEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\ListarEquipment\IListarEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\ObtenerEqPorID\IObtenerEqPorIDAD.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\CrearRentalOrder\ICrearRentalOrderAD.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\EditRentalOrder\IEditRentalOrderAD.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\ListarRentalOrder\IListarRentalOrder.cs" />
+    <Compile Include="AccesoADatos\RentalOrder\ObtenerROPorID\IObtenerROPorIdAD.cs" />
+    <Compile Include="AccesoADatos\ReturnDetails\CreateReturnDetails\ICreateReturnDetailsAD.cs" />
     <Compile Include="LogicaDeNegocio\Client\CreateClient\ICrearClientLN.cs" />
+    <Compile Include="LogicaDeNegocio\Client\EditClient\IEditClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
+    <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\EditarEquipment\IEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\IObtenerEqPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\ListarEquipment\IListarEquipmentLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\CrearRentalOrder\ICrearRentalOrderLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\EditRentalOrder\IEditRentalOrderLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\ListarRentalOrder\IListarRentalOrderLN.cs" />
+    <Compile Include="LogicaDeNegocio\rentalorder\ObtenerROPorID\IObtenerROPorIdLN.cs" />
+    <Compile Include="LogicaDeNegocio\ReturnDetails\CreateReturnDetails\ICreateReturnDetailsLN.cs" />
     <Compile Include="ModelosParaUI\ClientDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
+    <Compile Include="ModelosParaUI\OrderDetailDto.cs" />
+    <Compile Include="ModelosParaUI\RentalOrderDto.cs" />
+    <Compile Include="ModelosParaUI\ReturnDetailsDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\CrearRentalOrderViewModel .cs" />
+    <Compile Include="ViewModels\EquipmentReturnViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

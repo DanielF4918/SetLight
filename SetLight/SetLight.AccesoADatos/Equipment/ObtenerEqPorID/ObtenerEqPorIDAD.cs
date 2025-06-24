@@ -30,6 +30,7 @@ namespace SetLight.AccesoADatos.Equipment.ObtenerEqPorID
                                                            SerialNumber = elEquipment.SerialNumber,
                                                            Description = elEquipment.Description,
                                                            RentalValue = elEquipment.RentalValue,
+                                                           Stock = elEquipment.Stock,
                                                            Status = elEquipment.Status,
                                                            CategoryId = elEquipment.CategoryId
 
