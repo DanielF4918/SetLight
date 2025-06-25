@@ -10,5 +10,7 @@ namespace SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient
     public interface IListarClientLN
     {
         List<ClientDto> Obtener();
+        List<ClientDto> ObtenerActivos();
+
     }
 }

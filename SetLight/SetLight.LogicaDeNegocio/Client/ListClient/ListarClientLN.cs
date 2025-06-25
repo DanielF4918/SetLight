@@ -26,5 +26,10 @@ namespace SetLight.LogicaDeNegocio.Client.ListClient
             List<ClientDto> listaClientes = _listarClientAD.Obtener();
             return listaClientes;
         }
+        public List<ClientDto> ObtenerActivos()
+        {
+            return Obtener().Where(c => c.Status == 1).ToList();
+        }
+
     }
 }
