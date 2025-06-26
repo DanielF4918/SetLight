@@ -10,6 +10,7 @@ using SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ObtenerClPorId;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.AccesoADatos;
 using SetLight.LogicaDeNegocio.Client.CreateClient;
 using SetLight.LogicaDeNegocio.Client.EditClient;
 using SetLight.LogicaDeNegocio.Client.ListClient;
@@ -182,5 +183,28 @@ namespace SetLight.UI.Controllers
             _editClientLN.Actualizar(equipo);
             return RedirectToAction("ListarClient");
         }
+
+
+        public PartialViewResult BuscarClientesModal(string filtro)
+        {
+            using (var contexto = new Contexto())
+            {
+                var clientes = contexto.Clients
+                    .Where(c => filtro == null || c.FirstName.Contains(filtro) || c.LastName.Contains(filtro))
+                    .Select(c => new ClientDto
+                    {
+                        ClientId = c.ClientId,
+                        FirstName = c.FirstName,
+                        LastName = c.LastName,
+                        Email = c.Email,
+                        Phone = c.Phone
+                    }).ToList();
+
+                return PartialView("_SeleccionarClientePartial", clientes);
+            }
+        }
+
     }
+
+
 }
