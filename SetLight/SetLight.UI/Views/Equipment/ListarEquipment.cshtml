@@ -39,12 +39,13 @@
         <thead>
             <tr>
                 <th>Nombre del Equipo</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Número de Serie</th>
+
+                <th>N° de Serie</th>
                 <th>Descripción</th>
-                <th>Valor de Alquiler</th>
-                <th>Stock</th>
+                <th>Alquiler</th>
+                <th>Disponibles</th>
+                <th>Alquilados</th>
+                <th>Mantenimiento</th>
                 <th>Estado</th>
                 <th>Categoría</th>
                 <th>Acciones</th>
@@ -54,13 +55,14 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.EquipmentName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Brand)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Model)</td>
+                    <td>@item.EquipoCompleto</td>
+                    
                     <td>@Html.DisplayFor(modelItem => item.SerialNumber)</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
                     <td>@item.RentalValue.ToString("C")</td>
-                    <td>@item.Stock</td>
+                    <td>@item.Disponibles</td>
+                    <td>@item.Alquilados</td>
+                    <td>@item.EnMantenimiento</td>
                     <td>@item.EstadoEnTexto</td>
                     <td>@item.CategoriaNombre</td>
                     <td class="acciones">

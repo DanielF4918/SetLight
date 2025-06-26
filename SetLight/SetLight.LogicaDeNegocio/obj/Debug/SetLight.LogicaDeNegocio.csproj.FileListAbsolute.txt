@@ -88,3 +88,6 @@ C:\Users\kenca\OneDrive\Escritorio\23062025\SetLight\SetLight\SetLight.LogicaDeN
 C:\Users\kenca\OneDrive\Escritorio\23062025\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.0FE7D236.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\23062025\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.dll
 C:\Users\kenca\OneDrive\Escritorio\23062025\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\BouncyCastle.Crypto.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\itextsharp.dll
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\itextsharp.xml
