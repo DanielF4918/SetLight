@@ -1,0 +1,49 @@
+﻿@model List<SetLight.Entidades.Maintenance>
+
+@{
+    ViewBag.Title = "Mantenimientos en curso";
+
+}
+
+
+<h2>Mantenimientos en curso</h2>
+
+<div class="mb-3">
+    @Html.ActionLink(
+        "Ver Histórico",
+        "Historico",
+        "ReturnDetails",
+        new { area = "" },
+        new { @class = "btn btn-secondary" }
+    )
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Equipo</th>
+            <th>Inicio</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.Equipment.EquipmentName</td>
+                <td>@m.StartDate.ToString("dd/MM/yyyy")</td>
+                <td>@m.MaintenanceType</td>
+                <td>@m.MaintenanceStatus</td>
+                <td>
+                    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
+                    {
+                        @Html.Hidden("id", m.MaintenanceId)
+                        <button type="submit" class="btn btn-success">Finalizar</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

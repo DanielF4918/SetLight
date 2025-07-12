@@ -9,6 +9,7 @@ using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.Abstracciones.ViewModels;
 using SetLight.AccesoADatos;
 using SetLight.AccesoADatos.ReturnDetails.CreateReturnDetails;
+using SetLight.Entidades;
 using SetLight.LogicaDeNegocio.ReturnDetails.CreateReturnDetails;
 
 namespace SetLight.UI.Controllers
@@ -147,7 +148,22 @@ namespace SetLight.UI.Controllers
                             await ln.Guardar(dtoDañado);
                         }
 
+                        using (var contexto = new Contexto())
+                        {
+                            var mantenimiento = new Maintenance
+                            {
+                                StartDate = DateTime.Now,
+                                EndDate = null,
+                                MaintenanceType = "Revisión por daño",
+                                MaintenanceStatus = 1,
+                                EquipmentId = item.EquipmentId
+                            };
+
+                            contexto.Maintenance.Add(mantenimiento);
+                            contexto.SaveChanges();
+                        }
                     }
+
                 }
 
                 using (var contexto = new Contexto())
@@ -188,9 +204,16 @@ namespace SetLight.UI.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error al guardar devoluciones: " + ex.Message);
+                var mensaje = ex.Message;
+                if (ex.InnerException != null)
+                    mensaje += " - " + ex.InnerException.Message;
+                if (ex.InnerException?.InnerException != null)
+                    mensaje += " - " + ex.InnerException.InnerException.Message;
+
+                ModelState.AddModelError("", "Error al guardar devoluciones: " + mensaje);
                 return View(model);
             }
+
         }
 
 
@@ -241,5 +264,70 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
+        public ActionResult Mantenimientos()
+        {
+            using (var contexto = new Contexto())
+            {
+                var lista = contexto.Maintenance
+                    .Include("Equipment")
+                    .Where(m => m.MaintenanceStatus == 1)
+                    .ToList();
+
+                return View(lista);
+            }
+        }
+        [HttpPost]
+        public ActionResult FinalizarMantenimiento(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance.Find(id);
+                if (mantenimiento == null)
+                    return HttpNotFound();
+
+                mantenimiento.MaintenanceStatus = 2;
+                mantenimiento.EndDate = DateTime.Now;
+
+                var equipo = contexto.Equipment.Find(mantenimiento.EquipmentId);
+                if (equipo != null)
+                    equipo.Stock += 1;
+
+                contexto.SaveChanges();
+            }
+
+            return RedirectToAction("Mantenimientos");
+        }
+
+        public ActionResult TestInsertarMantenimiento()
+        {
+            using (var ctx = new Contexto())
+            {
+                ctx.Maintenance.Add(new Maintenance
+                {
+                    StartDate = DateTime.Now,
+                    MaintenanceType = "TestInsert",
+                    MaintenanceStatus = 1,
+                    EquipmentId = 1  
+                });
+                    ctx.SaveChanges();
+            }
+            return Content("¡Inserción de prueba completada!");
+        }
+        public ActionResult Historico()
+        {
+            using (var contexto = new Contexto())
+            {
+
+                var listaHistorico = contexto.Maintenance
+                    .Include("Equipment")
+                    .OrderByDescending(m => m.StartDate)
+                    .ToList();
+
+                return View(listaHistorico);
+            }
+        }
+
+
+
     }
 }
