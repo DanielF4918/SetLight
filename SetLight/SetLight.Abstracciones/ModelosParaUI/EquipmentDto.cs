@@ -35,7 +35,6 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Display(Name = "Stock Disponible")]
         public int Stock { get; set; }
 
-
         [Display(Name = "Estado")]
         public string EstadoEnTexto
         {
@@ -54,6 +53,24 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int CategoryId { get; set; }
         public int Status { get; set; }
 
+        [Display(Name = "Disponibles")]
+        public int Disponibles { get; set; }
+
+        [Display(Name = "Alquilados")]
+        public int Alquilados { get; set; }
+
+        [Display(Name = "En Mantenimiento")]
+        public int EnMantenimiento { get; set; }
+
+
+        [Display(Name = "Equipo")]
+        public string EquipoCompleto
+        {
+            get
+            {
+                return $"{EquipmentName} {Brand} {Model}";
+            }
+        }
 
     }
 
@@ -63,5 +80,6 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int? CategoriaId { get; set; }
         public int? Estado { get; set; }
     }
+
 
 }
