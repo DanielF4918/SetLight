@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
+using SetLight.Entidades;
 
 namespace SetLight.AccesoADatos
 {
@@ -22,6 +23,8 @@ namespace SetLight.AccesoADatos
         public DbSet<OrderDetailDA> OrderDetails { get; set; }
 
         public DbSet<ReturnDetailDa> ReturnDetails { get; set; }
+
+        public DbSet<Maintenance> Maintenance { get; set; }
 
     }
 }
