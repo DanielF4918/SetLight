@@ -1,0 +1,33 @@
+﻿@model List<SetLight.Abstracciones.ModelosParaUI.TrazabilidadDto>
+
+@{
+    ViewBag.Title = "Trazabilidad del Equipo";
+}
+
+<h2>Trazabilidad del Equipo @ViewBag.EquipoId</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Tipo de Evento</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Persona</th>
+            <th>Tipo de Mantenimiento</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TipoEvento</td>
+                <td>@item.FechaInicio?.ToString("dd/MM/yyyy")</td>
+                <td>@item.FechaFin?.ToString("dd/MM/yyyy")</td>
+                <td>@item.ClienteNombre</td>
+                <td>@item.TipoMantenimiento</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("listarEquipment", "Equipment")" class="btn btn-secondary">Volver al Inventario</a>

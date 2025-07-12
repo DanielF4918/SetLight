@@ -17,7 +17,7 @@ namespace SetLight.Entidades
         public DateTime? EndDate { get; set; }
 
         [Required]
-        public string MaintenanceType { get; set; }
+        public int MaintenanceType { get; set; }
 
         [Required]
         public int MaintenanceStatus { get; set; }

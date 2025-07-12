@@ -133,6 +133,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\RentalOrderController.cs" />
     <Compile Include="Controllers\ReturnDetailsController.cs" />
+    <Compile Include="Controllers\TrazabilidadController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -211,6 +212,7 @@
     <Content Include="Views\Client\_SeleccionarClientePartial.cshtml" />
     <Content Include="Views\ReturnDetails\Mantenimientos.cshtml" />
     <Content Include="Views\ReturnDetails\Historico.cshtml" />
+    <Content Include="Views\Trazabilidad\TrazabilidadPorEquipo.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
