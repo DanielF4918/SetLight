@@ -65,6 +65,7 @@
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EqCategoryDA.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
+    <Compile Include="Modelos\Maintenance.cs" />
     <Compile Include="Modelos\OrderDetailDA.cs" />
     <Compile Include="Modelos\RentalOrderDA.cs" />
     <Compile Include="Modelos\ReturnDetailsDA.cs" />

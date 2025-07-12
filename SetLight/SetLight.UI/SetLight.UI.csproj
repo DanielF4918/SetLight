@@ -209,6 +209,8 @@
     <Content Include="Views\ReturnDetails\CrearReturnDetails.cshtml" />
     <Content Include="Views\ReturnDetails\DetallesDevolucion.cshtml" />
     <Content Include="Views\Client\_SeleccionarClientePartial.cshtml" />
+    <Content Include="Views\ReturnDetails\Mantenimientos.cshtml" />
+    <Content Include="Views\ReturnDetails\Historico.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

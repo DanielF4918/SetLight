@@ -40,7 +40,6 @@ namespace SetLight.UI.Controllers
 
             using (var contexto = new Contexto())
             {
-                // Cargar todas las órdenes activas y sus detalles
                 var detallesOrdenesActivas = contexto.RentalOrders
                     .Where(o => o.StatusOrder == 1)
                     .SelectMany(o => o.OrderDetails)
@@ -52,9 +51,12 @@ namespace SetLight.UI.Controllers
                         .Where(d => d.EquipmentId == equipo.EquipmentId)
                         .Sum(d => (int?)d.Quantity) ?? 0;
 
-                    equipo.Disponibles = equipo.Stock; // Stock actual ya contempla lo alquilado
-                    equipo.EnMantenimiento = 0; // Puedes cambiar esto si tenés una tabla de mantenimientos
+                    equipo.Disponibles = equipo.Stock;
+
+                    equipo.EnMantenimiento = contexto.Maintenance
+                        .Any(m => m.EquipmentId == equipo.EquipmentId && m.MaintenanceStatus != 2) ? 1 : 0;
                 }
+
 
                 // ViewBags para combos
                 ViewBag.Categorias = contexto.EqCategory
