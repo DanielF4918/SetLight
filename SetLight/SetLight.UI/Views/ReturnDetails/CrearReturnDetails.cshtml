@@ -8,6 +8,18 @@
 
 <h4>Cliente: @Model.ClientName</h4>
 
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
@@ -37,10 +49,12 @@
                         @Html.HiddenFor(m => m.Items[i].Quantity)
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadBuenas)
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadDañadas)
                     </td>
                     <td>
                         @Html.TextBoxFor(m => m.Items[i].Observaciones, new { @class = "form-control" })

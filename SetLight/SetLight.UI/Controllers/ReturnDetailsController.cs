@@ -154,7 +154,7 @@ namespace SetLight.UI.Controllers
                             {
                                 StartDate = DateTime.Now,
                                 EndDate = null,
-                                MaintenanceType = "Revisión por daño",
+                                MaintenanceType = 1,
                                 MaintenanceStatus = 1,
                                 EquipmentId = item.EquipmentId
                             };
@@ -305,7 +305,7 @@ namespace SetLight.UI.Controllers
                 ctx.Maintenance.Add(new Maintenance
                 {
                     StartDate = DateTime.Now,
-                    MaintenanceType = "TestInsert",
+                    MaintenanceType = 1,
                     MaintenanceStatus = 1,
                     EquipmentId = 1  
                 });

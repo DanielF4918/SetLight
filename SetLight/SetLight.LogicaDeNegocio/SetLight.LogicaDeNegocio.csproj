@@ -64,6 +64,7 @@
     <Compile Include="rentalorder\ListarRentalOrder\ListarRentalOrderLN.cs" />
     <Compile Include="rentalorder\ObtenerROPorID\ObtenerROPorIdLN.cs" />
     <Compile Include="ReturnDetails\CreateReturnDetails\CreateReturnDetailsLN.cs" />
+    <Compile Include="Trazabilidad\ObtenerTrazabilidadPorEquipoLN.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SetLight.Abstracciones\SetLight.Abstracciones.csproj">
