@@ -65,15 +65,18 @@
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EqCategoryDA.cs" />
     <Compile Include="Modelos\EquipmentDA.cs" />
+    <Compile Include="Modelos\Maintenance.cs" />
     <Compile Include="Modelos\OrderDetailDA.cs" />
     <Compile Include="Modelos\RentalOrderDA.cs" />
     <Compile Include="Modelos\ReturnDetailsDA.cs" />
+    <Compile Include="Modelos\TrazabilidadDA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rentalorder\CrearRentalOrder\CrearRentalOrderAD.cs" />
     <Compile Include="rentalorder\EditRentalOrder\EditRentalOrderAD.cs" />
     <Compile Include="rentalorder\ListarRentalOrder\ListarRentalOderAD.cs" />
     <Compile Include="rentalorder\ObtenerROPorID\ObtenerROPorIdAD.cs" />
     <Compile Include="ReturnDetails\CreateReturnDetails\CreateReturnDetailsAD.cs" />
+    <Compile Include="Trazabilidad\ObtenerTrazabilidadPorEquipoAD.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

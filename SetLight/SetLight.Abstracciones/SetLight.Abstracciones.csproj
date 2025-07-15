@@ -60,6 +60,7 @@
     <Compile Include="AccesoADatos\RentalOrder\ListarRentalOrder\IListarRentalOrder.cs" />
     <Compile Include="AccesoADatos\RentalOrder\ObtenerROPorID\IObtenerROPorIdAD.cs" />
     <Compile Include="AccesoADatos\ReturnDetails\CreateReturnDetails\ICreateReturnDetailsAD.cs" />
+    <Compile Include="AccesoADatos\trazabilidad\ITrazabilidadAD.cs" />
     <Compile Include="LogicaDeNegocio\Client\CreateClient\ICrearClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\EditClient\IEditClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
@@ -74,12 +75,14 @@
     <Compile Include="LogicaDeNegocio\rentalorder\ListarRentalOrder\IListarRentalOrderLN.cs" />
     <Compile Include="LogicaDeNegocio\rentalorder\ObtenerROPorID\IObtenerROPorIdLN.cs" />
     <Compile Include="LogicaDeNegocio\ReturnDetails\CreateReturnDetails\ICreateReturnDetailsLN.cs" />
+    <Compile Include="LogicaDeNegocio\trazabilidad\ITrazabilidadLN.cs" />
     <Compile Include="ModelosParaUI\ClientDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
     <Compile Include="ModelosParaUI\OrderDetailDto.cs" />
     <Compile Include="ModelosParaUI\RentalOrderDto.cs" />
     <Compile Include="ModelosParaUI\ReturnDetailsDto.cs" />
+    <Compile Include="ModelosParaUI\TrazabilidadDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\CrearRentalOrderViewModel .cs" />
     <Compile Include="ViewModels\EquipmentReturnViewModel.cs" />
