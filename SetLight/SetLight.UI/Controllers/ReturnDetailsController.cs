@@ -154,7 +154,7 @@ namespace SetLight.UI.Controllers
                             {
                                 StartDate = DateTime.Now,
                                 EndDate = DateTime.Now,
-                                MaintenanceType = 1,
+                                MaintenanceType = item.MaintenanceType,
                                 MaintenanceStatus = 1,
                                 EquipmentId = item.EquipmentId
                             };
