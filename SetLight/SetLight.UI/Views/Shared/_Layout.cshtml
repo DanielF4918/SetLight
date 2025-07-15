@@ -21,16 +21,8 @@
                     <li>@Html.ActionLink("Equipos", "ListarEquipment", "Equipment", new { area = "" }, new { @class = "nav-link" })</li>
                     <li>@Html.ActionLink("Clientes", "ListarClient", "Client", new { area = "" }, new { @class = "nav-link" })</li>
                     <li>@Html.ActionLink("Ordenes", "Index", "RentalOrder", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li class="nav-item">
-                        @Html.ActionLink(
-                          "Mantenimiento",
-                          "Mantenimientos",
-                          "ReturnDetails",
-                          new { area = "" },
-                          new { @class = "nav-link" }
-                        )
-                    </li>
-
+                    <li class="nav-item">@Html.ActionLink("Mantenimiento", "Mantenimientos", "ReturnDetails", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("Trazabilidad", "VerTrazabilidad", "Trazabilidad", new { equipoId = 1 }, new { @class = "nav-link" })</li>
 
                 </ul>
             </div>

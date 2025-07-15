@@ -6,6 +6,10 @@
 
 <h2>Trazabilidad del Equipo @ViewBag.EquipoId</h2>
 
+<a href="@Url.Action("DescargarTrazabilidad", "Trazabilidad", new { equipoId = ViewBag.EquipoId })" class="btn btn-info mb-3">
+    Descargar PDF de Trazabilidad
+</a>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -21,13 +25,22 @@
         {
             <tr>
                 <td>@item.TipoEvento</td>
-                <td>@item.FechaInicio?.ToString("dd/MM/yyyy")</td>
-                <td>@item.FechaFin?.ToString("dd/MM/yyyy")</td>
-                <td>@item.ClienteNombre</td>
-                <td>@item.TipoMantenimiento</td>
+                <td>@(item.FechaInicio.HasValue ? item.FechaInicio.Value.ToString("dd/MM/yyyy") : "-")</td>
+                <td>
+                    @(
+                    item.FechaFin.HasValue
+                        ? item.FechaFin.Value.ToString("dd/MM/yyyy")
+                        : item.FechaMantenimiento.HasValue
+                            ? item.FechaMantenimiento.Value.ToString("dd/MM/yyyy")
+                            : "-"
+                )
+                </td>
+                <td>@(item.ClienteNombre ?? item.Tecnico ?? "-")</td>
+                <td>@(item.TipoEvento == "Mantenimiento" ? item.TipoMantenimiento.ToString() : "-")</td>
             </tr>
         }
     </tbody>
+
 </table>
 
 <a href="@Url.Action("listarEquipment", "Equipment")" class="btn btn-secondary">Volver al Inventario</a>
