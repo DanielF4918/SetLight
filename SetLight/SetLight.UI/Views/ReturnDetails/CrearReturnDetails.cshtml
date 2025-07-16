@@ -8,6 +8,18 @@
 
 <h4>Cliente: @Model.ClientName</h4>
 
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
@@ -21,6 +33,7 @@
                 <th>Cantidad en buen estado</th>
                 <th>Cantidad dañada</th>
                 <th>Observaciones</th>
+                <th>Tipo de mantenimiento</th>
             </tr>
         </thead>
         <tbody>
@@ -37,13 +50,29 @@
                         @Html.HiddenFor(m => m.Items[i].Quantity)
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadBuenas)
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity })
+                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadDañadas)
                     </td>
+
                     <td>
                         @Html.TextBoxFor(m => m.Items[i].Observaciones, new { @class = "form-control" })
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(
+                            m => m.Items[i].MaintenanceType,
+                            new List<SelectListItem> {
+                                new SelectListItem{ Value="1", Text="Revisión por daño" },
+                                new SelectListItem{ Value="2", Text="Reparación mayor" },
+                                new SelectListItem{ Value="3", Text="Mantenimiento preventivo" },
+                            },
+                            "-- Seleccione --",
+                            new { @class = "form-control" }
+                        )
+                        @Html.ValidationMessageFor(m => m.Items[i].MaintenanceType)
                     </td>
                 </tr>
             }

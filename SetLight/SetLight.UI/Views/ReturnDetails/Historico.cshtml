@@ -1,0 +1,50 @@
+﻿@model List<SetLight.Entidades.Maintenance>
+
+@{
+    ViewBag.Title = "Histórico de Mantenimientos";
+}
+
+<h2>Histórico de Mantenimientos</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Equipo</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.Equipment.EquipmentName</td>
+                <td>@m.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    @(m.EndDate.HasValue
+                    ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                    : "<em>En curso</em>")
+                </td>
+                <td>
+                    @(
+        m.MaintenanceType == 1 ? "Revisión por daño" :
+        m.MaintenanceType == 2 ? "Reparación mayor" :
+        m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
+        "—"
+    )
+                </td>
+                <td>
+                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
+                </td>
+
+                <td>
+                    @(m.MaintenanceStatus == 1
+                    ? "En curso"
+                    : "Finalizado")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

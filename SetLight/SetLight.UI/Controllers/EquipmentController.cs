@@ -38,6 +38,36 @@ namespace SetLight.UI.Controllers
         {
             var lista = _listarEquipmentLN.Obtener();
 
+            using (var contexto = new Contexto())
+            {
+                var detallesOrdenesActivas = contexto.RentalOrders
+                    .Where(o => o.StatusOrder == 1)
+                    .SelectMany(o => o.OrderDetails)
+                    .ToList();
+
+                foreach (var equipo in lista)
+                {
+                    equipo.Alquilados = detallesOrdenesActivas
+                        .Where(d => d.EquipmentId == equipo.EquipmentId)
+                        .Sum(d => (int?)d.Quantity) ?? 0;
+
+                    equipo.Disponibles = equipo.Stock;
+
+                    equipo.EnMantenimiento = contexto.Maintenance
+                        .Any(m => m.EquipmentId == equipo.EquipmentId && m.MaintenanceStatus != 2) ? 1 : 0;
+                }
+
+
+                // ViewBags para combos
+                ViewBag.Categorias = contexto.EqCategory
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.CategoryId.ToString(),
+                        Text = c.CategoryName,
+                        Selected = (CategoriaId.HasValue && CategoriaId == c.CategoryId)
+                    }).ToList();
+            }
+
             // Filtros
             if (!string.IsNullOrWhiteSpace(Nombre))
                 lista = lista.Where(e => e.EquipmentName != null &&
@@ -49,30 +79,21 @@ namespace SetLight.UI.Controllers
             if (Estado.HasValue && Estado.Value != 0)
                 lista = lista.Where(e => e.Status == Estado).ToList();
 
-            // ViewBags para combos
-            using (var contexto = new Contexto())
-            {
-                ViewBag.Categorias = contexto.EqCategory
-                    .Select(c => new SelectListItem
-                    {
-                        Value = c.CategoryId.ToString(),
-                        Text = c.CategoryName,
-                        Selected = (CategoriaId.HasValue && CategoriaId == c.CategoryId)
-                    }).ToList();
-            }
-
             ViewBag.Estados = new List<SelectListItem>
     {
         new SelectListItem { Value = "0", Text = "Todos", Selected = Estado == null || Estado == 0 },
         new SelectListItem { Value = "1", Text = "Activo", Selected = Estado == 1 },
-        new SelectListItem { Value = "2", Text = "Agotado", Selected = Estado == 2 },
-        new SelectListItem { Value = "3", Text = "Inactivo", Selected = Estado == 3 }
+        new SelectListItem { Value = "2", Text = "Alquilado", Selected = Estado == 2 },
+        new SelectListItem { Value = "3", Text = "Inactivo", Selected = Estado == 3 },
+        new SelectListItem { Value = "4", Text = "En mantenimiento", Selected = Estado == 4 }
     };
 
             ViewBag.NombreBuscado = Nombre;
 
             return View(lista);
         }
+
+
 
         // GET: Equipment/Details/5
         public ActionResult Details(int id)
