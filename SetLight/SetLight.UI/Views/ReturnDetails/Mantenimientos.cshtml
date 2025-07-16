@@ -34,7 +34,19 @@
             <tr>
                 <td>@m.Equipment.EquipmentName</td>
                 <td>@m.StartDate.ToString("dd/MM/yyyy")</td>
-                <td>@m.MaintenanceType</td>
+                <td>
+                    @{
+                        var tipo = m.MaintenanceType == 1 ? "Revisión por daño"
+                                 : m.MaintenanceType == 2 ? "Reparación mayor"
+                                 : m.MaintenanceType == 3 ? "Mantenimiento preventivo"
+                                 : "—";
+                    }
+                    @tipo
+                </td>
+                <td>
+                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
+                </td>
+
                 <td>@m.MaintenanceStatus</td>
                 <td>
                     @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
