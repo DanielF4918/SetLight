@@ -153,8 +153,8 @@ namespace SetLight.UI.Controllers
                             var mantenimiento = new Maintenance
                             {
                                 StartDate = DateTime.Now,
-                                EndDate = null,
-                                MaintenanceType = 1,
+                                EndDate = DateTime.Now,
+                                MaintenanceType = item.MaintenanceType,
                                 MaintenanceStatus = 1,
                                 EquipmentId = item.EquipmentId
                             };

@@ -27,7 +27,18 @@
                     ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
                     : "<em>En curso</em>")
                 </td>
-                <td>@m.MaintenanceType</td>
+                <td>
+                    @(
+        m.MaintenanceType == 1 ? "Revisión por daño" :
+        m.MaintenanceType == 2 ? "Reparación mayor" :
+        m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
+        "—"
+    )
+                </td>
+                <td>
+                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
+                </td>
+
                 <td>
                     @(m.MaintenanceStatus == 1
                     ? "En curso"
