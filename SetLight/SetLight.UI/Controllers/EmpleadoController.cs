@@ -1,25 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using SetLight.Abstracciones.LogicaDeNegocio.Empleado;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.LogicaDeNegocio.Empleado.CrearEmpleado;
 using SetLight.LogicaDeNegocio.Empleado.ListarEmpleado;
+using SetLight.UI.Models; 
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace SetLight.UI.Controllers
 {
     public class EmpleadoController : Controller
     {
-
-        private IListarEmpleadoLN _listarEmpleadoLN;
-
-
+        private  IListarEmpleadoLN _listarEmpleadoLN;
+        private  ICrearEmpleadoLN _crearEmpleadoLN;
+        private  ApplicationDbContext _contexto;
 
         public EmpleadoController()
         {
             _listarEmpleadoLN = new ListarEmpleadoLN();
+            _crearEmpleadoLN = new CrearEmpleadoLN();
+            _contexto = new ApplicationDbContext(); 
         }
+
         // GET: Empleado
         public ActionResult ListarEmpleado()
         {
@@ -27,32 +32,42 @@ namespace SetLight.UI.Controllers
             return View(listaEmpleados);
         }
 
-        // GET: Empleado/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
         // GET: Empleado/Create
-        public ActionResult Create()
+        public ActionResult CrearEmpleado()
         {
+            ViewBag.Roles = ObtenerListaRoles();
             return View();
         }
 
         // POST: Empleado/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> CrearEmpleado(EmpleadoDto empleadoDto)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add insert logic here
+                await _crearEmpleadoLN.Guardar(empleadoDto);
+                return RedirectToAction("ListarEmpleado");
+            }
 
-                return RedirectToAction("Index");
-            }
-            catch
+            ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+            return View(empleadoDto);
+        }
+
+        private IEnumerable<SelectListItem> ObtenerListaRoles(string rolSeleccionado = null)
+        {
+            return _contexto.Roles.Select(r => new SelectListItem
             {
-                return View();
-            }
+                Value = r.Id,
+                Text = r.Name,
+                Selected = r.Id == rolSeleccionado
+            }).ToList();
+        }
+
+        // GET: Empleado/Details/5
+        public ActionResult Details(int id)
+        {
+            return View();
         }
 
         // GET: Empleado/Edit/5
@@ -68,7 +83,6 @@ namespace SetLight.UI.Controllers
             try
             {
                 // TODO: Add update logic here
-
                 return RedirectToAction("Index");
             }
             catch
@@ -90,7 +104,6 @@ namespace SetLight.UI.Controllers
             try
             {
                 // TODO: Add delete logic here
-
                 return RedirectToAction("Index");
             }
             catch
