@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using SetLight.Abstracciones.ModelosParaUI;
 
-namespace SetLight.Abstracciones.AccesoADatos.Empleado
+namespace SetLight.Abstracciones.LogicaDeNegocio.Empleado
 {
-    public interface ICrearEmpleadoAD
-    {  
+    public interface ICrearEmpleadoLN
+    {
         Task<int> Guardar(EmpleadoDto empleadoAGuardar);
+
     }
 }

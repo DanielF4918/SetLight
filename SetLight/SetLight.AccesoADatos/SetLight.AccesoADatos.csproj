@@ -57,6 +57,7 @@
     <Compile Include="Client\ListClient\ListarClientAD.cs" />
     <Compile Include="Client\ObtenerClPorID\ObtenerClPorIDAD.cs" />
     <Compile Include="Contexto.cs" />
+    <Compile Include="Empleado\CrearEmpleado\CrearEmpleadoAD.cs" />
     <Compile Include="Empleado\ListarEmpleado\ListarEmpleadoAD.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryAD.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />

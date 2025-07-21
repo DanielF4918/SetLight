@@ -67,6 +67,7 @@
     <Compile Include="LogicaDeNegocio\Client\EditClient\IEditClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
+    <Compile Include="LogicaDeNegocio\Empleado\ICrearEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\Empleado\IListarEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
