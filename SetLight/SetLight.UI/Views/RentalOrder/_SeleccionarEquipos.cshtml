@@ -11,7 +11,7 @@
             <th>Marca</th>
             <th>Modelo</th>
             <th>Valor Renta</th>
-            <th><strong>Stock</strong></th> 
+            <th><strong>Stock</strong></th>
             <th>Cantidad</th>
         </tr>
     </thead>
@@ -25,24 +25,25 @@
                 </td>
                 <td>@Html.DisplayFor(m => m[i].Brand)</td>
                 <td>@Html.DisplayFor(m => m[i].Model)</td>
-                <td>₡@Model[i].RentalValue.ToString("N2")</td>
-                <td><strong>@Model[i].Stock</strong></td> 
+                <td>₡@Model[i].RentalValue.ToString("N0")</td>
+                <td><strong>@Model[i].Stock</strong></td>
                 <td>
                     <input type="number" min="0" class="form-control cantidad-equipo"
-                           data-index="@i" data-id="@Model[i].EquipmentId"
+                           data-id="@Model[i].EquipmentId"
                            data-name="@Model[i].EquipmentName"
                            data-brand="@Model[i].Brand"
                            data-model="@Model[i].Model"
                            data-value="@Model[i].RentalValue"
-                           data-stock="@Model[i].Stock" 
-                    value="0" />
+                           data-stock="@Model[i].Stock"
+                           value="0" />
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-
-<div class="text-right">
-    <button type="button" class="btn btn-primary" id="btnAgregarEquipos">Agregar seleccionados</button>
+<div class="text-end">
+    <button type="button" class="btn btn-primary" id="btnAgregarEquipos">
+        Agregar seleccionados
+    </button>
 </div>
