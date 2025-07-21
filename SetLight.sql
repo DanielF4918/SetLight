@@ -123,3 +123,11 @@ ALTER TABLE Clients
 ADD Status INT NOT NULL;
 
 ALTER TABLE RentalOrders ADD RutaComprobante VARCHAR(255) NULL;
+
+
+ALTER TABLE RentalOrders
+ADD EmpleadoId INT NULL;
+
+ALTER TABLE RentalOrders
+ADD CONSTRAINT FK_RentalOrders_Empleado
+FOREIGN KEY (EmpleadoId) REFERENCES Empleado(IdEmpleado);
