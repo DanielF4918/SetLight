@@ -14,6 +14,8 @@ namespace SetLight.AccesoADatos.RentalOrder
             {
                 var lista = (from orden in db.RentalOrders
                              join cliente in db.Clients on orden.ClientId equals cliente.ClientId
+                             join empleado in db.Empleado on orden.EmpleadoId equals empleado.IdEmpleado into empJoin
+                             from empleado in empJoin.DefaultIfEmpty() 
                              select new RentalOrderDto
                              {
                                  OrderId = orden.OrderId,
@@ -22,11 +24,15 @@ namespace SetLight.AccesoADatos.RentalOrder
                                  OrderDate = orden.OrderDate,
                                  StartDate = orden.StartDate,
                                  EndDate = orden.EndDate,
-                                 StatusOrder = orden.StatusOrder
+                                 StatusOrder = orden.StatusOrder,
+                                 EmpleadoNombreCompleto = empleado != null
+                                     ? empleado.Nombre + " " + empleado.Apellido
+                                     : "No asignado"
                              }).ToList();
 
                 return lista;
             }
         }
+
     }
 }
