@@ -50,6 +50,8 @@
     <Compile Include="AccesoADatos\Client\EditClient\IEditClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ListClient\IListClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ObtenerClPorId\IObtenerClPorIDAD.cs" />
+    <Compile Include="AccesoADatos\Empleado\ICrearEmpleadoAD.cs" />
+    <Compile Include="AccesoADatos\Empleado\IListarEmpleadoAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
     <Compile Include="AccesoADatos\Equipment\CrearEquipment\ICrearEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\EditarEquipment\IEditarEquipmentAD.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="LogicaDeNegocio\Client\EditClient\IEditClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
+    <Compile Include="LogicaDeNegocio\Empleado\IListarEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\EditarEquipment\IEquipmentLN.cs" />
@@ -77,6 +80,7 @@
     <Compile Include="LogicaDeNegocio\ReturnDetails\CreateReturnDetails\ICreateReturnDetailsLN.cs" />
     <Compile Include="LogicaDeNegocio\trazabilidad\ITrazabilidadLN.cs" />
     <Compile Include="ModelosParaUI\ClientDto.cs" />
+    <Compile Include="ModelosParaUI\EmpeladoDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
     <Compile Include="ModelosParaUI\OrderDetailDto.cs" />

@@ -26,5 +26,8 @@ namespace SetLight.AccesoADatos
 
         public DbSet<Maintenance> Maintenance { get; set; }
 
+        public DbSet<EmpleadoDA> Empleado { get; set; }
+  
+
     }
 }

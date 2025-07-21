@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using SetLight.AccesoADatos;
 using SetLight.UI.Models;
 
 namespace SetLight.UI.Controllers
@@ -17,6 +19,13 @@ namespace SetLight.UI.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private  RoleManager<IdentityRole> _roleManager;
+
+        public AccountController(RoleManager<IdentityRole> roleManager)
+        {
+            _roleManager = roleManager;
+        }
+
 
         public AccountController()
         {
@@ -153,37 +162,68 @@ namespace SetLight.UI.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
+
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // Para obtener más información sobre cómo habilitar la confirmación de cuentas y el restablecimiento de contraseña, visite https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Enviar un correo electrónico con este vínculo
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirmar la cuenta", "Para confirmar su cuenta, haga clic <a href=\"" + callbackUrl + "\">aquí</a>");
+                    using (var contexto = new Contexto())
+                    {
+                        // Buscar si existe un empleado con ese correo
+                        var empleado = contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == model.Email);
 
+                        if (empleado == null)
+                        {
+                            // No existe, eliminamos el usuario
+                            await UserManager.DeleteAsync(user);
+                            ModelState.AddModelError("", "El correo ingresado no pertenece a ningún empleado registrado. Solicite primero el registro por parte del administrador.");
+                            return View(model);
+                        }
+
+                        // Obtener el nombre del rol desde Identity
+                        RoleManager<IdentityRole> roleManager;
+
+                        if (_roleManager != null)
+                        {
+                            roleManager = _roleManager;
+                        }
+                        else
+                        {
+                            var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
+                            roleManager = new RoleManager<IdentityRole>(roleStore);
+                        }
+
+                        var rol = await roleManager.FindByIdAsync(empleado.RolId);
+                        var rolNombre = rol?.Name;
+
+                        if (rolNombre == null)
+                        {
+                            // Rol no existe en la tabla de Identity
+                            await UserManager.DeleteAsync(user);
+                            ModelState.AddModelError("", "El rol asignado al empleado no existe en el sistema.");
+                            return View(model);
+                        }
+
+                        // Asignar el rol al usuario
+                        await UserManager.AddToRoleAsync(user.Id, rolNombre);
+
+                        // Enlazar el empleado con el IdentityId
+                        empleado.IdEmpleadoGuid = Guid.Parse(user.Id);
+                        contexto.Entry(empleado).State = System.Data.Entity.EntityState.Modified;
+                        await contexto.SaveChangesAsync();
+                    }
+
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                     return RedirectToAction("Index", "Home");
                 }
+
                 AddErrors(result);
             }
 
-            // Si llegamos a este punto, es que se ha producido un error y volvemos a mostrar el formulario
+            // Si llegamos aquí, hay errores
             return View(model);
         }
 
-        //
-        // GET: /Account/ConfirmEmail
-        [AllowAnonymous]
-        public async Task<ActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null)
-            {
-                return View("Error");
-            }
-            var result = await UserManager.ConfirmEmailAsync(userId, code);
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
+
+
 
         //
         // GET: /Account/ForgotPassword
