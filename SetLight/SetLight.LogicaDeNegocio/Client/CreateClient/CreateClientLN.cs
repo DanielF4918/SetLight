@@ -21,7 +21,6 @@ namespace SetLight.LogicaDeNegocio.Client.CreateClient
 
         public async Task<int> Guardar(ClientDto clientAGuardar)
         {
-            // Puedes aplicar reglas de negocio aquí si es necesario
             int id = await _crearClientAD.Guardar(clientAGuardar);
             return id;
         }
