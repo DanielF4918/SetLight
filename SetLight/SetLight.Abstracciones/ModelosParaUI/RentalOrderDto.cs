@@ -16,12 +16,13 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int ClientId { get; set; }
         public string RutaComprobante { get; set; }
 
-
+        public int? EmpleadoId { get; set; }
 
         public string ClientName { get; set; }
 
         public List<OrderDetailDto> Details { get; set; } = new List<OrderDetailDto>();
 
+        public string EmpleadoNombreCompleto { get; set; }
 
     }
 }

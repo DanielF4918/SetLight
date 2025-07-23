@@ -96,6 +96,23 @@ CREATE TABLE dbo.ReturnDetails (
     CONSTRAINT FK_ReturnDetails_Equipment FOREIGN KEY (EquipmentId) REFERENCES dbo.Equipment(EquipmentId)
 );
 
+--Empleados
+CREATE TABLE Empleado (
+    IdEmpleado INT PRIMARY KEY IDENTITY(1,1),
+    IdEmpleadoGuid UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(), -- ID interno
+    Nombre NVARCHAR(30) NOT NULL,
+    Apellido NVARCHAR(30) NOT NULL,
+    TelefonoCelular NVARCHAR(10) NOT NULL,
+    CorreoElectronico NVARCHAR(50) NOT NULL UNIQUE,
+    RolId NVARCHAR(128) NOT NULL,
+    IdUsuarioIdentity NVARCHAR(128) NULL, -- se completa en el registro
+    Estado BIT NOT NULL DEFAULT 1,
+
+    CONSTRAINT FK_Empleado_AspNetRoles FOREIGN KEY (RolId)
+        REFERENCES AspNetRoles(Id)
+)
+
+
 
 
 ALTER TABLE Equipment
@@ -106,3 +123,11 @@ ALTER TABLE Clients
 ADD Status INT NOT NULL;
 
 ALTER TABLE RentalOrders ADD RutaComprobante VARCHAR(255) NULL;
+
+
+ALTER TABLE RentalOrders
+ADD EmpleadoId INT NULL;
+
+ALTER TABLE RentalOrders
+ADD CONSTRAINT FK_RentalOrders_Empleado
+FOREIGN KEY (EmpleadoId) REFERENCES Empleado(IdEmpleado);
