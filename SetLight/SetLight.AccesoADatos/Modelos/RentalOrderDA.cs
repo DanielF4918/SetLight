@@ -29,7 +29,14 @@ namespace SetLight.AccesoADatos.Modelos
 
         public virtual ClientDa Client { get; set; }
 
+        [Column("EmpleadoId")]
+        [ForeignKey("Empleado")] 
+        public int? EmpleadoId { get; set; }
+
+        public virtual EmpleadoDA Empleado { get; set; }
+
         public virtual ICollection<OrderDetailDA> OrderDetails { get; set; }
+
         public string RutaComprobante { get; set; }
     }
 }

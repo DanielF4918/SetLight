@@ -18,7 +18,9 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                 StartDate = orden.StartDate,
                 EndDate = orden.EndDate,
                 ClientId = orden.ClientId,
-                StatusOrder = orden.StatusOrder
+                StatusOrder = orden.StatusOrder,
+                EmpleadoId = orden.EmpleadoId, 
+                RutaComprobante = orden.RutaComprobante 
             };
 
             db.RentalOrders.Add(entidad);
@@ -37,7 +39,6 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                 if (equipo != null)
                 {
                     Console.WriteLine($"Equipo: {equipo.EquipmentName} | Stock actual: {equipo.Stock} | Cantidad alquilada: {detalle.Quantity}");
-
 
                     if (equipo.Stock < detalle.Quantity)
                     {

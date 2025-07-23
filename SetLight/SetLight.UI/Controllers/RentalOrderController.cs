@@ -77,6 +77,8 @@ namespace SetLight.UI.Controllers
         {
             var ordenes = (from orden in _contexto.RentalOrders
                            join cliente in _contexto.Clients on orden.ClientId equals cliente.ClientId
+                           join empleado in _contexto.Empleado on orden.EmpleadoId equals empleado.IdEmpleado into empJoin
+                           from empleado in empJoin.DefaultIfEmpty() 
                            select new RentalOrderDto
                            {
                                OrderId = orden.OrderId,
@@ -86,6 +88,9 @@ namespace SetLight.UI.Controllers
                                StatusOrder = orden.StatusOrder,
                                ClientId = orden.ClientId,
                                ClientName = cliente.FirstName + " " + cliente.LastName,
+                               EmpleadoNombreCompleto = empleado != null
+                                    ? empleado.Nombre + " " + empleado.Apellido
+                                    : "No asignado",
                                RutaComprobante = orden.RutaComprobante,
                                Details = (from detalle in _contexto.OrderDetails
                                           join equipo in _contexto.Equipment
@@ -103,6 +108,7 @@ namespace SetLight.UI.Controllers
 
             return View(ordenes);
         }
+
 
 
         // Crear orden (GET)
@@ -148,22 +154,28 @@ namespace SetLight.UI.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(CrearRentalOrderViewModel model)
         {
+            System.Diagnostics.Debug.WriteLine("===> Entró al método POST: Create");
+
             if (ModelState.IsValid)
             {
+                System.Diagnostics.Debug.WriteLine("===> ModelState válido");
+
                 var equiposSeleccionados = model.EquiposSeleccionados?.Where(e => e.Quantity > 0).ToList();
 
                 if (equiposSeleccionados == null || !equiposSeleccionados.Any())
                 {
+                    System.Diagnostics.Debug.WriteLine("===> No se seleccionaron equipos válidos");
+
                     ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
 
                     model.Clientes = _contexto.Clients
                         .Where(c => c.Status == 1)
                         .Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
+                        {
+                            ClientId = c.ClientId,
+                            FirstName = c.FirstName,
+                            LastName = c.LastName
+                        }).ToList();
 
                     model.EquiposDisponibles = _contexto.Equipment
                         .Where(e => e.Status == 1 && e.Stock > 0)
@@ -180,12 +192,28 @@ namespace SetLight.UI.Controllers
                     return View(model);
                 }
 
+                string correoUsuario = User.Identity?.Name ?? "(sin identidad)";
+                System.Diagnostics.Debug.WriteLine($"✅ Correo autenticado: {correoUsuario}");
+
+                var empleado = _contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == correoUsuario && e.Estado);
+                if (empleado == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("❌ No se encontró empleado con ese correo.");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Empleado encontrado: {empleado.Nombre} {empleado.Apellido} (ID: {empleado.IdEmpleado})");
+                }
+
+                int? idEmpleado = empleado?.IdEmpleado;
+
                 var nuevaOrden = new RentalOrderDto
                 {
                     ClientId = model.ClientId,
                     StartDate = model.StartDate,
                     EndDate = model.EndDate,
                     StatusOrder = model.StatusOrder,
+                    EmpleadoId = idEmpleado,
                     Details = equiposSeleccionados.Select(e => new OrderDetailDto
                     {
                         EquipmentId = e.EquipmentId,
@@ -197,8 +225,12 @@ namespace SetLight.UI.Controllers
                     }).ToList()
                 };
 
+                System.Diagnostics.Debug.WriteLine("➡️ Orden preparada. Guardando en base de datos...");
+
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
                 await crearLN.Guardar(nuevaOrden);
+
+                System.Diagnostics.Debug.WriteLine("✅ Orden guardada exitosamente.");
 
                 var ordenGuardada = _contexto.RentalOrders
                     .OrderByDescending(o => o.OrderId)
@@ -207,6 +239,7 @@ namespace SetLight.UI.Controllers
                 if (ordenGuardada != null && (ordenGuardada.StatusOrder == 1 || ordenGuardada.StatusOrder == 2))
                 {
                     var cliente = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
+
                     var ordenParaPDF = new RentalOrderDto
                     {
                         OrderId = ordenGuardada.OrderId,
@@ -221,9 +254,22 @@ namespace SetLight.UI.Controllers
                     string fileName = $"Orden_{ordenParaPDF.OrderId}.pdf";
                     ordenGuardada.RutaComprobante = fileName;
                     await _contexto.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"📄 Comprobante PDF generado y guardado: {fileName}");
                 }
 
                 return RedirectToAction("Index");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("❌ ModelState inválido");
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"🛑 Error en {kvp.Key}: {error.ErrorMessage}");
+                    }
+                }
             }
 
             model.Clientes = _contexto.Clients.Select(c => new ClientDto
@@ -243,12 +289,14 @@ namespace SetLight.UI.Controllers
                     Model = e.Model,
                     RentalValue = e.RentalValue,
                     Quantity = 0,
-
                     Stock = e.Stock
                 }).ToList();
 
             return View(model);
         }
+
+
+
 
         // GET: RentalOrder/Edit/5
         public ActionResult Edit(int id)
