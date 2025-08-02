@@ -17,5 +17,8 @@ namespace SetLight.Abstracciones.ViewModels
         public List<OrderDetailDto> EquiposDisponibles { get; set; } = new List<OrderDetailDto>();
         public List<OrderDetailDto> EquiposSeleccionados { get; set; } = new List<OrderDetailDto>();
 
+        public decimal? DescuentoManual { get; set; }
+
+
     }
 }

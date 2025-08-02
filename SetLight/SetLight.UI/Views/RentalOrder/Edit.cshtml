@@ -1,4 +1,5 @@
-﻿﻿@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
+﻿
+@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
 
 @{
     ViewBag.Title = "Editar Orden";
@@ -17,14 +18,19 @@
 
     <div class="form-group">
         @Html.LabelFor(model => model.StartDate)
-        @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
+        @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date", id = "StartDate" })
     </div>
 
     <div class="form-group">
         @Html.LabelFor(model => model.EndDate)
-        @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
+        @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date", id = "EndDate" })
     </div>
 
+    <div class="form-group">
+        <label>Descuento manual (%)</label>
+        <input type="number" name="DescuentoManual" id="DescuentoManual" step="0.01" min="0" max="100" class="form-control"
+               value="@(Model.DescuentoManual.HasValue ? Model.DescuentoManual.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+    </div>
 
     <div class="form-group">
         <label>Equipos</label><br />
@@ -32,6 +38,8 @@
             Seleccionar equipos
         </button>
     </div>
+
+    <div id="inputsEquiposContainer"></div>
 
     <div id="equiposSeleccionadosContainer" class="mt-3">
         <h5>Equipos seleccionados</h5>
@@ -43,26 +51,59 @@
                     <th>Modelo</th>
                     <th>Valor Renta</th>
                     <th>Cantidad</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 @for (int i = 0; i < Model.EquiposSeleccionados.Count; i++)
                 {
+                    var equipo = Model.EquiposSeleccionados[i];
+                    var subtotalEquipo = equipo.Quantity * equipo.RentalValue;
+
                     <tr>
-                        <td>@Model.EquiposSeleccionados[i].EquipmentName</td>
-                        <td>@Model.EquiposSeleccionados[i].Brand</td>
-                        <td>@Model.EquiposSeleccionados[i].Model</td>
-                        <td>₡@Model.EquiposSeleccionados[i].RentalValue.ToString("N2")</td>
-                        <td>@Model.EquiposSeleccionados[i].Quantity</td>
+                        <td>@equipo.EquipmentName</td>
+                        <td>@equipo.Brand</td>
+                        <td>@equipo.Model</td>
+                        <td>₡@equipo.RentalValue.ToString("N2")</td>
+                        <td>@equipo.Quantity</td>
+                        <td>₡@subtotalEquipo.ToString("N2")</td>
                     </tr>
 
-                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentId" value="@Model.EquiposSeleccionados[i].EquipmentId" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentName" value="@Model.EquiposSeleccionados[i].EquipmentName" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Brand" value="@Model.EquiposSeleccionados[i].Brand" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Model" value="@Model.EquiposSeleccionados[i].Model" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].RentalValue" value="@Model.EquiposSeleccionados[i].RentalValue" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Quantity" value="@Model.EquiposSeleccionados[i].Quantity" />
+                    @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentId", equipo.EquipmentId)
+                    @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentName", equipo.EquipmentName)
+                    @Html.Hidden($"EquiposSeleccionados[{i}].Brand", equipo.Brand)
+                    @Html.Hidden($"EquiposSeleccionados[{i}].Model", equipo.Model)
+                    @Html.Hidden($"EquiposSeleccionados[{i}].RentalValue", equipo.RentalValue)
+                    @Html.Hidden($"EquiposSeleccionados[{i}].Quantity", equipo.Quantity)
                 }
+            </tbody>
+        </table>
+    </div>
+
+    <div id="resumenCostoAlquiler" class="mt-4">
+        <h5>Cálculo de alquiler</h5>
+        <table class="table-inventario" style="max-width: 500px;">
+            <tbody>
+                <tr>
+                    <th style="width: 60%;">Días de alquiler</th>
+                    <td><span id="diasAlquiler">0</span></td>
+                </tr>
+                <tr>
+                    <th>Subtotal</th>
+                    <td>₡<span id="subtotalAlquiler">0</span></td>
+                </tr>
+                <tr>
+                    <th>Descuento manual</th>
+                    <td>₡<span id="descuentoAplicado">0</span></td>
+                </tr>
+                <tr>
+                    <th>IVA (13%)</th>
+                    <td>₡<span id="ivaAlquiler">0</span></td>
+                </tr>
+                <tr style="background-color: #f5f5f5; font-weight: bold;">
+                    <th>Total a pagar</th>
+                    <td>₡<span id="totalAlquiler">0</span></td>
+                </tr>
             </tbody>
         </table>
     </div>

@@ -13,15 +13,21 @@
 
     <div class="form-group">
         <label>Fecha de inicio</label><br />
-        @Html.TextBoxFor(m => m.StartDate, new { type = "date", @class = "form-control" })
+        @Html.TextBoxFor(m => m.StartDate, new { type = "date", @class = "form-control", id = "StartDate" })
     </div>
 
     <div class="form-group">
         <label>Fecha de fin</label><br />
-        @Html.TextBoxFor(m => m.EndDate, new { type = "date", @class = "form-control" })
+        @Html.TextBoxFor(m => m.EndDate, new { type = "date", @class = "form-control", id = "EndDate" })
     </div>
 
     @Html.HiddenFor(m => m.StatusOrder)
+
+    <!-- Campo de descuento manual (monto en colones) -->
+    <div class="form-group mt-3">
+        <label for="DescuentoManual">Descuento manual (₡)</label>
+        @Html.TextBoxFor(m => m.DescuentoManual, new { @class = "form-control", id = "DescuentoManual", type = "number", min = "0", step = "0.01" })
+    </div>
 
     <div class="form-group">
         <label>Equipos</label><br />
@@ -40,10 +46,40 @@
                     <th>Modelo</th>
                     <th>Valor Renta</th>
                     <th>Cantidad</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
+
+        <!-- Resumen de costos -->
+        <div id="resumenCostoAlquiler" class="mt-4">
+            <h5>Cálculo de alquiler</h5>
+            <table class="table-inventario" style="max-width: 500px;">
+                <tbody>
+                    <tr>
+                        <th style="width: 60%;">Días de alquiler</th>
+                        <td><span id="diasAlquiler">0</span></td>
+                    </tr>
+                    <tr>
+                        <th>Subtotal</th>
+                        <td>₡<span id="subtotalAlquiler">0</span></td>
+                    </tr>
+                    <tr>
+                        <th>Descuento aplicado</th>
+                        <td>₡<span id="descuentoAplicado">0</span></td>
+                    </tr>
+                    <tr>
+                        <th>IVA (13%)</th>
+                        <td>₡<span id="ivaAlquiler">0</span></td>
+                    </tr>
+                    <tr style="background-color: #f5f5f5; font-weight: bold;">
+                        <th>Total</th>
+                        <td>₡<span id="totalAlquiler">0</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="inputsEquiposContainer"></div>
