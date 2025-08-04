@@ -26,7 +26,8 @@ namespace SetLight.AccesoADatos.rentalorder.EditRentalOrder
             ROEnBaseDeDatos.StartDate = ROParaActualizar.StartDate;
             ROEnBaseDeDatos.EndDate = ROParaActualizar.EndDate;
             ROEnBaseDeDatos.StatusOrder = ROParaActualizar.StatusOrder;
-            
+            ROEnBaseDeDatos.DescuentoManual = ROParaActualizar.DescuentoManual;
+
             int seGuardoRO = elContexto.SaveChanges();
             return seGuardoRO;
 

@@ -19,7 +19,8 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                 EndDate = orden.EndDate,
                 ClientId = orden.ClientId,
                 StatusOrder = orden.StatusOrder,
-                EmpleadoId = orden.EmpleadoId, 
+                EmpleadoId = orden.EmpleadoId,
+                DescuentoManual = orden.DescuentoManual,
                 RutaComprobante = orden.RutaComprobante 
             };
 

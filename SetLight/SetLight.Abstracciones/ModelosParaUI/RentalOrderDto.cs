@@ -24,5 +24,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
         public string EmpleadoNombreCompleto { get; set; }
 
+        public decimal? DescuentoManual { get; set; }
+
+
+
     }
 }

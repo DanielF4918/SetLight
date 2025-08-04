@@ -131,3 +131,8 @@ ADD EmpleadoId INT NULL;
 ALTER TABLE RentalOrders
 ADD CONSTRAINT FK_RentalOrders_Empleado
 FOREIGN KEY (EmpleadoId) REFERENCES Empleado(IdEmpleado);
+
+
+ALTER TABLE RentalOrders
+ADD DescuentoManual DECIMAL(18, 2) NULL;
+
