@@ -74,13 +74,12 @@ namespace SetLight.UI.Controllers
             return View(historial);
         }
 
-        // Listado de órdenes
         public ActionResult Index()
         {
             var ordenes = (from orden in _contexto.RentalOrders
                            join cliente in _contexto.Clients on orden.ClientId equals cliente.ClientId
                            join empleado in _contexto.Empleado on orden.EmpleadoId equals empleado.IdEmpleado into empJoin
-                           from empleado in empJoin.DefaultIfEmpty() 
+                           from empleado in empJoin.DefaultIfEmpty()
                            select new RentalOrderDto
                            {
                                OrderId = orden.OrderId,
@@ -275,41 +274,32 @@ namespace SetLight.UI.Controllers
             if (orden == null)
                 return HttpNotFound();
 
-            // Equipos seleccionados en la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
-                            join equipo in _contexto.Equipment
-                                on detalle.EquipmentId equals equipo.EquipmentId
-                            select new OrderDetailDto
+                            join equipo in _contexto.Equipment on detalle.EquipmentId equals equipo.EquipmentId
+                            select new
                             {
-                                EquipmentId = equipo.EquipmentId,
-                                EquipmentName = equipo.EquipmentName,
-                                Brand = equipo.Brand,
-                                Model = equipo.Model,
-                                RentalValue = equipo.RentalValue,
-                                Quantity = detalle.Quantity,
-                                Stock = equipo.Stock
+                                equipo,
+                                detalle.Quantity
                             }).ToList();
 
-            var idsSeleccionados = detalles.Select(d => d.EquipmentId).ToList();
 
-            // Equipos disponibles: si hay seleccionados, excluirlos; si no, traer todos
-            var disponiblesQuery = _contexto.Equipment.AsQueryable();
+            var equiposDb = _contexto.Equipment.Where(e => e.Status == 1).ToList();
 
-            if (idsSeleccionados.Any())
-            {
-                disponiblesQuery = disponiblesQuery.Where(e => !idsSeleccionados.Contains(e.EquipmentId));
-            }
 
-            var disponibles = disponiblesQuery.Select(e => new OrderDetailDto
-            {
-                EquipmentId = e.EquipmentId,
-                EquipmentName = e.EquipmentName,
-                Brand = e.Brand,
-                Model = e.Model,
-                RentalValue = e.RentalValue,
-                Stock = e.Stock,
-                Quantity = 0
+            var disponibles = equiposDb.Select(e => {
+                var yaAsignado = detalles.FirstOrDefault(d => d.equipo.EquipmentId == e.EquipmentId)?.Quantity ?? 0;
+                return new OrderDetailDto
+                {
+                    EquipmentId = e.EquipmentId,
+                    EquipmentName = e.EquipmentName,
+                    Brand = e.Brand,
+                    Model = e.Model,
+                    RentalValue = e.RentalValue,
+                    Stock = e.Stock,
+                    Quantity = yaAsignado,
+                    CantidadMaxima = e.Stock + yaAsignado
+                };
             }).ToList();
 
             var viewModel = new CrearRentalOrderViewModel
@@ -320,9 +310,8 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 StatusOrder = orden.StatusOrder,
                 DescuentoManual = orden.DescuentoManual,
-                EquiposSeleccionados = detalles,
+                EquiposSeleccionados = disponibles.Where(d => d.Quantity > 0).ToList(),
                 EquiposDisponibles = disponibles,
-
                 Clientes = _contexto.Clients
                     .Select(c => new ClientDto
                     {
@@ -334,6 +323,9 @@ namespace SetLight.UI.Controllers
 
             return View("Edit", viewModel);
         }
+
+
+
 
 
 
@@ -366,7 +358,7 @@ namespace SetLight.UI.Controllers
                         Stock = e.Stock
                     }).ToList();
 
-                return View(model); 
+                return View(model);
             }
 
             using (var transaction = _contexto.Database.BeginTransaction())
@@ -381,7 +373,7 @@ namespace SetLight.UI.Controllers
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
                     orden.OrderDate = DateTime.Now;
-                    orden.DescuentoManual = model.DescuentoManual; 
+                    orden.DescuentoManual = model.DescuentoManual;
 
                     var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
