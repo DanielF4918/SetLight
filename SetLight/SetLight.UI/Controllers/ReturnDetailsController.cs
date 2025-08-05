@@ -14,6 +14,7 @@ using SetLight.LogicaDeNegocio.ReturnDetails.CreateReturnDetails;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador,Tecnico")]
     public class ReturnDetailsController : Controller
     {
         private ICreateReturnDetailsAD _createReturnDetailsAD;

@@ -1,9 +1,5 @@
 ﻿@model List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>
 
-<div class="form-group">
-    <input type="text" id="buscarEquipo" class="form-control" placeholder="Buscar por nombre, marca o modelo..." />
-</div>
-
 <table class="table table-bordered table-striped" id="tablaEquipos">
     <thead>
         <tr>
@@ -11,7 +7,7 @@
             <th>Marca</th>
             <th>Modelo</th>
             <th>Valor Renta</th>
-            <th><strong>Stock</strong></th>
+            <th>Stock</th>
             <th>Cantidad</th>
         </tr>
     </thead>
@@ -19,31 +15,28 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             <tr>
-                <td>
-                    @Html.HiddenFor(m => m[i].EquipmentId)
-                    @Html.DisplayFor(m => m[i].EquipmentName)
-                </td>
-                <td>@Html.DisplayFor(m => m[i].Brand)</td>
-                <td>@Html.DisplayFor(m => m[i].Model)</td>
+                @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentId", Model[i].EquipmentId)
+                @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentName", Model[i].EquipmentName)
+                @Html.Hidden($"EquiposSeleccionados[{i}].Brand", Model[i].Brand)
+                @Html.Hidden($"EquiposSeleccionados[{i}].Model", Model[i].Model)
+                @Html.Hidden($"EquiposSeleccionados[{i}].RentalValue", Model[i].RentalValue)
+
+                <td>@Model[i].EquipmentName</td>
+                <td>@Model[i].Brand</td>
+                <td>@Model[i].Model</td>
                 <td>₡@Model[i].RentalValue.ToString("N0")</td>
                 <td><strong>@Model[i].Stock</strong></td>
                 <td>
-                    <input type="number" min="0" class="form-control cantidad-equipo"
-                           data-id="@Model[i].EquipmentId"
-                           data-name="@Model[i].EquipmentName"
-                           data-brand="@Model[i].Brand"
-                           data-model="@Model[i].Model"
-                           data-value="@Model[i].RentalValue"
-                           data-stock="@Model[i].Stock"
-                           value="0" />
+                    @Html.TextBox($"EquiposSeleccionados[{i}].Quantity", 0, new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = Model[i].Stock
+                    })
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-<div class="text-end">
-    <button type="button" class="btn btn-primary" id="btnAgregarEquipos">
-        Agregar seleccionados
-    </button>
-</div>
+<button type="button" class="btn btn-success mt-3" id="btnSeleccionarEquipos">Seleccionar equipos no sirve</button>

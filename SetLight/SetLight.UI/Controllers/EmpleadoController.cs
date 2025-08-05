@@ -12,6 +12,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class EmpleadoController : Controller
     {
         private  IListarEmpleadoLN _listarEmpleadoLN;

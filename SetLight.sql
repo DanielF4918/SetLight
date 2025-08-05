@@ -131,3 +131,38 @@ ADD EmpleadoId INT NULL;
 ALTER TABLE RentalOrders
 ADD CONSTRAINT FK_RentalOrders_Empleado
 FOREIGN KEY (EmpleadoId) REFERENCES Empleado(IdEmpleado);
+
+
+ALTER TABLE RentalOrders
+ADD DescuentoManual DECIMAL(18, 2) NULL;
+
+
+USE [SetLight]; -- Asegúrate de estar usando la base de datos correcta
+GO
+
+SELECT *
+FROM AspNetRoles;
+
+
+
+USE [SetLight];
+GO
+
+INSERT INTO Empleado (
+    Nombre,
+    Apellido,
+    TelefonoCelular,
+    CorreoElectronico,
+    RolId,
+    IdUsuarioIdentity, -- esto normalmente se completa luego del registro en Identity
+    Estado
+)
+VALUES (
+    'Carlos',
+    'Ramírez',
+    '88889999',
+    'admin@setlight.com',
+    '48DA0F27-3C67-436A-8C3B-747AAAF09469', -- ID del rol Administrador
+    NULL, -- Se completa cuando el usuario se registra en el sistema
+    1
+);
