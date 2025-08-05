@@ -6,6 +6,7 @@ using System.IO;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador,Colaborador")]
     public class TrazabilidadController : Controller
     {
         private readonly ITrazabilidadLN _trazabilidadLN;

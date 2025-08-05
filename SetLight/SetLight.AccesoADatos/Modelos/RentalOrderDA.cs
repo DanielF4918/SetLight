@@ -38,5 +38,8 @@ namespace SetLight.AccesoADatos.Modelos
         public virtual ICollection<OrderDetailDA> OrderDetails { get; set; }
 
         public string RutaComprobante { get; set; }
+
+        public decimal? DescuentoManual { get; set; }
+
     }
 }

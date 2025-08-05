@@ -4,52 +4,50 @@
     ViewBag.Title = "Editar cliente";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Editar cliente</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow p-4 border-dark">
+                <h2 class="text-center fw-bold text-black mb-4">Editar cliente</h2>
 
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
-
-        <div class="row justify-content-center">
-            <div class="col-md-4 mx-auto">
-                <div class="card p-4 shadow-sm">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.ClientId)
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-                    @Html.HiddenFor(model => model.ClientId)
-
-                    <div class="form-group mb-3">
-                        @Html.LabelFor(model => model.FirstName, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.FirstName, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control border-dark" } })
                         @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
                     </div>
 
-                    <div class="form-group mb-3">
-                        @Html.LabelFor(model => model.LastName, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.LastName, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control border-dark" } })
                         @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
                     </div>
 
-                    <div class="form-group mb-3">
-                        @Html.LabelFor(model => model.Phone, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control" } })
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.Phone, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control border-dark" } })
                         @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
                     </div>
 
-                    <div class="form-group mb-3">
-                        @Html.LabelFor(model => model.Email, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                    <div class="mb-4">
+                        @Html.LabelFor(model => model.Email, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control border-dark" } })
                         @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
                     </div>
 
-                    <div class="form-group text-center">
-                        <input type="submit" value="Guardar cambios" class="btn btn-success me-2" />
-                        @Html.ActionLink("Volver al listado", "ListarClient", null, new { @class = "btn btn-dark" })
+                    <div class="text-center">
+                        <input type="submit" value="Guardar cambios" class="btn btn-success fw-semibold me-2 text-white" />
+                        @Html.ActionLink("Volver al listado", "ListarClient", null, new { @class = "btn btn-dark fw-semibold text-white" })
                     </div>
-                </div>
+                }
             </div>
         </div>
-    }
+    </div>
 </div>
 
 @section Scripts {

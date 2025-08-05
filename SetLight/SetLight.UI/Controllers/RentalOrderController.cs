@@ -13,9 +13,11 @@ using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
 using SetLight.AccesoADatos.Modelos;
 using SetLight.AccesoADatos.Equipment.ObtenerEqPorID;
 using SetLight.LogicaDeNegocio.Services;
+using System.Collections.Generic;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador,Colaborador")]
     public class RentalOrderController : Controller
     {
         private Contexto _contexto;
@@ -154,18 +156,12 @@ namespace SetLight.UI.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(CrearRentalOrderViewModel model)
         {
-            System.Diagnostics.Debug.WriteLine("===> Entró al método POST: Create");
-
             if (ModelState.IsValid)
             {
-                System.Diagnostics.Debug.WriteLine("===> ModelState válido");
-
                 var equiposSeleccionados = model.EquiposSeleccionados?.Where(e => e.Quantity > 0).ToList();
 
                 if (equiposSeleccionados == null || !equiposSeleccionados.Any())
                 {
-                    System.Diagnostics.Debug.WriteLine("===> No se seleccionaron equipos válidos");
-
                     ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
 
                     model.Clientes = _contexto.Clients
@@ -192,19 +188,8 @@ namespace SetLight.UI.Controllers
                     return View(model);
                 }
 
-                string correoUsuario = User.Identity?.Name ?? "(sin identidad)";
-                System.Diagnostics.Debug.WriteLine($"✅ Correo autenticado: {correoUsuario}");
-
+                string correoUsuario = User.Identity?.Name ?? "";
                 var empleado = _contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == correoUsuario && e.Estado);
-                if (empleado == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("❌ No se encontró empleado con ese correo.");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"✅ Empleado encontrado: {empleado.Nombre} {empleado.Apellido} (ID: {empleado.IdEmpleado})");
-                }
-
                 int? idEmpleado = empleado?.IdEmpleado;
 
                 var nuevaOrden = new RentalOrderDto
@@ -214,6 +199,7 @@ namespace SetLight.UI.Controllers
                     EndDate = model.EndDate,
                     StatusOrder = model.StatusOrder,
                     EmpleadoId = idEmpleado,
+                    DescuentoManual = model.DescuentoManual,
                     Details = equiposSeleccionados.Select(e => new OrderDetailDto
                     {
                         EquipmentId = e.EquipmentId,
@@ -225,12 +211,8 @@ namespace SetLight.UI.Controllers
                     }).ToList()
                 };
 
-                System.Diagnostics.Debug.WriteLine("➡️ Orden preparada. Guardando en base de datos...");
-
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
                 await crearLN.Guardar(nuevaOrden);
-
-                System.Diagnostics.Debug.WriteLine("✅ Orden guardada exitosamente.");
 
                 var ordenGuardada = _contexto.RentalOrders
                     .OrderByDescending(o => o.OrderId)
@@ -254,22 +236,9 @@ namespace SetLight.UI.Controllers
                     string fileName = $"Orden_{ordenParaPDF.OrderId}.pdf";
                     ordenGuardada.RutaComprobante = fileName;
                     await _contexto.SaveChangesAsync();
-
-                    System.Diagnostics.Debug.WriteLine($"📄 Comprobante PDF generado y guardado: {fileName}");
                 }
 
                 return RedirectToAction("Index");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("❌ ModelState inválido");
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"🛑 Error en {kvp.Key}: {error.ErrorMessage}");
-                    }
-                }
             }
 
             model.Clientes = _contexto.Clients.Select(c => new ClientDto
@@ -298,18 +267,19 @@ namespace SetLight.UI.Controllers
 
 
 
+
         // GET: RentalOrder/Edit/5
         public ActionResult Edit(int id)
         {
-
             var orden = _contexto.RentalOrders.FirstOrDefault(o => o.OrderId == id);
             if (orden == null)
                 return HttpNotFound();
 
+            // Equipos seleccionados en la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
-                            on detalle.EquipmentId equals equipo.EquipmentId
+                                on detalle.EquipmentId equals equipo.EquipmentId
                             select new OrderDetailDto
                             {
                                 EquipmentId = equipo.EquipmentId,
@@ -321,26 +291,17 @@ namespace SetLight.UI.Controllers
                                 Stock = equipo.Stock
                             }).ToList();
 
+            var idsSeleccionados = detalles.Select(d => d.EquipmentId).ToList();
 
-            var viewModel = new CrearRentalOrderViewModel
+            // Equipos disponibles: si hay seleccionados, excluirlos; si no, traer todos
+            var disponiblesQuery = _contexto.Equipment.AsQueryable();
+
+            if (idsSeleccionados.Any())
             {
-                OrderId = orden.OrderId,
-                ClientId = orden.ClientId,
-                StartDate = orden.StartDate,
-                EndDate = orden.EndDate,
-                StatusOrder = orden.StatusOrder,
-                EquiposSeleccionados = detalles,
-                Clientes = _contexto.Clients.Select(c => new ClientDto
-                {
-                    ClientId = c.ClientId,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName
-                }).ToList()
-            };
+                disponiblesQuery = disponiblesQuery.Where(e => !idsSeleccionados.Contains(e.EquipmentId));
+            }
 
-            viewModel.EquiposDisponibles = _contexto.Equipment
-            .Where(e => e.Status == 1 && e.Stock > 0)
-            .Select(e => new OrderDetailDto
+            var disponibles = disponiblesQuery.Select(e => new OrderDetailDto
             {
                 EquipmentId = e.EquipmentId,
                 EquipmentName = e.EquipmentName,
@@ -351,9 +312,33 @@ namespace SetLight.UI.Controllers
                 Quantity = 0
             }).ToList();
 
+            var viewModel = new CrearRentalOrderViewModel
+            {
+                OrderId = orden.OrderId,
+                ClientId = orden.ClientId,
+                StartDate = orden.StartDate,
+                EndDate = orden.EndDate,
+                StatusOrder = orden.StatusOrder,
+                DescuentoManual = orden.DescuentoManual,
+                EquiposSeleccionados = detalles,
+                EquiposDisponibles = disponibles,
 
-            return View(viewModel);
+                Clientes = _contexto.Clients
+                    .Select(c => new ClientDto
+                    {
+                        ClientId = c.ClientId,
+                        FirstName = c.FirstName,
+                        LastName = c.LastName
+                    }).ToList()
+            };
+
+            return View("Edit", viewModel);
         }
+
+
+
+
+
 
         //POST: RentalOrder/Edit/5
         [HttpPost]
@@ -381,14 +366,14 @@ namespace SetLight.UI.Controllers
                         Stock = e.Stock
                     }).ToList();
 
-                return View(model);
+                return View(model); 
             }
 
             using (var transaction = _contexto.Database.BeginTransaction())
             {
                 try
                 {
-                    var orden = _contexto.RentalOrders.Find(id);
+                    var orden = await _contexto.RentalOrders.FindAsync(id);
                     if (orden == null)
                         return HttpNotFound();
 
@@ -396,12 +381,13 @@ namespace SetLight.UI.Controllers
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
                     orden.OrderDate = DateTime.Now;
+                    orden.DescuentoManual = model.DescuentoManual; 
 
-                    var detallesAntiguos = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
+                    var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
-                    foreach (var detalle in detallesAntiguos)
+                    foreach (var detalle in detallesAnteriores)
                     {
-                        var equipo = _contexto.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
+                        var equipo = await _contexto.Equipment.FindAsync(detalle.EquipmentId);
                         if (equipo != null)
                         {
                             equipo.Stock += detalle.Quantity;
@@ -411,30 +397,30 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
-                    _contexto.OrderDetails.RemoveRange(detallesAntiguos);
+                    _contexto.OrderDetails.RemoveRange(detallesAnteriores);
                     await _contexto.SaveChangesAsync();
 
-                    foreach (var nuevo in model.EquiposSeleccionados)
+                    foreach (var item in model.EquiposSeleccionados.Where(e => e.Quantity > 0))
                     {
                         _contexto.OrderDetails.Add(new OrderDetailDA
                         {
-                            OrderId = orden.OrderId,
-                            EquipmentId = nuevo.EquipmentId,
-                            Quantity = nuevo.Quantity
+                            OrderId = id,
+                            EquipmentId = item.EquipmentId,
+                            Quantity = item.Quantity
                         });
 
-                        var equipo = _contexto.Equipment.FirstOrDefault(e => e.EquipmentId == nuevo.EquipmentId);
+                        var equipo = await _contexto.Equipment.FindAsync(item.EquipmentId);
                         if (equipo != null)
                         {
-                            if (equipo.Stock < nuevo.Quantity)
+                            if (equipo.Stock < item.Quantity)
                                 throw new InvalidOperationException($"Stock insuficiente para {equipo.EquipmentName}");
 
-                            equipo.Stock -= nuevo.Quantity;
+                            equipo.Stock -= item.Quantity;
 
                             if (equipo.Stock <= 0)
                             {
                                 equipo.Stock = 0;
-                                equipo.Status = 2;
+                                equipo.Status = 2; // Inactivo
                             }
                         }
                     }
@@ -447,7 +433,7 @@ namespace SetLight.UI.Controllers
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    ModelState.AddModelError("", "Ocurrió un error al guardar los cambios: " + ex.Message);
+                    ModelState.AddModelError("", "Error al guardar los cambios: " + ex.Message);
                 }
             }
 
@@ -472,6 +458,8 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
+
 
         //GET: VerComprobante
         public ActionResult VerComprobante(int id)

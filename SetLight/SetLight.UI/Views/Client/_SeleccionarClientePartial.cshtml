@@ -1,33 +1,38 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.ClientDto>
 
-<div class="mb-3">
-    <input type="text" class="form-control" id="buscadorClientes" placeholder="Buscar por nombre, correo o teléfono...">
-</div>
+<div class="container-fluid p-3">
+    <div class="mb-4">
+        <input type="text" class="form-control border-dark" id="buscadorClientes" placeholder="Buscar por nombre, correo o teléfono...">
+    </div>
 
-<table class="table table-bordered table-hover" id="tablaClientes">
-    <thead class="table-light">
-        <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var cliente in Model)
-        {
-            <tr>
-                <td>@(cliente.FirstName + " " + cliente.LastName)</td>
-                <td>@cliente.Email</td>
-                <td>@cliente.Phone</td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-success seleccionar-cliente"
-                            data-id="@cliente.ClientId"
-                            data-nombre="@(cliente.FirstName + " " + cliente.LastName)">
-                        Seleccionar
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-center align-middle">
+            <thead class="table-dark text-white">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cliente in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@($"{cliente.FirstName} {cliente.LastName}")</td>
+                        <td>@cliente.Email</td>
+                        <td>@cliente.Phone</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-success seleccionar-cliente fw-semibold"
+                                    data-id="@cliente.ClientId"
+                                    data-nombre="@($"{cliente.FirstName} {cliente.LastName}")">
+                                Seleccionar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

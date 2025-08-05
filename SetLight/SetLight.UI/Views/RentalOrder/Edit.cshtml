@@ -1,84 +1,129 @@
-﻿﻿@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
+﻿@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
 
 @{
     ViewBag.Title = "Editar Orden";
 }
 
-<h2>Editar Orden</h2>
+<div class="container mt-4 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
+    <h2 class="text-center mb-4 text-dark">Editar orden de alquiler</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.ClientId)
-        @Html.DropDownListFor(m => m.ClientId, new SelectList(Model.Clientes, "ClientId", "FirstName"), "Seleccione un cliente", new { @class = "form-control" })
-    </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Cliente</label>
+            @Html.DropDownListFor(m => m.ClientId, new SelectList(Model.Clientes, "ClientId", "FirstName"), "Seleccione un cliente", new { @class = "form-control border-dark" })
+        </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.StartDate)
-        @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
-    </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Fecha de inicio</label>
+            @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control border-dark", type = "date", id = "StartDate" })
+        </div>
 
-    <div class="form-group">
-        @Html.LabelFor(model => model.EndDate)
-        @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control", type = "date" })
-    </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Fecha de fin</label>
+            @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control border-dark", type = "date", id = "EndDate" })
+        </div>
 
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Descuento manual (₡)</label>
+            <input type="number" name="DescuentoManual" id="DescuentoManual" step="0.01" min="0" max="999999"
+                   class="form-control border-dark"
+                   value="@(Model.DescuentoManual.HasValue ? Model.DescuentoManual.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+        </div>
 
-    <div class="form-group">
-        <label>Equipos</label><br />
-        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalSeleccionarEquipos">
-            Seleccionar equipos
-        </button>
-    </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Equipos</label><br />
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalSeleccionarEquipos">
+                Seleccionar equipos
+            </button>
+        </div>
 
-    <div id="equiposSeleccionadosContainer" class="mt-3">
-        <h5>Equipos seleccionados</h5>
-        <table class="table table-bordered" id="tablaResumenEquipos">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Valor Renta</th>
-                    <th>Cantidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.EquiposSeleccionados.Count; i++)
-                {
+        <div id="inputsEquiposContainer"></div>
+
+        <div id="equiposSeleccionadosContainer" class="mt-4">
+            <h5 class="fw-bold text-dark mb-3">Equipos seleccionados</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle" id="tablaResumenEquipos">
+                    <thead class="table-dark text-white">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Valor Renta</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.EquiposSeleccionados.Count; i++)
+                        {
+                            var equipo = Model.EquiposSeleccionados[i];
+                            var subtotalEquipo = equipo.Quantity * equipo.RentalValue;
+
+                            <tr>
+                                <td>@equipo.EquipmentName</td>
+                                <td>@equipo.Brand</td>
+                                <td>@equipo.Model</td>
+                                <td>₡@equipo.RentalValue.ToString("N2")</td>
+                                <td>@equipo.Quantity</td>
+                                <td>₡@subtotalEquipo.ToString("N2")</td>
+                            </tr>
+
+                            @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentId", equipo.EquipmentId)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentName", equipo.EquipmentName)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Brand", equipo.Brand)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Model", equipo.Model)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].RentalValue", equipo.RentalValue)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Quantity", equipo.Quantity)
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="resumenCostoAlquiler" class="mt-4">
+            <h5 class="fw-bold text-dark">Cálculo de alquiler</h5>
+            <table class="table table-bordered" style="max-width: 500px;">
+                <tbody>
                     <tr>
-                        <td>@Model.EquiposSeleccionados[i].EquipmentName</td>
-                        <td>@Model.EquiposSeleccionados[i].Brand</td>
-                        <td>@Model.EquiposSeleccionados[i].Model</td>
-                        <td>₡@Model.EquiposSeleccionados[i].RentalValue.ToString("N2")</td>
-                        <td>@Model.EquiposSeleccionados[i].Quantity</td>
+                        <th style="width: 60%;">Días de alquiler</th>
+                        <td><span id="diasAlquiler">0</span></td>
                     </tr>
+                    <tr>
+                        <th>Subtotal</th>
+                        <td>₡<span id="subtotalAlquiler">0</span></td>
+                    </tr>
+                    <tr>
+                        <th>Descuento manual</th>
+                        <td>₡<span id="descuentoAplicado">0</span></td>
+                    </tr>
+                    <tr>
+                        <th>IVA (13%)</th>
+                        <td>₡<span id="ivaAlquiler">0</span></td>
+                    </tr>
+                    <tr class="fw-bold bg-light">
+                        <th>Total a pagar</th>
+                        <td>₡<span id="totalAlquiler">0</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentId" value="@Model.EquiposSeleccionados[i].EquipmentId" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].EquipmentName" value="@Model.EquiposSeleccionados[i].EquipmentName" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Brand" value="@Model.EquiposSeleccionados[i].Brand" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Model" value="@Model.EquiposSeleccionados[i].Model" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].RentalValue" value="@Model.EquiposSeleccionados[i].RentalValue" />
-                    <input type="hidden" name="EquiposSeleccionados[@i].Quantity" value="@Model.EquiposSeleccionados[i].Quantity" />
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div class="form-group mt-3">
-        <input type="submit" value="Guardar cambios" class="btn btn-primary" />
-        @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary ms-2" })
-    </div>
-}
+        <div class="form-group mt-4 text-center">
+            <input type="submit" value="Guardar cambios" class="btn btn-success px-4 fw-semibold" />
+            @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary ms-3" })
+        </div>
+    }
+</div>
 
 <div class="modal fade" id="modalSeleccionarEquipos" tabindex="-1" role="dialog" aria-labelledby="modalLabelEquipos" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Seleccionar equipos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalLabelEquipos">Seleccionar equipos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="modalBodyEquipos">
                 @Html.Partial("_SeleccionarEquipos", Model.EquiposDisponibles)

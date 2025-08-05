@@ -18,6 +18,7 @@ using SetLight.LogicaDeNegocio.Equipment.ObtenerEqPorID;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador,Colaborador,Tecnico")]
     public class EquipmentController : Controller
     {
         private IListarEquipmentLN _listarEquipmentLN;
