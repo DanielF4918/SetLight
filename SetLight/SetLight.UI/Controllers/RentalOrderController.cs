@@ -17,6 +17,7 @@ using System.Collections.Generic;
 
 namespace SetLight.UI.Controllers
 {
+    [Authorize(Roles = "Administrador,Colaborador")]
     public class RentalOrderController : Controller
     {
         private Contexto _contexto;

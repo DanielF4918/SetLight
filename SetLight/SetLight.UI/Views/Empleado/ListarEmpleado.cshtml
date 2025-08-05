@@ -1,69 +1,54 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EmpleadoDto>
 
 @{
-    ViewBag.Title = "ListarEmpleado";
+    ViewBag.Title = "Listado de Empleados";
 }
 
-<h2>ListarEmpleado</h2>
+<h2 class="mb-4">Listado de Empleados</h2>
 
-<p>
-    @Html.ActionLink("Create New", "CrearEmpleado")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.IdEmpleadoGuid)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Nombre)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Apellido)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.TelefonoCelular)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CorreoElectronico)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.RolId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Estado)
-        </th>
-        <th></th>
-    </tr>
+<div class="text-end mb-3">
+    @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
+</div>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.IdEmpleadoGuid)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Nombre)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Apellido)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.TelefonoCelular)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CorreoElectronico)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.RolId)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Estado)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.IdEmpleado }) |
-            @Html.ActionLink("Details", "Details", new { id=item.IdEmpleado }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.IdEmpleado })
-        </td>
-    </tr>
-}
-
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark text-white">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().IdEmpleadoGuid)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Apellido)</th>
+            <th>@Html.DisplayNameFor(model => model.First().TelefonoCelular)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CorreoElectronico)</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.IdEmpleadoGuid</td>
+                <td>@item.Nombre</td>
+                <td>@item.Apellido</td>
+                <td>@item.TelefonoCelular</td>
+                <td>@item.CorreoElectronico</td>
+                <td>@item.RolId</td>
+                <td>
+                    @if (item.Estado)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
+                    @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
+                    @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
