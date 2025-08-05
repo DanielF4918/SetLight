@@ -38,16 +38,15 @@
         const totalBruto = +(subtotal + iva).toFixed(2);
 
 
-        const descuentoMonto = parseFloat(descuentoInput.value) || 0;
-        const totalFinal = +(totalBruto - descuentoMonto).toFixed(2);
-
+        const descuentoPct = parseFloat(descuentoInput.value) || 0;
+        const montoDescuento = +(totalBruto * (descuentoPct / 100)).toFixed(2);
+        const totalFinal = +(totalBruto - montoDescuento).toFixed(2);
 
         subtotalEl.textContent = subtotal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
         ivaEl.textContent = iva.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-        descuentoEl.textContent = descuentoMonto.toLocaleString('es-CR', { minimumFractionDigits: 2 });
+        descuentoEl.textContent = montoDescuento.toLocaleString('es-CR', { minimumFractionDigits: 2 });
         totalEl.textContent = totalFinal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
 
-        descuentoInput.value = descuentoMonto;
     }
 
 

@@ -17,5 +17,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
 
         public int Stock { get; set; }
+
+        public decimal? DescuentoManual { get; set; }
+
+        public int CantidadMaxima { get; set; }
     }
 }
