@@ -27,16 +27,27 @@
                 <td>₡@Model[i].RentalValue.ToString("N0")</td>
                 <td><strong>@Model[i].Stock</strong></td>
                 <td>
-                    @Html.TextBox($"EquiposSeleccionados[{i}].Quantity", 0, new
-                    {
-                        @class = "form-control",
-                        type = "number",
-                        min = "0",
-                        max = Model[i].Stock
-                    })
+                    @Html.TextBox(
+    $"EquiposSeleccionados[{i}].Quantity", 0,
+    new
+         {
+        @class = "form-control cantidad-equipo",
+        type = "number",
+        min = "0",
+        max = Model[i].Stock,
+        data_id = Model[i].EquipmentId,
+        data_name = Model[i].EquipmentName,
+        data_brand = Model[i].Brand,
+        data_model = Model[i].Model,
+        data_value = Model[i].RentalValue,
+        data_stock = Model[i].Stock
+    }
+)
+
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<button type="button" class="btn btn-success mt-3" id="btnSeleccionarEquipos">Seleccionar equipos no sirve</button>
+<button type="button" class="btn btn-success mt-3" id="btnAgregarEquipos">Seleccionar equipos</button>
+
