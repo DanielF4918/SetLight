@@ -466,3 +466,5 @@ C:\Users\kenca\OneDrive\Escritorio\5 de agosto\SetLight\SetLight\SetLight.UI\obj
 C:\Users\kenca\OneDrive\Escritorio\5 de agosto\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.3A7BDE39.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\5 de agosto\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.dll
 C:\Users\kenca\OneDrive\Escritorio\5 de agosto\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.Migrations.Inicial.resources
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.csproj.GenerateResource.cache
