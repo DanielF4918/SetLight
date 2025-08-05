@@ -125,3 +125,6 @@ C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Deb
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.0FE7D236.Up2Date
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.dll
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\obj\Debug\SetLight.LogicaDeNegocio.pdb
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\BouncyCastle.Crypto.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\itextsharp.dll
+C:\Users\malum\Source\Repos\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\itextsharp.xml

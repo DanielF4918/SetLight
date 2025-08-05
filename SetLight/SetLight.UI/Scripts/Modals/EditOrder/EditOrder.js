@@ -51,4 +51,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     actualizarResumen();
+
+
+
+
+
 });
