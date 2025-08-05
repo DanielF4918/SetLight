@@ -1,41 +1,52 @@
-﻿/* Set padding to keep content from hitting the edges */
+﻿body {
+    background-color: #ffffff;
+    color: #000000;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #000000;
+    border-bottom: 3px solid #D71920;
+    padding: 10px 20px;
+}
+
+.navbar-brand, .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+    margin-right: 20px;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+    .navbar-brand:hover, .nav-link:hover {
+        color: #D71920 !important;
+    }
+
 .body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+    margin-top: 30px;
+    padding: 30px 40px;
 }
-
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
-}
-
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
-}
-
 
 .table-inventario {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
-    background-color: white;
+    background-color: #ffffff;
+    font-size: 15px;
     border: 1px solid #dee2e6;
+    margin-top: 20px;
 }
 
     .table-inventario thead {
         background-color: #f5f5f5;
+        color: #000000;
         font-weight: bold;
     }
 
     .table-inventario th,
     .table-inventario td {
-        padding: 12px 10px;
+        padding: 14px 12px;
         text-align: left;
         border-bottom: 1px solid #dee2e6;
     }
@@ -44,201 +55,125 @@ textarea {
         background-color: #f0f0f0;
     }
 
-.btn-ver {
-    background-color: black;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    margin-right: 5px;
-}
-
-.btn-editar {
-    background-color: black;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    margin-right: 5px;
-}
-
-.btn-eliminar {
-    background-color: #dc3545;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    margin-right: 5px;
-}
-
+.btn-ver,
+.btn-editar,
 .btn-trazabilidad {
-    background-color: black;
-    color: yellow;
-    padding: 6px 12px;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 8px 16px;
     border: none;
-}
-
-
-.filtros-inventario {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-    .filtros-inventario input,
-    .filtros-inventario select {
-        padding: 5px 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    .filtros-inventario button {
-        padding: 6px 12px;
-        background-color: #eee;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-
-/* Set padding to keep content from hitting the edges */
-.body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-/* Bootstrap override: prevent dt truncation */
-.dl-horizontal dt {
-    white-space: normal;
-}
-
-/* Limit form element width */
-input,
-select,
-textarea {
-    max-width: 280px;
-}
-
-/* Tabla de inventario */
-.table-inventario {
-    width: 100%;
-    border-collapse: collapse;
+    margin-right: 5px;
+    border-radius: 4px;
     font-size: 14px;
-    background-color: white;
-    border: 1px solid #dee2e6;
 }
 
-    .table-inventario thead {
-        background-color: #f5f5f5;
-        font-weight: bold;
+    .btn-ver:hover,
+    .btn-editar:hover,
+    .btn-trazabilidad:hover {
+        background-color: #D71920;
+        color: #ffffff;
     }
-
-    .table-inventario th,
-    .table-inventario td {
-        padding: 12px 10px;
-        text-align: left;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .table-inventario tr:hover {
-        background-color: #f0f0f0;
-    }
-
-/* Botones */
-.btn-ver {
-    background-color: black;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    margin-right: 5px;
-}
-
-.btn-editar {
-    background-color: black;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    margin-right: 5px;
-}
 
 .btn-eliminar {
-    background-color: #dc3545;
-    color: white;
-    padding: 6px 12px;
+    background-color: #D71920;
+    color: #ffffff;
+    padding: 8px 16px;
     border: none;
     margin-right: 5px;
-}
-
-.btn-sm {
-    padding: 6px 12px;
-    font-size: 14px;
     border-radius: 4px;
+    font-size: 14px;
 }
 
-.btn-success {
-    background-color: #198754;
-    border: none;
-}
+    .btn-eliminar:hover {
+        background-color: #a30c10;
+    }
 
 .btn-dark {
     background-color: #212529;
     color: white;
     border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
+    .btn-dark:hover {
+        background-color: #000000;
+    }
 
-/* Filtros superiores */
 .filtros-inventario {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    align-items: center;
 }
 
     .filtros-inventario input,
     .filtros-inventario select {
-        padding: 5px 8px;
+        padding: 6px 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        font-size: 14px;
     }
 
     .filtros-inventario button {
-        padding: 6px 12px;
-        background-color: #eee;
-        border: 1px solid #ccc;
+        padding: 8px 16px;
+        background-color: #D71920;
+        color: #ffffff;
+        border: none;
         border-radius: 4px;
+        font-size: 14px;
     }
 
-/* estilo para formularios (crear/editar/detalle) */
+        .filtros-inventario button:hover {
+            background-color: #a30c10;
+        }
+
 .form-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 30px;
+    padding: 40px 0;
 }
 
 .form-card {
     width: 100%;
     max-width: 600px;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
     border: 1px solid #dee2e6;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-
     .form-card .form-label {
-        font-weight: bold;
+        font-weight: 600;
+        color: #000000;
     }
 
     .form-card .form-control {
         width: 100%;
         max-width: 100%;
+        font-size: 14px;
     }
 
     .form-card .form-group {
-        margin-bottom: 1rem;
+        margin-bottom: 20px;
     }
 
     .form-card .btn {
         min-width: 140px;
+        font-size: 14px;
     }
+.navbar {
+    background-color: #000000 !important; /* Fondo negro */
+    border-bottom: 3px solid #D71920; /* Línea roja al fondo */
+    padding: 10px 20px;
+}
+
+/* Modificación o eliminación de la clase .bg-dark */
+.bg-dark {
+    /* Elimina el background-color o ajústalo si es necesario */
+    background-color: #000000 !important; /* Asegura que el fondo sea negro */
+}

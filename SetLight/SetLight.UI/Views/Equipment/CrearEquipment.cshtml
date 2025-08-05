@@ -1,87 +1,79 @@
 ﻿@model SetLight.Abstracciones.ModelosParaUI.EquipmentDto
-
 @{
     ViewBag.Title = "Registrar nuevo equipo";
 }
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="form-card p-4 shadow-sm">
-        <h2 class="text-center mb-4">Registrar nuevo equipo</h2>
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-white">
+    <div class="form-card p-5 shadow-sm">
+        <h2 class="text-center mb-4 text-uppercase" style="font-weight: 700;">Registrar nuevo equipo</h2>
 
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
-            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.EquipmentName, new { @class = "form-label" })
-                @Html.EditorFor(model => model.EquipmentName, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.EquipmentName, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.EquipmentName, new { @class = "form-label" })
+                @Html.EditorFor(m => m.EquipmentName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(m => m.EquipmentName, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.Brand, new { @class = "form-label" })
-                @Html.EditorFor(model => model.Brand, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Brand, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.Brand, new { @class = "form-label" })
+                @Html.EditorFor(m => m.Brand, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(m => m.Brand, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.Model, new { @class = "form-label" })
-                @Html.EditorFor(model => model.Model, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Model, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.Model, new { @class = "form-label" })
+                @Html.EditorFor(m => m.Model, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(m => m.Model, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.SerialNumber, new { @class = "form-label" })
-                @Html.EditorFor(model => model.SerialNumber, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.SerialNumber, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.SerialNumber, new { @class = "form-label" })
+                @Html.EditorFor(m => m.SerialNumber, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(m => m.SerialNumber, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.Description, new { @class = "form-label" })
-                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = 3 })
-                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3 })
+                @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.RentalValue, new { @class = "form-label" })
-                @Html.EditorFor(model => model.RentalValue, new { htmlAttributes = new { @class = "form-control", placeholder = "₡0.00" } })
-                @Html.ValidationMessageFor(model => model.RentalValue, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.RentalValue, new { @class = "form-label" })
+                @Html.EditorFor(m => m.RentalValue, new { htmlAttributes = new { @class = "form-control", placeholder = "₡0.00" } })
+                @Html.ValidationMessageFor(m => m.RentalValue, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group mb-3">
-                @Html.LabelFor(model => model.Stock, new { @class = "form-label" })
-                @Html.EditorFor(model => model.Stock, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0" } })
-                @Html.ValidationMessageFor(model => model.Stock, "", new { @class = "text-danger" })
+                @Html.LabelFor(m => m.Stock, new { @class = "form-label" })
+                @Html.EditorFor(m => m.Stock, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0" } })
+                @Html.ValidationMessageFor(m => m.Stock, "", new { @class = "text-danger" })
             </div>
 
-            <div class="form-group mb-3">
-                @Html.LabelFor(model => model.CategoryId, new { @class = "form-label" })
+            <div class="form-group mb-4">
+                @Html.LabelFor(m => m.CategoryId, "Seleccionar categoría", new { @class = "form-label" })
                 <div class="d-flex gap-2">
-                    @Html.DropDownListFor(model => model.CategoryId,
-                        (IEnumerable<SelectListItem>)ViewBag.Categorias,
-                        "-- Seleccione una categoría --",
-                        new { @class = "form-control" })
-
-                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalEqCategory">
-                        Nueva categoría
-                    </button>
+                    @Html.DropDownListFor(m => m.CategoryId, (IEnumerable<SelectListItem>)ViewBag.Categorias, "-- Seleccione una categoría --", new { @class = "form-control" })
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEqCategory">Nueva categoría</button>
                 </div>
-                @Html.ValidationMessageFor(model => model.CategoryId, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
             </div>
 
-            <div class="form-group mt-4 text-center">
-                <input type="submit" value="Guardar cambios" class="btn btn-success me-2" />
-                @Html.ActionLink("Volver al listado", "ListarEquipment", null, new { @class = "btn btn-dark" })
+            <div class="form-group text-center mt-4">
+                <input type="submit" value="Guardar equipo" class="btn btn-dark me-2" />
+                @Html.ActionLink("Volver", "ListarEquipment", null, new { @class = "btn btn-outline-dark" })
             </div>
         }
     </div>
 </div>
 
-<div class="modal fade" id="modalEqCategory" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal fade" id="modalEqCategory" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content" id="modal-content-category">
-        </div>
+        <div class="modal-content" id="modal-content-category"></div>
     </div>
 </div>
 
