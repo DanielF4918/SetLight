@@ -1,5 +1,5 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    const btnAgregar = document.getElementById("btnAgregarEquipos");
+
     const tablaResumen = document.getElementById("tablaResumenEquipos").querySelector("tbody");
     const inputsContainer = document.getElementById("inputsEquiposContainer");
 
@@ -37,20 +37,19 @@
         const iva = +(subtotal * 0.13).toFixed(2);
         const totalBruto = +(subtotal + iva).toFixed(2);
 
-        // Calcular descuento como porcentaje del total bruto
-        const descuentoPct = parseFloat(descuentoInput.value) || 0;
-        const montoDescuento = +(totalBruto * (descuentoPct / 100)).toFixed(2);
-        const totalFinal = +(totalBruto - montoDescuento).toFixed(2);
 
-        // Actualizar los elementos del DOM
+        const descuentoMonto = parseFloat(descuentoInput.value) || 0;
+        const totalFinal = +(totalBruto - descuentoMonto).toFixed(2);
+
+
         subtotalEl.textContent = subtotal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
         ivaEl.textContent = iva.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-        descuentoEl.textContent = montoDescuento.toLocaleString('es-CR', { minimumFractionDigits: 2 });
+        descuentoEl.textContent = descuentoMonto.toLocaleString('es-CR', { minimumFractionDigits: 2 });
         totalEl.textContent = totalFinal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
 
-        // Reflejar el valor actualizado en el input real (por si se requiere en backend)
-        descuentoInput.value = descuentoPct;
+        descuentoInput.value = descuentoMonto;
     }
+
 
     if (startDateInput) startDateInput.addEventListener("change", actualizarResumen);
     if (endDateInput) endDateInput.addEventListener("change", actualizarResumen);
@@ -59,8 +58,9 @@
         descuentoInput.addEventListener("change", actualizarResumen);
     }
 
-    if (btnAgregar) {
-        btnAgregar.addEventListener("click", function () {
+
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.id === "btnAgregarEquipos") {
             tablaResumen.innerHTML = "";
             inputsContainer.innerHTML = "";
 
@@ -119,9 +119,11 @@
 
             if (!hayError) {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarEquipos'));
-                modal.hide();
+                if (modal) modal.hide();
             }
-        });
-    }
+        }
+    });
 
-    actualizarResumen(); 
+
+    actualizarResumen();
+});
