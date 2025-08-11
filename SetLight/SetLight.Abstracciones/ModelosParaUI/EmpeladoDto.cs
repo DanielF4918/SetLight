@@ -36,7 +36,10 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
         [Required]
         [DisplayName("Rol del Empleado")]
-        public string RolId { get; set; } 
+        public string RolId { get; set; }
+
+        [DisplayName("Rol")]
+        public string NombreRol { get; set; }
 
         [DisplayName("Estado")]
         [Required]
