@@ -51,7 +51,9 @@
     <Compile Include="AccesoADatos\Client\ListClient\IListClientAD.cs" />
     <Compile Include="AccesoADatos\Client\ObtenerClPorId\IObtenerClPorIDAD.cs" />
     <Compile Include="AccesoADatos\Empleado\ICrearEmpleadoAD.cs" />
+    <Compile Include="AccesoADatos\Empleado\IEditarEmpleadoAD.cs" />
     <Compile Include="AccesoADatos\Empleado\IListarEmpleadoAD.cs" />
+    <Compile Include="AccesoADatos\Empleado\IObtenerEmpleadoPorIDAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
     <Compile Include="AccesoADatos\Equipment\CrearEquipment\ICrearEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\EditarEquipment\IEditarEquipmentAD.cs" />
@@ -68,7 +70,9 @@
     <Compile Include="LogicaDeNegocio\Client\ListClient\IListarClientLN.cs" />
     <Compile Include="LogicaDeNegocio\Client\ObtenerClPorId\IObtenerClPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\Empleado\ICrearEmpleadoLN.cs" />
+    <Compile Include="LogicaDeNegocio\Empleado\IEditarEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\Empleado\IListarEmpleadoLN.cs" />
+    <Compile Include="LogicaDeNegocio\Empleado\IObtenerEmpleadoPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\EditarEquipment\IEquipmentLN.cs" />

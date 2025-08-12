@@ -77,18 +77,31 @@
     </div>
 </div>
 
-<!-- Modales -->
-@foreach (var orden in Model)
+<!-- Modales -->@foreach (var orden in Model)
 {
+    var dias = (orden.EndDate - orden.StartDate).Days + 1;
+    decimal totalOrden = orden.Details.Sum(d => d.RentalValue * d.Quantity * dias);
+
     <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
+                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">
+                        Equipos de la orden #@orden.OrderId
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-sm table-bordered text-center align-middle">
+                    <div class="mb-3">
+                        <strong>Cliente:</strong> @orden.ClientName<br />
+                        <strong>Colaborador:</strong> @orden.EmpleadoNombreCompleto<br />
+                        <strong>Fecha de orden:</strong> @orden.OrderDate.ToShortDateString()<br />
+                        <strong>Desde:</strong> @orden.StartDate.ToShortDateString() &nbsp;
+                        <strong>Hasta:</strong> @orden.EndDate.ToShortDateString() &nbsp;
+                        <strong>Días de alquiler:</strong> @dias
+                    </div>
+
+                    <table class="table table-bordered text-center align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Equipo</th>
@@ -102,16 +115,23 @@
                         <tbody>
                             @foreach (var detalle in orden.Details)
                             {
+                                var subtotal = detalle.RentalValue * detalle.Quantity * dias;
                                 <tr>
                                     <td>@detalle.EquipmentName</td>
                                     <td>@detalle.Brand</td>
                                     <td>@detalle.Model</td>
                                     <td>@detalle.Quantity</td>
-                                    <td>₡@detalle.RentalValue</td>
-                                    <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                    <td>₡@detalle.RentalValue.ToString("N2")</td>
+                                    <td>₡@subtotal.ToString("N2")</td>
                                 </tr>
                             }
                         </tbody>
+                        <tfoot>
+                            <tr class="fw-bold bg-light">
+                                <td colspan="5" class="text-end">Total de la orden:</td>
+                                <td>₡@totalOrden.ToString("N2")</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
                 <div class="modal-footer">

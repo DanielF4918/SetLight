@@ -9,6 +9,11 @@ using SetLight.LogicaDeNegocio.Empleado.CrearEmpleado;
 using SetLight.LogicaDeNegocio.Empleado.ListarEmpleado;
 using SetLight.UI.Models; 
 using Microsoft.AspNet.Identity.EntityFramework;
+using SetLight.LogicaDeNegocio.Empleado.ObtenerEmpleadoPorID;
+using System.Runtime.Remoting.Contexts;
+using SetLight.AccesoADatos;
+using SetLight.Abstracciones.AccesoADatos.Empleado;
+using SetLight.AccesoADatos.Empleado.EditarEmpleado;
 
 namespace SetLight.UI.Controllers
 {
@@ -18,12 +23,17 @@ namespace SetLight.UI.Controllers
         private  IListarEmpleadoLN _listarEmpleadoLN;
         private  ICrearEmpleadoLN _crearEmpleadoLN;
         private  ApplicationDbContext _contexto;
+        private IObtenerEmpleadoPorIDLN _obtenerEmpleadoPorIDLN;
+        private IEditarEmpleadoAD _editarEmpleadoAD;
+
 
         public EmpleadoController()
         {
             _listarEmpleadoLN = new ListarEmpleadoLN();
             _crearEmpleadoLN = new CrearEmpleadoLN();
-            _contexto = new ApplicationDbContext(); 
+            _contexto = new ApplicationDbContext();
+            _obtenerEmpleadoPorIDLN = new ObtenerEmpleadoPorIDLN();
+            _editarEmpleadoAD = new EditarEmpleadoAD();
         }
 
         // GET: Empleado
@@ -72,25 +82,96 @@ namespace SetLight.UI.Controllers
         }
 
         // GET: Empleado/Edit/5
+        [HttpGet]
         public ActionResult Edit(int id)
         {
-            return View();
+            EmpleadoDto model;
+
+            using (var contexto = new Contexto())
+            {
+                model = contexto.Empleado
+                    .Where(e => e.IdEmpleado == id)
+                    .Select(e => new EmpleadoDto
+                    {
+                        IdEmpleado = e.IdEmpleado,
+                        IdEmpleadoGuid = e.IdEmpleadoGuid, 
+                        Nombre = e.Nombre,
+                        Apellido = e.Apellido,
+                        TelefonoCelular = e.TelefonoCelular,
+                        CorreoElectronico = e.CorreoElectronico,
+                        RolId = e.RolId,     
+                        Estado = e.Estado   
+                    })
+                    .FirstOrDefault();
+            }
+
+            if (model == null) return HttpNotFound();
+
+
+            ViewBag.Roles = ObtenerListaRoles(model.RolId);
+
+            ViewBag.Estados = new[]
+            {
+        new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+        new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+    };
+
+            return View("Edit", model); 
         }
 
         // POST: Empleado/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(EmpleadoDto model)
         {
+            if (string.IsNullOrWhiteSpace(model.RolId))
+            {
+                ModelState.AddModelError(nameof(model.RolId), "Debe seleccionar un rol.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Roles = ObtenerListaRoles(model.RolId);
+                ViewBag.Estados = new[]
+                {
+            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+        };
+                return View("EditEmployee", model); 
+            }
+
             try
             {
-                // TODO: Add update logic here
-                return RedirectToAction("Index");
+                var filasAfectadas = _editarEmpleadoAD.Editar(model);
+
+                if (filasAfectadas <= 0)
+                {
+                    ModelState.AddModelError("", "No se pudo actualizar el empleado.");
+                    ViewBag.Roles = ObtenerListaRoles(model.RolId);
+                    ViewBag.Estados = new[]
+                    {
+                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+            };
+                    return View("EditEmployee", model);
+                }
+
+                TempData["Ok"] = "Empleado actualizado correctamente.";
+                return RedirectToAction("ListarEmpleado"); 
             }
-            catch
+            catch (Exception)
             {
-                return View();
+                ModelState.AddModelError("", "Ocurrió un error al actualizar el empleado.");
+                ViewBag.Roles = ObtenerListaRoles(model.RolId);
+                ViewBag.Estados = new[]
+                {
+            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+        };
+                return View("EditEmployee", model);
             }
         }
+
 
         // GET: Empleado/Delete/5
         public ActionResult Delete(int id)
@@ -112,5 +193,39 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
+
+
+        // GET: Empleado/Activar/5
+        public ActionResult Activar(int id)
+        {
+            using (var ctx = new Contexto())
+            {
+                var emp = ctx.Empleado.FirstOrDefault(e => e.IdEmpleado == id);
+                if (emp == null) return HttpNotFound();
+
+                emp.Estado = true; // Activo
+                ctx.SaveChanges();
+                TempData["Ok"] = "Empleado activado.";
+            }
+
+            return RedirectToAction("ListarEmpleado");
+        }
+
+        // GET: Empleado/Inactivar/5
+        public ActionResult Inactivar(int id)
+        {
+            using (var ctx = new Contexto())
+            {
+                var emp = ctx.Empleado.FirstOrDefault(e => e.IdEmpleado == id);
+                if (emp == null) return HttpNotFound();
+
+                emp.Estado = false; // Inactivo
+                ctx.SaveChanges();
+                TempData["Ok"] = "Empleado inactivado.";
+            }
+
+            return RedirectToAction("ListarEmpleado");
+        }
+
     }
 }

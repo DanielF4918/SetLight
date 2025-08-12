@@ -105,10 +105,13 @@ namespace SetLight.UI.Controllers
                                               RentalValue = equipo.RentalValue,
                                               Quantity = detalle.Quantity
                                           }).ToList()
-                           }).ToList();
+                           })
+                           .OrderByDescending(o => o.OrderId) 
+                           .ToList();
 
             return View(ordenes);
         }
+
 
 
 
@@ -474,6 +477,14 @@ namespace SetLight.UI.Controllers
                                 Quantity = detalle.Quantity
                             }).ToList();
 
+            int cantidadDias = (orden.EndDate - orden.StartDate).Days;
+            if (cantidadDias <= 0) cantidadDias = 1;
+
+            decimal subtotal = detalles.Sum(d => d.RentalValue * d.Quantity * cantidadDias);
+            decimal descuento = orden.DescuentoManual ?? 0;
+            decimal iva = (subtotal - descuento) * 0.13m;
+            decimal total = subtotal - descuento + iva;
+
             var dto = new RentalOrderDto
             {
                 OrderId = orden.OrderId,
@@ -481,11 +492,17 @@ namespace SetLight.UI.Controllers
                 StartDate = orden.StartDate,
                 EndDate = orden.EndDate,
                 ClientName = cliente.FirstName + " " + cliente.LastName,
-                Details = detalles
+                Details = detalles,
+                DescuentoManual = descuento,
+                CantidadDias = cantidadDias,
+                Subtotal = subtotal,
+                Iva = iva,
+                Total = total
             };
 
             byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
             return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
         }
+
     }
 }
