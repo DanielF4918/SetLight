@@ -3,7 +3,7 @@ using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using SetLight.Abstracciones.ModelosParaUI;
-using System.Collections.Generic;
+using System.Globalization; // USD
 
 namespace SetLight.LogicaDeNegocio.Services
 {
@@ -22,6 +22,9 @@ namespace SetLight.LogicaDeNegocio.Services
                 var valueFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
                 var tableHeaderFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
                 var tableBodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+
+                // Cultura USD
+                var us = CultureInfo.GetCultureInfo("en-US");
 
                 // Título
                 Paragraph title = new Paragraph("ORDEN DE ALQUILER", titleFont)
@@ -69,7 +72,7 @@ namespace SetLight.LogicaDeNegocio.Services
                     equipoTable.AddCell(cell);
                 }
 
-                // 🔥 Cálculo por días de alquiler
+                // Cálculo por días de alquiler
                 int cantidadDias = (orden.EndDate - orden.StartDate).Days + 1;
                 decimal total = 0;
                 foreach (var item in orden.Details)
@@ -81,8 +84,8 @@ namespace SetLight.LogicaDeNegocio.Services
                     equipoTable.AddCell(new Phrase(item.Brand, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Model, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Quantity.ToString(), tableBodyFont));
-                    equipoTable.AddCell(new Phrase("₡" + item.RentalValue.ToString("N2"), tableBodyFont));
-                    equipoTable.AddCell(new Phrase("₡" + subtotal.ToString("N2"), tableBodyFont));
+                    equipoTable.AddCell(new Phrase(item.RentalValue.ToString("C2", us), tableBodyFont)); // USD
+                    equipoTable.AddCell(new Phrase(subtotal.ToString("C2", us), tableBodyFont));         // USD
                 }
 
                 doc.Add(equipoTable);
@@ -117,14 +120,13 @@ namespace SetLight.LogicaDeNegocio.Services
                 resumen.AddCell(new PdfPCell(new Phrase("DÍAS DE ALQUILER", tableBodyFont)) { Border = Rectangle.NO_BORDER });
                 resumen.AddCell(new PdfPCell(new Phrase(cantidadDias.ToString(), tableBodyFont)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
 
-                AddResumenRow("SUBTOTAL", "₡" + total.ToString("N2"));
-                AddResumenRow($"DESCUENTO ({porcentajeDescuento:N0}%)", "-₡" + montoDescuento.ToString("N2"));
-                AddResumenRow("IVA (13%)", "₡" + impuestos.ToString("N2"));
-                AddResumenRow("TOTAL A PAGAR", "₡" + totalFinal.ToString("N2"), true);
-
-                doc.Add(resumen);
+                AddResumenRow("SUBTOTAL", total.ToString("C2", us));
+                AddResumenRow($"DESCUENTO ({porcentajeDescuento:N0}%)", "-" + montoDescuento.ToString("C2", us));
+                AddResumenRow("IVA (13%)", impuestos.ToString("C2", us));
+                AddResumenRow("TOTAL A PAGAR", totalFinal.ToString("C2", us), true);
 
                 // Firma
+                doc.Add(resumen);
                 doc.Add(new Paragraph("\n\nNotas: El cliente es responsable por el uso adecuado del equipo durante el periodo de alquiler.\n\n", valueFont));
                 doc.Add(new Paragraph("____________________________", valueFont));
                 doc.Add(new Paragraph("Firma de la Empresa", valueFont));
