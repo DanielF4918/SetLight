@@ -1,14 +1,73 @@
 ﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
-
+@using System.Globalization
 @{
     ViewBag.Title = "Órdenes de Alquiler";
+    var us = CultureInfo.GetCultureInfo("en-US");
+
+    // Filtros actuales
+    int? filtroOrderId = ViewBag.FiltroOrderId as int?;
+    int? filtroEstado = ViewBag.FiltroEstado as int?;
+    string filtroCliente = (string)ViewBag.FiltroCliente ?? "";
+    int? filtroEmpleadoId = ViewBag.FiltroEmpleadoId as int?;
+    string filtroDesde = ViewBag.FiltroDesde as string;
+    string filtroHasta = ViewBag.FiltroHasta as string;
+
+    var empleados = ViewBag.Empleados as List<SelectListItem> ?? new List<SelectListItem>();
 }
 
 <div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
     <h2 class="mb-4 text-dark fw-bold">Órdenes de Alquiler Registradas</h2>
 
-    <div class="text-end mb-3">
-        @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
+    <div class="mb-3 d-flex gap-2 justify-content-between">
+        <div>
+            @using (Html.BeginForm("Index", "RentalOrder", FormMethod.Get, new { @class = "row g-2" }))
+            {
+                <div class="col-auto">
+                    <label class="form-label"># Orden</label>
+                    @Html.TextBox("orderId", filtroOrderId?.ToString(), new { @class = "form-control", type = "number", min = "1", placeholder = "ID" })
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Cliente</label>
+                    @Html.TextBox("cliente", filtroCliente, new { @class = "form-control", placeholder = "Nombre cliente" })
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Estado</label>
+                    @Html.DropDownList("estado",
+                        new List<SelectListItem> {
+                            new SelectListItem{ Text="Todos", Value="" },
+                            new SelectListItem{ Text="Activa", Value="1", Selected=(filtroEstado==1) },
+                            new SelectListItem{ Text="Completada", Value="2", Selected=(filtroEstado==2) },
+                            new SelectListItem{ Text="Cancelada", Value="3", Selected=(filtroEstado==3) }
+                        },
+                        new { @class = "form-select" })
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Colaborador</label>
+                    @Html.DropDownList("empleadoId",
+                        new List<SelectListItem>(
+                            new[] { new SelectListItem { Text = "Todos", Value = "" } }
+                            .Concat(empleados.Select(e =>
+                                new SelectListItem { Text = e.Text, Value = e.Value, Selected = (filtroEmpleadoId.HasValue && e.Value == filtroEmpleadoId.Value.ToString()) }))),
+                        new { @class = "form-select", style = "min-width:200px" })
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Desde (inicio)</label>
+                    @Html.TextBox("desde", filtroDesde, new { @class = "form-control", type = "date" })
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Hasta (fin)</label>
+                    @Html.TextBox("hasta", filtroHasta, new { @class = "form-control", type = "date" })
+                </div>
+                <div class="col-auto d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="@Url.Action("Index","RentalOrder")" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            }
+        </div>
+
+        <div class="text-end">
+            @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -22,7 +81,7 @@
                     <th>Fin</th>
                     <th>Colaborador</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    <th style="width: 290px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,9 +103,7 @@
                             @estado
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-dark mb-1" onclick="mostrarEquiposModal(@orden.OrderId)">
-                                Ver equipos
-                            </button>
+                            <button class="btn btn-sm btn-dark mb-1" onclick="mostrarEquiposModal(@orden.OrderId)">Ver equipos</button>
 
                             @if (orden.StatusOrder == 1)
                             {
@@ -61,9 +118,7 @@
 
                             @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
                             {
-                                <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })" class="btn btn-sm btn-success mb-1">
-                                    Descargar comprobante
-                                </a>
+                                <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })" class="btn btn-sm btn-success mb-1">Descargar comprobante</a>
                             }
                             else
                             {
@@ -77,31 +132,18 @@
     </div>
 </div>
 
-<!-- Modales -->@foreach (var orden in Model)
+<!-- Modales -->
+@foreach (var orden in Model)
 {
-    var dias = (orden.EndDate - orden.StartDate).Days + 1;
-    decimal totalOrden = orden.Details.Sum(d => d.RentalValue * d.Quantity * dias);
-
     <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">
-                        Equipos de la orden #@orden.OrderId
-                    </h5>
+                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <strong>Cliente:</strong> @orden.ClientName<br />
-                        <strong>Colaborador:</strong> @orden.EmpleadoNombreCompleto<br />
-                        <strong>Fecha de orden:</strong> @orden.OrderDate.ToShortDateString()<br />
-                        <strong>Desde:</strong> @orden.StartDate.ToShortDateString() &nbsp;
-                        <strong>Hasta:</strong> @orden.EndDate.ToShortDateString() &nbsp;
-                        <strong>Días de alquiler:</strong> @dias
-                    </div>
-
-                    <table class="table table-bordered text-center align-middle">
+                    <table class="table table-sm table-bordered text-center align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Equipo</th>
@@ -115,23 +157,16 @@
                         <tbody>
                             @foreach (var detalle in orden.Details)
                             {
-                                var subtotal = detalle.RentalValue * detalle.Quantity * dias;
                                 <tr>
                                     <td>@detalle.EquipmentName</td>
                                     <td>@detalle.Brand</td>
                                     <td>@detalle.Model</td>
                                     <td>@detalle.Quantity</td>
-                                    <td>₡@detalle.RentalValue.ToString("N2")</td>
-                                    <td>₡@subtotal.ToString("N2")</td>
+                                    <td>@detalle.RentalValue.ToString("C2", us)</td>
+                                    <td>@((detalle.RentalValue * detalle.Quantity).ToString("C2", us))</td>
                                 </tr>
                             }
                         </tbody>
-                        <tfoot>
-                            <tr class="fw-bold bg-light">
-                                <td colspan="5" class="text-end">Total de la orden:</td>
-                                <td>₡@totalOrden.ToString("N2")</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
                 <div class="modal-footer">

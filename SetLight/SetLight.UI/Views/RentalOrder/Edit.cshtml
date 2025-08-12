@@ -28,15 +28,7 @@
 
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Descuento manual (%)</label>
-            @Html.TextBoxFor(m => m.DescuentoManual, new
-            {
-                @class = "form-control border-dark",
-                type = "number",
-                step = "0.01",
-                min = "0",
-                max = "999999",
-                id = "DescuentoManual"
-            })
+            @Html.TextBoxFor(m => m.DescuentoManual, new { @class = "form-control border-dark", type = "number", step = "0.01", min = "0", max = "999999", id = "DescuentoManual" })
         </div>
 
         <div class="form-group mb-3">
@@ -62,8 +54,7 @@
                             <th>Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -78,19 +69,19 @@
                     </tr>
                     <tr>
                         <th>Subtotal</th>
-                        <td>₡<span id="subtotalAlquiler">0</span></td>
+                        <td>$<span id="subtotalAlquiler">0</span></td>
                     </tr>
                     <tr>
                         <th>Descuento manual</th>
-                        <td>₡<span id="descuentoAplicado">0</span></td>
+                        <td>$<span id="descuentoAplicado">0</span></td>
                     </tr>
                     <tr>
                         <th>IVA (13%)</th>
-                        <td>₡<span id="ivaAlquiler">0</span></td>
+                        <td>$<span id="ivaAlquiler">0</span></td>
                     </tr>
                     <tr class="fw-bold bg-light">
                         <th>Total a pagar</th>
-                        <td>₡<span id="totalAlquiler">0</span></td>
+                        <td>$<span id="totalAlquiler">0</span></td>
                     </tr>
                 </tbody>
             </table>

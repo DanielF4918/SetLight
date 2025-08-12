@@ -587,3 +587,5 @@ C:\Users\kenca\OneDrive\Escritorio\ARREGLO\SetLight\SetLight\SetLight.UI\obj\Deb
 C:\Users\kenca\OneDrive\Escritorio\ARREGLO\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.3A7BDE39.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\ARREGLO\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.dll
 C:\Users\kenca\OneDrive\Escritorio\ARREGLO\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.pdb
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.Migrations.Inicial.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.csproj.GenerateResource.cache
