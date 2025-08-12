@@ -2,13 +2,11 @@
 
 @{
     ViewBag.Title = "Mantenimientos en curso";
-
 }
 
+<h2>Mantenimientos</h2>
 
-<h2>Mantenimientos en curso</h2>
-
-<div class="mb-3">
+<div class="mb-3 d-flex gap-2">
     @Html.ActionLink(
         "Ver Histórico",
         "Historico",
@@ -17,6 +15,41 @@
         new { @class = "btn btn-secondary" }
     )
 </div>
+
+@using (Html.BeginForm("Mantenimientos", "ReturnDetails", FormMethod.Get))
+{
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <label>Equipo</label>
+            @Html.DropDownList("equipmentId", (IEnumerable<SelectListItem>)ViewBag.Equipos, "Todos", new { @class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            <label>Estado</label>
+            @Html.DropDownList("status", (IEnumerable<SelectListItem>)ViewBag.Statuses, "Todos", new { @class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            <label>Tipo</label>
+            @Html.DropDownList("type", (IEnumerable<SelectListItem>)ViewBag.Types, "Todos", new { @class = "form-control" })
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-4">
+        <div class="col-md-3">
+            <label>Desde</label>
+            <input type="date" name="from" class="form-control" value="@Request["from"]" />
+        </div>
+        <div class="col-md-3">
+            <label>Hasta</label>
+            <input type="date" name="to" class="form-control" value="@Request["to"]" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <a href="@Url.Action("Mantenimientos","ReturnDetails")" class="btn btn-outline-secondary w-100">Limpiar</a>
+        </div>
+    </div>
+}
 
 <table class="table">
     <thead>
@@ -43,16 +76,19 @@
                     }
                     @tipo
                 </td>
+                <td>@(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")</td>
                 <td>
-                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
-                </td>
-
-                <td>@m.MaintenanceStatus</td>
-                <td>
-                    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
+                    @if (m.MaintenanceStatus == 1)
                     {
-                        @Html.Hidden("id", m.MaintenanceId)
-                        <button type="submit" class="btn btn-success">Finalizar</button>
+                        using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
+                        {
+                            @Html.Hidden("id", m.MaintenanceId)
+                            <button type="submit" class="btn btn-success">Finalizar</button>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
                     }
                 </td>
             </tr>

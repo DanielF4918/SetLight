@@ -44,7 +44,7 @@
 
             <div class="form-group mb-3">
                 @Html.LabelFor(m => m.RentalValue, new { @class = "form-label" })
-                @Html.EditorFor(m => m.RentalValue, new { htmlAttributes = new { @class = "form-control", placeholder = "₡0.00" } })
+                @Html.EditorFor(m => m.RentalValue, new { htmlAttributes = new { @class = "form-control", placeholder = "$0.00" } })
                 @Html.ValidationMessageFor(m => m.RentalValue, "", new { @class = "text-danger" })
             </div>
 
@@ -55,7 +55,7 @@
             </div>
 
             <div class="form-group mb-4">
-                @Html.LabelFor(m => m.CategoryId, new { @class = "form-label" })
+                @Html.LabelFor(m => m.CategoryId, "Seleccionar categoría", new { @class = "form-label" })
                 <div class="d-flex gap-2">
                     @Html.DropDownListFor(m => m.CategoryId, (IEnumerable<SelectListItem>)ViewBag.Categorias, "-- Seleccione una categoría --", new { @class = "form-control" })
                     <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEqCategory">Nueva categoría</button>

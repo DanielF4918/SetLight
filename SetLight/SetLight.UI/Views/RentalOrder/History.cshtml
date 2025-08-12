@@ -1,7 +1,8 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
-
+@using System.Globalization
 @{
     ViewBag.Title = "Historial de órdenes";
+    var us = CultureInfo.GetCultureInfo("en-US");
 }
 
 <h2>Historial de órdenes de @ViewBag.ClientName</h2>
@@ -39,17 +40,16 @@ else
                         </button>
                     </td>
                     <td>
-                    @if (order.StatusOrder == 1 || order.StatusOrder == 2)
-                    {
-                        <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = order.OrderId })" class="btn btn-sm btn-success">
-                            Descargar comprobante
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="text-muted">No disponible</span>
-                    }
-
+                        @if (order.StatusOrder == 1 || order.StatusOrder == 2)
+                        {
+                            <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = order.OrderId })" class="btn btn-sm btn-success">
+                                Descargar comprobante
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No disponible</span>
+                        }
                     </td>
                 </tr>
             }
@@ -87,8 +87,8 @@ else
                                         <td>@detalle.Brand</td>
                                         <td>@detalle.Model</td>
                                         <td>@detalle.Quantity</td>
-                                        <td>₡@detalle.RentalValue.ToString("N2")</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity)
+                                        <td>@detalle.RentalValue.ToString("C2", us)</td>
+                                        <td>@((detalle.RentalValue * detalle.Quantity).ToString("C2", us))</td>
                                     </tr>
                                 }
                             </tbody>

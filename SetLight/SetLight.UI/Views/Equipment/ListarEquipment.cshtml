@@ -1,7 +1,9 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
 
+@using System.Globalization
 @{
     ViewBag.Title = "Equipos";
+    var us = CultureInfo.GetCultureInfo("en-US");
 }
 
 <div class="contenido-principal">
@@ -55,7 +57,7 @@
                             <td>@item.EquipoCompleto</td>
                             <td>@item.SerialNumber</td>
                             <td>@item.Description</td>
-                            <td>@item.RentalValue.ToString("C")</td>
+                            <td>@item.RentalValue.ToString("C2", us)</td>
                             <td>@item.Disponibles</td>
                             <td>@item.Alquilados</td>
                             <td>@item.EnMantenimiento</td>

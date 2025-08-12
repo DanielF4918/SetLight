@@ -1,4 +1,6 @@
 ﻿@model List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>
+@using System.Globalization
+@{ var us = CultureInfo.GetCultureInfo("en-US"); }
 
 <table class="table table-bordered table-striped" id="tablaEquipos">
     <thead>
@@ -14,28 +16,36 @@
     <tbody>
         @for (int i = 0; i < Model.Count; i++)
         {
+            var cantidadSeleccionada = Model[i].Quantity;
+            var stockDisponible = Model[i].Stock;
+            var cantidadMaxima = stockDisponible + cantidadSeleccionada;
             <tr>
-                @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentId", Model[i].EquipmentId)
-                @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentName", Model[i].EquipmentName)
-                @Html.Hidden($"EquiposSeleccionados[{i}].Brand", Model[i].Brand)
-                @Html.Hidden($"EquiposSeleccionados[{i}].Model", Model[i].Model)
-                @Html.Hidden($"EquiposSeleccionados[{i}].RentalValue", Model[i].RentalValue)
-
                 <td>@Model[i].EquipmentName</td>
                 <td>@Model[i].Brand</td>
                 <td>@Model[i].Model</td>
-                <td>₡@Model[i].RentalValue.ToString("N0")</td>
-                <td><strong>@Model[i].Stock</strong></td>
+                <td>@Model[i].RentalValue.ToString("C2", us)</td>
+                <td id="stock-display-@Model[i].EquipmentId"><strong>@Model[i].Stock</strong></td>
                 <td>
-                    @Html.TextBox($"EquiposSeleccionados[{i}].Quantity", 0, new
-                    {
-                        @class = "form-control",
-                        type = "number",
-                        min = "0",
-                        max = Model[i].Stock
-                    })
+                    @Html.TextBox(
+                        $"EquiposSeleccionados[{i}].Quantity", cantidadSeleccionada,
+                        new
+                        {
+                            @class = "form-control cantidad-equipo",
+                            type = "number",
+                            min = "0",
+                            max = cantidadMaxima,
+                            data_id = Model[i].EquipmentId,
+                            data_name = Model[i].EquipmentName,
+                            data_brand = Model[i].Brand,
+                            data_model = Model[i].Model,
+                            data_value = Model[i].RentalValue,
+                            data_stock = stockDisponible,
+                            data_selected = cantidadSeleccionada
+                        }
+                    )
                 </td>
             </tr>
         }
     </tbody>
 </table>
+<button type="button" class="btn btn-success mt-3" id="btnAgregarEquipos">Seleccionar equipos</button>

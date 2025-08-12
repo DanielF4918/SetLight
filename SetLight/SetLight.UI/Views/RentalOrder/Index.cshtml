@@ -1,8 +1,6 @@
 ﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
-
-@{
-    ViewBag.Title = "Órdenes de Alquiler";
-}
+@using System.Globalization
+@{ ViewBag.Title = "Órdenes de Alquiler"; var us = CultureInfo.GetCultureInfo("en-US"); }
 
 <div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
     <h2 class="mb-4 text-dark fw-bold">Órdenes de Alquiler Registradas</h2>
@@ -10,6 +8,45 @@
     <div class="text-end mb-3">
         @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
     </div>
+
+    @using (Html.BeginForm("Index", "RentalOrder", FormMethod.Get))
+    {
+        <div class="row g-2 mb-3">
+            <div class="col-md-2">
+                <label># Orden</label>
+                <input type="number" name="orderId" class="form-control" value="@Request["orderId"]" />
+            </div>
+            <div class="col-md-3">
+                <label>Cliente</label>
+                @Html.DropDownList("clientId", (IEnumerable<SelectListItem>)ViewBag.Clientes, "Todos", new { @class = "form-control" })
+            </div>
+            <div class="col-md-2">
+                <label>Estado</label>
+                @Html.DropDownList("status", (IEnumerable<SelectListItem>)ViewBag.Statuses, "Todos", new { @class = "form-control" })
+            </div>
+            <div class="col-md-3">
+                <label>Colaborador</label>
+                @Html.DropDownList("employeeId", (IEnumerable<SelectListItem>)ViewBag.Empleados, "Todos", new { @class = "form-control" })
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-4">
+            <div class="col-md-3">
+                <label>Desde</label>
+                <input type="date" name="from" class="form-control" value="@Request["from"]" />
+            </div>
+            <div class="col-md-3">
+                <label>Hasta</label>
+                <input type="date" name="to" class="form-control" value="@Request["to"]" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <a class="btn btn-outline-secondary w-100" href="@Url.Action("Index","RentalOrder")">Limpiar</a>
+            </div>
+        </div>
+    }
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover text-center align-middle">
@@ -107,8 +144,8 @@
                                     <td>@detalle.Brand</td>
                                     <td>@detalle.Model</td>
                                     <td>@detalle.Quantity</td>
-                                    <td>₡@detalle.RentalValue.ToString("N2")</td>
-                                    <td>₡@(detalle.RentalValue * detalle.Quantity).ToString("N2")</td>
+                                    <td>@detalle.RentalValue.ToString("C2", us)</td>
+                                    <td>@( (detalle.RentalValue * detalle.Quantity).ToString("C2", us) )</td>
                                 </tr>
                             }
                         </tbody>
