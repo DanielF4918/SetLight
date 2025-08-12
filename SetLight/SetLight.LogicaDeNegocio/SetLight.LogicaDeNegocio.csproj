@@ -55,6 +55,7 @@
     <Compile Include="Client\ObtenerClPorIDLN\ObtenerClPorIDLN.cs" />
     <Compile Include="Empleado\CrearEmpleado\CrearEmpleadoLN.cs" />
     <Compile Include="Empleado\ListarEmpleado\ListarEmpleadoLN.cs" />
+    <Compile Include="Empleado\ObtenerEmpleadoPorID\ObtenerEmpleadoPorIDLN.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryLN.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentLN.cs" />
     <Compile Include="Equipment\EditarEquipment\EditarEquipmentLN.cs" />
