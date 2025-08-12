@@ -15,18 +15,16 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int StatusOrder { get; set; }
         public int ClientId { get; set; }
         public string RutaComprobante { get; set; }
-
         public int? EmpleadoId { get; set; }
-
         public string ClientName { get; set; }
-
         public List<OrderDetailDto> Details { get; set; } = new List<OrderDetailDto>();
-
         public string EmpleadoNombreCompleto { get; set; }
-
         public decimal? DescuentoManual { get; set; }
 
-
-
+        public int CantidadDias { get; set; }
+        public decimal Subtotal { get; set; }
+        public decimal Iva { get; set; }
+        public decimal Total { get; set; }
     }
+
 }

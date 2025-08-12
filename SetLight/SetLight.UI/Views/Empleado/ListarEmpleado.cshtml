@@ -13,7 +13,6 @@
 <table class="table table-bordered table-striped table-hover">
     <thead class="table-dark text-white">
         <tr>
-            <th>@Html.DisplayNameFor(model => model.First().IdEmpleadoGuid)</th>
             <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
             <th>@Html.DisplayNameFor(model => model.First().Apellido)</th>
             <th>@Html.DisplayNameFor(model => model.First().TelefonoCelular)</th>
@@ -27,12 +26,29 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.IdEmpleadoGuid</td>
                 <td>@item.Nombre</td>
                 <td>@item.Apellido</td>
                 <td>@item.TelefonoCelular</td>
                 <td>@item.CorreoElectronico</td>
-                <td>@item.RolId</td>
+                <td>
+                    @if (item.RolId == "E5A9EDE4-DAEA-4DA2-B6D0-F279CE33C010")
+                    {
+                        <span class="badge bg-primary">Administrador</span>
+                    }
+                    else if (item.RolId == "B7885CA2-6B6E-47D2-9974-54EBE7EB2A6B")
+                    {
+                        <span class="badge bg-info text-dark">Colaborador</span>
+                    }
+                    else if (item.RolId == "87A0E71E-13BB-4D95-82D7-785DEF3100E0")
+                    {
+                        <span class="badge bg-secondary">Técnico</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-dark">Desconocido</span>
+                    }
+                </td>
+
                 <td>
                     @if (item.Estado)
                     {
@@ -45,8 +61,19 @@
                 </td>
                 <td>
                     @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
-                    @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
-                    @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
+
+                    @if (item.Estado)
+                    {
+                        @Html.ActionLink("Inactivar", "Inactivar", "Empleado",
+                            new { id = item.IdEmpleado },
+                            new { @class = "btn btn-outline-secondary btn-sm", onclick = "return confirm('¿Inactivar este empleado?');" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Activar", "Activar", "Empleado",
+                            new { id = item.IdEmpleado },
+                            new { @class = "btn btn-outline-success btn-sm", onclick = "return confirm('¿Activar este empleado?');" })
+                    }
                 </td>
             </tr>
         }
