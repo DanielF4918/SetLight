@@ -31,7 +31,7 @@
                 <td>@item.TelefonoCelular</td>
                 <td>@item.CorreoElectronico</td>
                 <td>
-                    @if (item.RolId == "31F16267-19E9-4FD8-B518-43706DF8000C")
+                    @if (item.RolId == "E5A9EDE4-DAEA-4DA2-B6D0-F279CE33C010")
                     {
                         <span class="badge bg-primary">Administrador</span>
                     }
@@ -62,6 +62,18 @@
                 <td>
                     @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
 
+                    @if (item.Estado)
+                    {
+                        @Html.ActionLink("Inactivar", "Inactivar", "Empleado",
+                            new { id = item.IdEmpleado },
+                            new { @class = "btn btn-outline-secondary btn-sm", onclick = "return confirm('¿Inactivar este empleado?');" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Activar", "Activar", "Empleado",
+                            new { id = item.IdEmpleado },
+                            new { @class = "btn btn-outline-success btn-sm", onclick = "return confirm('¿Activar este empleado?');" })
+                    }
                 </td>
             </tr>
         }

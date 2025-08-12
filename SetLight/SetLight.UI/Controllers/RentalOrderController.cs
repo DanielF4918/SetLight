@@ -105,10 +105,13 @@ namespace SetLight.UI.Controllers
                                               RentalValue = equipo.RentalValue,
                                               Quantity = detalle.Quantity
                                           }).ToList()
-                           }).ToList();
+                           })
+                           .OrderByDescending(o => o.OrderId) 
+                           .ToList();
 
             return View(ordenes);
         }
+
 
 
 
