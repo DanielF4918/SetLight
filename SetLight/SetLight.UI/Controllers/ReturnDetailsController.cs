@@ -23,7 +23,6 @@ namespace SetLight.UI.Controllers
         {
             _createReturnDetailsAD = new CreateReturnDetailsAD();
         }
-
         public ActionResult DetallesDevolucion(int orderId)
         {
             using (var contexto = new Contexto())
@@ -49,6 +48,8 @@ namespace SetLight.UI.Controllers
                 return View(viewModel);
             }
         }
+
+
 
         // GET: ReturnDetails/Details/5
         public ActionResult Details(int id)
@@ -86,6 +87,8 @@ namespace SetLight.UI.Controllers
                 return View(model);
             }
         }
+
+
 
         //POST: ReturnDetails/CrearReturnDetails
         [HttpPost]
@@ -192,7 +195,7 @@ namespace SetLight.UI.Controllers
                         var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
                         if (orden != null)
                         {
-                            orden.StatusOrder = 2;
+                            orden.StatusOrder = 2; 
                             contexto.SaveChanges();
                         }
                     }
@@ -214,6 +217,11 @@ namespace SetLight.UI.Controllers
 
         }
 
+
+
+
+
+
         // GET: ReturnDetails/Edit/5
         public ActionResult Edit(int id)
         {
@@ -226,6 +234,8 @@ namespace SetLight.UI.Controllers
         {
             try
             {
+                // TODO: Add update logic here
+
                 return RedirectToAction("Index");
             }
             catch
@@ -246,6 +256,8 @@ namespace SetLight.UI.Controllers
         {
             try
             {
+                // TODO: Add delete logic here
+
                 return RedirectToAction("Index");
             }
             catch
@@ -253,51 +265,18 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
-
-        // Mantenimientos (CON FILTROS)
-        [HttpGet]
-        public ActionResult Mantenimientos(int? equipmentId, int? status, int? type, DateTime? from, DateTime? to)
+        public ActionResult Mantenimientos()
         {
             using (var contexto = new Contexto())
             {
-                var q = contexto.Maintenance
+                var lista = contexto.Maintenance
                     .Include("Equipment")
-                    .AsQueryable();
-
-                // Por defecto podrías querer solo en curso; si quieres eso, descomenta:
-                // if (!status.HasValue) q = q.Where(m => m.MaintenanceStatus == 1);
-
-                if (status.HasValue) q = q.Where(m => m.MaintenanceStatus == status.Value);
-                if (type.HasValue) q = q.Where(m => m.MaintenanceType == type.Value);
-                if (equipmentId.HasValue) q = q.Where(m => m.EquipmentId == equipmentId.Value);
-                if (from.HasValue) q = q.Where(m => m.StartDate >= from.Value);
-                if (to.HasValue) q = q.Where(m => (m.EndDate ?? m.StartDate) <= to.Value);
-
-                var lista = q.OrderByDescending(m => m.StartDate).ToList();
-
-                ViewBag.Equipos = contexto.Equipment
-                    .OrderBy(e => e.EquipmentName)
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.EquipmentId.ToString(),
-                        Text = e.EquipmentName
-                    }).ToList();
-
-                ViewBag.Statuses = new List<SelectListItem>{
-                    new SelectListItem{Value="1", Text="En curso"},
-                    new SelectListItem{Value="2", Text="Finalizado"}
-                };
-
-                ViewBag.Types = new List<SelectListItem>{
-                    new SelectListItem{Value="1", Text="Revisión por daño"},
-                    new SelectListItem{Value="2", Text="Reparación mayor"},
-                    new SelectListItem{Value="3", Text="Mantenimiento preventivo"}
-                };
+                    .Where(m => m.MaintenanceStatus == 1)
+                    .ToList();
 
                 return View(lista);
             }
         }
-
         [HttpPost]
         public ActionResult FinalizarMantenimiento(int id)
         {
@@ -329,17 +308,17 @@ namespace SetLight.UI.Controllers
                     StartDate = DateTime.Now,
                     MaintenanceType = 1,
                     MaintenanceStatus = 1,
-                    EquipmentId = 1
+                    EquipmentId = 1  
                 });
-                ctx.SaveChanges();
+                    ctx.SaveChanges();
             }
             return Content("¡Inserción de prueba completada!");
         }
-
         public ActionResult Historico()
         {
             using (var contexto = new Contexto())
             {
+
                 var listaHistorico = contexto.Maintenance
                     .Include("Equipment")
                     .OrderByDescending(m => m.StartDate)
@@ -348,5 +327,8 @@ namespace SetLight.UI.Controllers
                 return View(listaHistorico);
             }
         }
+
+
+
     }
 }

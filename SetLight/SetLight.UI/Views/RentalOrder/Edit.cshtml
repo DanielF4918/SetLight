@@ -13,22 +13,24 @@
 
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Cliente</label>
-            @Html.DropDownListFor(m => m.ClientId, new SelectList(Model.Clientes, "ClientId", "FirstName", Model.ClientId), "Seleccione un cliente", new { @class = "form-control border-dark" })
+            @Html.DropDownListFor(m => m.ClientId, new SelectList(Model.Clientes, "ClientId", "FirstName"), "Seleccione un cliente", new { @class = "form-control border-dark" })
         </div>
 
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Fecha de inicio</label>
-            @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control border-dark", type = "date", id = "StartDate" })
+            @Html.TextBox("StartDate", Model.StartDate.ToString("yyyy-MM-dd"), new { @class = "form-control border-dark", type = "date", id = "StartDate" })
         </div>
 
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Fecha de fin</label>
-            @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control border-dark", type = "date", id = "EndDate" })
+            @Html.TextBox("EndDate", Model.EndDate.ToString("yyyy-MM-dd"), new { @class = "form-control border-dark", type = "date", id = "EndDate" })
         </div>
 
         <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Descuento manual (%)</label>
-            @Html.TextBoxFor(m => m.DescuentoManual, new { @class = "form-control border-dark", type = "number", step = "0.01", min = "0", max = "999999", id = "DescuentoManual" })
+            <label class="form-label fw-semibold">Descuento manual (₡)</label>
+            <input type="number" name="DescuentoManual" id="DescuentoManual" step="0.01" min="0" max="999999"
+                   class="form-control border-dark"
+                   value="@(Model.DescuentoManual.HasValue ? Model.DescuentoManual.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "")" />
         </div>
 
         <div class="form-group mb-3">
@@ -54,7 +56,29 @@
                             <th>Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                        @for (int i = 0; i < Model.EquiposSeleccionados.Count; i++)
+                        {
+                            var equipo = Model.EquiposSeleccionados[i];
+                            var subtotalEquipo = equipo.Quantity * equipo.RentalValue;
+
+                            <tr>
+                                <td>@equipo.EquipmentName</td>
+                                <td>@equipo.Brand</td>
+                                <td>@equipo.Model</td>
+                                <td>₡@equipo.RentalValue.ToString("N2")</td>
+                                <td>@equipo.Quantity</td>
+                                <td>₡@subtotalEquipo.ToString("N2")</td>
+                            </tr>
+
+                            @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentId", equipo.EquipmentId)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].EquipmentName", equipo.EquipmentName)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Brand", equipo.Brand)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Model", equipo.Model)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].RentalValue", equipo.RentalValue)
+                            @Html.Hidden($"EquiposSeleccionados[{i}].Quantity", equipo.Quantity)
+                        }
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -69,19 +93,19 @@
                     </tr>
                     <tr>
                         <th>Subtotal</th>
-                        <td>$<span id="subtotalAlquiler">0</span></td>
+                        <td>₡<span id="subtotalAlquiler">0</span></td>
                     </tr>
                     <tr>
                         <th>Descuento manual</th>
-                        <td>$<span id="descuentoAplicado">0</span></td>
+                        <td>₡<span id="descuentoAplicado">0</span></td>
                     </tr>
                     <tr>
                         <th>IVA (13%)</th>
-                        <td>$<span id="ivaAlquiler">0</span></td>
+                        <td>₡<span id="ivaAlquiler">0</span></td>
                     </tr>
                     <tr class="fw-bold bg-light">
                         <th>Total a pagar</th>
-                        <td>$<span id="totalAlquiler">0</span></td>
+                        <td>₡<span id="totalAlquiler">0</span></td>
                     </tr>
                 </tbody>
             </table>

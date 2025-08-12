@@ -1,11 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using SetLight.Abstracciones.ModelosParaUI;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using System.Globalization; // <-- agregado
 
 namespace SetLight.LogicaDeNegocio.Services
 {
@@ -25,10 +25,6 @@ namespace SetLight.LogicaDeNegocio.Services
                 var tableHeaderFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
                 var tableBodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
 
-                // Cultura USD
-                var us = CultureInfo.GetCultureInfo("en-US");
-                string C(decimal v) => v.ToString("C2", us);
-
                 // Título centrado
                 Paragraph title = new Paragraph("ORDEN DE ALQUILER", titleFont)
                 {
@@ -42,13 +38,15 @@ namespace SetLight.LogicaDeNegocio.Services
                 headerTable.WidthPercentage = 100;
                 headerTable.SetWidths(new float[] { 1, 1 });
 
-                PdfPCell left = new PdfPCell { Border = Rectangle.NO_BORDER };
+                PdfPCell left = new PdfPCell();
+                left.Border = Rectangle.NO_BORDER;
                 left.AddElement(new Paragraph("Emitido por:", labelFont));
                 left.AddElement(new Paragraph("Light Project Films", valueFont));
                 left.AddElement(new Paragraph("San José, Costa Rica", valueFont));
                 left.AddElement(new Paragraph("Tel: 2222-0000", valueFont));
 
-                PdfPCell right = new PdfPCell { Border = Rectangle.NO_BORDER };
+                PdfPCell right = new PdfPCell();
+                right.Border = Rectangle.NO_BORDER;
                 right.AddElement(new Paragraph("Cliente:", labelFont));
                 right.AddElement(new Paragraph(orden.ClientName, valueFont));
                 right.AddElement(new Paragraph("Orden ID: " + orden.OrderId, valueFont));
@@ -61,7 +59,10 @@ namespace SetLight.LogicaDeNegocio.Services
                 doc.Add(new Paragraph("\n"));
 
                 // Tabla de equipos
-                PdfPTable equipoTable = new PdfPTable(6) { WidthPercentage = 100 };
+                PdfPTable equipoTable = new PdfPTable(6)
+                {
+                    WidthPercentage = 100
+                };
                 equipoTable.SetWidths(new float[] { 3, 2, 2, 1, 2, 2 });
 
                 string[] headers = { "Equipo", "Marca", "Modelo", "Cant.", "Precio Unitario", "Subtotal" };
@@ -85,8 +86,8 @@ namespace SetLight.LogicaDeNegocio.Services
                     equipoTable.AddCell(new Phrase(item.Brand, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Model, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Quantity.ToString(), tableBodyFont));
-                    equipoTable.AddCell(new Phrase(C(item.RentalValue), tableBodyFont)); // USD
-                    equipoTable.AddCell(new Phrase(C(subtotal), tableBodyFont));        // USD
+                    equipoTable.AddCell(new Phrase("₡" + item.RentalValue.ToString("N2"), tableBodyFont));
+                    equipoTable.AddCell(new Phrase("₡" + subtotal.ToString("N2"), tableBodyFont));
                 }
                 doc.Add(equipoTable);
 
@@ -106,15 +107,11 @@ namespace SetLight.LogicaDeNegocio.Services
                 void AddResumenRow(string label, decimal amount, bool bold = false)
                 {
                     resumen.AddCell(new PdfPCell(new Phrase(label, bold ? tableHeaderFont : tableBodyFont)) { Border = Rectangle.NO_BORDER });
-                    resumen.AddCell(new PdfPCell(new Phrase(C(amount), bold ? tableHeaderFont : tableBodyFont))
-                    {
-                        Border = Rectangle.NO_BORDER,
-                        HorizontalAlignment = Element.ALIGN_RIGHT
-                    });
+                    resumen.AddCell(new PdfPCell(new Phrase("₡" + amount.ToString("N2"), bold ? tableHeaderFont : tableBodyFont)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
                 }
 
                 AddResumenRow("SUBTOTAL", total);
-                AddResumenRow("Tax (13%)", impuestos);
+                AddResumenRow("IVA (13%)", impuestos);
                 AddResumenRow("TOTAL A PAGAR", totalFinal, true);
 
                 doc.Add(resumen);

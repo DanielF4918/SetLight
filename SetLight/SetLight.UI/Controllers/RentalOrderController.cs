@@ -74,82 +74,44 @@ namespace SetLight.UI.Controllers
             return View(historial);
         }
 
-        // Listado de órdenes (CON FILTROS)
-        [HttpGet]
-        public ActionResult Index(int? orderId, int? clientId, int? status, int? employeeId, DateTime? from, DateTime? to)
+        // Listado de órdenes
+        public ActionResult Index()
         {
-            var q =
-                from orden in _contexto.RentalOrders
-                join cliente in _contexto.Clients on orden.ClientId equals cliente.ClientId
-                join empleado in _contexto.Empleado on orden.EmpleadoId equals empleado.IdEmpleado into empJoin
-                from empleado in empJoin.DefaultIfEmpty()
-                select new RentalOrderDto
-                {
-                    OrderId = orden.OrderId,
-                    OrderDate = orden.OrderDate,
-                    StartDate = orden.StartDate,
-                    EndDate = orden.EndDate,
-                    StatusOrder = orden.StatusOrder,
-                    ClientId = orden.ClientId,
-                    ClientName = cliente.FirstName + " " + cliente.LastName,
-                    EmpleadoNombreCompleto = empleado != null
-                        ? empleado.Nombre + " " + empleado.Apellido
-                        : "No asignado",
-                    RutaComprobante = orden.RutaComprobante,
-                    Details = (from detalle in _contexto.OrderDetails
-                               join equipo in _contexto.Equipment
-                               on detalle.EquipmentId equals equipo.EquipmentId
-                               where detalle.OrderId == orden.OrderId
-                               select new OrderDetailDto
-                               {
-                                   EquipmentName = equipo.EquipmentName,
-                                   Brand = equipo.Brand,
-                                   Model = equipo.Model,
-                                   RentalValue = equipo.RentalValue,
-                                   Quantity = detalle.Quantity
-                               }).ToList()
-                };
-
-            // Filtros
-            if (orderId.HasValue) q = q.Where(o => o.OrderId == orderId.Value);
-            if (clientId.HasValue) q = q.Where(o => o.ClientId == clientId.Value);
-            if (status.HasValue) q = q.Where(o => o.StatusOrder == status.Value);
-            if (employeeId.HasValue) q = q.Where(o => o.EmpleadoNombreCompleto != "No asignado")
-                                          .Where(o => _contexto.Empleado
-                                                .Where(e => e.IdEmpleado == employeeId.Value)
-                                                .Select(e => e.Nombre + " " + e.Apellido)
-                                                .Contains(o.EmpleadoNombreCompleto));
-            if (from.HasValue) q = q.Where(o => o.OrderDate >= from.Value);
-            if (to.HasValue) q = q.Where(o => o.OrderDate <= to.Value);
-
-            var ordenes = q.OrderByDescending(o => o.OrderId).ToList();
-
-            // Combos para filtros
-            ViewBag.Clientes = _contexto.Clients
-                .OrderBy(c => c.FirstName)
-                .Select(c => new SelectListItem
-                {
-                    Value = c.ClientId.ToString(),
-                    Text = c.FirstName + " " + c.LastName
-                }).ToList();
-
-            ViewBag.Empleados = _contexto.Empleado
-                .OrderBy(e => e.Nombre)
-                .Select(e => new SelectListItem
-                {
-                    Value = e.IdEmpleado.ToString(),
-                    Text = e.Nombre + " " + e.Apellido
-                }).ToList();
-
-            ViewBag.Statuses = new List<SelectListItem>
-            {
-                new SelectListItem{ Value = "1", Text = "Activa" },
-                new SelectListItem{ Value = "2", Text = "Completada" },
-                new SelectListItem{ Value = "3", Text = "Cancelada" }
-            };
+            var ordenes = (from orden in _contexto.RentalOrders
+                           join cliente in _contexto.Clients on orden.ClientId equals cliente.ClientId
+                           join empleado in _contexto.Empleado on orden.EmpleadoId equals empleado.IdEmpleado into empJoin
+                           from empleado in empJoin.DefaultIfEmpty() 
+                           select new RentalOrderDto
+                           {
+                               OrderId = orden.OrderId,
+                               OrderDate = orden.OrderDate,
+                               StartDate = orden.StartDate,
+                               EndDate = orden.EndDate,
+                               StatusOrder = orden.StatusOrder,
+                               ClientId = orden.ClientId,
+                               ClientName = cliente.FirstName + " " + cliente.LastName,
+                               EmpleadoNombreCompleto = empleado != null
+                                    ? empleado.Nombre + " " + empleado.Apellido
+                                    : "No asignado",
+                               RutaComprobante = orden.RutaComprobante,
+                               Details = (from detalle in _contexto.OrderDetails
+                                          join equipo in _contexto.Equipment
+                                          on detalle.EquipmentId equals equipo.EquipmentId
+                                          where detalle.OrderId == orden.OrderId
+                                          select new OrderDetailDto
+                                          {
+                                              EquipmentName = equipo.EquipmentName,
+                                              Brand = equipo.Brand,
+                                              Model = equipo.Model,
+                                              RentalValue = equipo.RentalValue,
+                                              Quantity = detalle.Quantity
+                                          }).ToList()
+                           }).ToList();
 
             return View(ordenes);
         }
+
+
 
         // Crear orden (GET)
         public ActionResult Create()
@@ -187,6 +149,8 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
+
 
         // Crear orden (POST)
         [HttpPost]
@@ -300,6 +264,10 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
+
+
+
+
         // GET: RentalOrder/Edit/5
         public ActionResult Edit(int id)
         {
@@ -367,6 +335,11 @@ namespace SetLight.UI.Controllers
             return View("Edit", viewModel);
         }
 
+
+
+
+
+
         //POST: RentalOrder/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -393,7 +366,7 @@ namespace SetLight.UI.Controllers
                         Stock = e.Stock
                     }).ToList();
 
-                return View(model);
+                return View(model); 
             }
 
             using (var transaction = _contexto.Database.BeginTransaction())
@@ -408,7 +381,7 @@ namespace SetLight.UI.Controllers
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
                     orden.OrderDate = DateTime.Now;
-                    orden.DescuentoManual = model.DescuentoManual;
+                    orden.DescuentoManual = model.DescuentoManual; 
 
                     var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
@@ -485,6 +458,8 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
+
 
         //GET: VerComprobante
         public ActionResult VerComprobante(int id)
