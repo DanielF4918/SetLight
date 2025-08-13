@@ -36,8 +36,8 @@
     }
 
     <div class="table-responsive">
-        <table class="table table-bordered align-middle text-center">
-            <thead style="background-color: black; color: white;">
+        <table class="styled-table align-middle text-center w-100">
+            <thead>
                 <tr>
                     <th>Nombre</th>
                     <th>Teléfono</th>
@@ -57,16 +57,16 @@
                         <td>
                             @if (item.Status == 1)
                             {
-                                @Html.ActionLink("Inactivar", "Inactivar", new { id = item.ClientId }, new { @class = "btn btn-dark btn-sm" })
+                                @Html.ActionLink("Inactivar", "Inactivar", new { id = item.ClientId }, new { @class = "btn btn-dark" })
                             }
                             else
                             {
-                                @Html.ActionLink("Activar", "Activar", new { id = item.ClientId }, new { @class = "btn btn-success btn-sm text-white" })
+                                @Html.ActionLink("Activar", "Activar", new { id = item.ClientId }, new { @class = "btn btn-success" })
                             }
                         </td>
                         <td>
-                            @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-secondary btn-sm me-1 text-white" }) @* gris oscuro *@
-                            @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-danger btn-sm text-white" })
+                            @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-secondary me-1" })
+                            @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-danger" })
                         </td>
                     </tr>
                 }
