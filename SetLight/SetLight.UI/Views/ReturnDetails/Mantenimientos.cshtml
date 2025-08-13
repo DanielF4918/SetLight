@@ -2,17 +2,11 @@
 
 @{
     ViewBag.Title = "Mantenimientos en curso";
-    // Valores actuales de filtros
-    var filtroEquipo = (string)ViewBag.FiltroEquipo ?? "";
-    int? filtroTipo = ViewBag.FiltroTipo as int?;
-    int? filtroEstado = ViewBag.FiltroEstado as int?;
-    string filtroDesde = ViewBag.FiltroDesde as string;
-    string filtroHasta = ViewBag.FiltroHasta as string;
 }
 
 <h2>Mantenimientos en curso</h2>
 
-<div class="mb-3 d-flex gap-2">
+<div class="mb-3">
     @Html.ActionLink(
         "Ver Histórico",
         "Historico",
@@ -20,63 +14,16 @@
         new { area = "" },
         new { @class = "btn btn-secondary" }
     )
-    <a href="@Url.Action("Mantenimientos","ReturnDetails")" class="btn btn-outline-secondary">Limpiar filtros</a>
 </div>
 
-<!-- Filtros -->
-@using (Html.BeginForm("Mantenimientos", "ReturnDetails", FormMethod.Get, new { @class = "row g-3 mb-4" }))
-{
-    <div class="col-md-3">
-        <label class="form-label">Equipo (nombre)</label>
-        @Html.TextBox("equipo", filtroEquipo, new { @class = "form-control", placeholder = "Buscar por nombre" })
-    </div>
-
-    <div class="col-md-2">
-        <label class="form-label">Tipo</label>
-        @Html.DropDownList("tipo",
-            new List<SelectListItem> {
-                new SelectListItem{ Text="Todos", Value="" },
-                new SelectListItem{ Text="Revisión por daño", Value="1", Selected = (filtroTipo == 1) },
-                new SelectListItem{ Text="Reparación mayor",  Value="2", Selected = (filtroTipo == 2) },
-                new SelectListItem{ Text="Mantenimiento preventivo", Value="3", Selected = (filtroTipo == 3) }
-            },
-            new { @class = "form-select" })
-    </div>
-
-    <div class="col-md-2">
-        <label class="form-label">Estado</label>
-        @Html.DropDownList("estado",
-            new List<SelectListItem> {
-                new SelectListItem{ Text="(Por defecto: En curso)", Value="" , Selected = !filtroEstado.HasValue},
-                new SelectListItem{ Text="En curso", Value="1", Selected = (filtroEstado == 1) },
-                new SelectListItem{ Text="Finalizado", Value="2", Selected = (filtroEstado == 2) }
-            },
-            new { @class = "form-select" })
-    </div>
-
-    <div class="col-md-2">
-        <label class="form-label">Desde (inicio)</label>
-        @Html.TextBox("desde", filtroDesde, new { @class = "form-control", type = "date" })
-    </div>
-
-    <div class="col-md-2">
-        <label class="form-label">Hasta (inicio)</label>
-        @Html.TextBox("hasta", filtroHasta, new { @class = "form-control", type = "date" })
-    </div>
-
-    <div class="col-md-1 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-    </div>
-}
-
-<table class="table">
+<table class="styled-table">
     <thead>
         <tr>
             <th>Equipo</th>
             <th>Inicio</th>
             <th>Tipo</th>
             <th>Estado</th>
-            <th style="width: 170px;">Acción</th>
+            <th>Acción</th>
         </tr>
     </thead>
     <tbody>
@@ -98,17 +45,10 @@
                     @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
                 </td>
                 <td>
-                    @if (m.MaintenanceStatus == 1)
+                    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
                     {
-                        using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post, new { @class = "d-inline" }))
-                        {
-                            @Html.Hidden("id", m.MaintenanceId)
-                            <button type="submit" class="btn btn-success btn-sm">Finalizar</button>
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
+                        @Html.Hidden("id", m.MaintenanceId)
+                        <button type="submit" class="btn btn-success">Finalizar</button>
                     }
                 </td>
             </tr>
