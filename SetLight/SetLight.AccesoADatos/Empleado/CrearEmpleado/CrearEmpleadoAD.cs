@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using SetLight.Abstracciones.AccesoADatos.Empleado;
 using SetLight.Abstracciones.ModelosParaUI;
@@ -35,7 +32,14 @@ namespace SetLight.AccesoADatos.Empleado.CrearEmpleado
                 TelefonoCelular = empleado.TelefonoCelular,
                 CorreoElectronico = empleado.CorreoElectronico,
                 RolId = empleado.RolId,
-                Estado = empleado.Estado
+                Estado = empleado.Estado,
+                Cedula = empleado.Cedula,
+                ContactoEmergenciaNombre = empleado.ContactoEmergenciaNombre,
+                ContactoEmergenciaTelefono = empleado.ContactoEmergenciaTelefono,
+                ContactoEmergenciaParentesco = empleado.ContactoEmergenciaParentesco,
+                TipoSangre = empleado.TipoSangre,
+                Alergias = empleado.Alergias,
+                InfoMedica = empleado.InfoMedica
             };
         }
     }
