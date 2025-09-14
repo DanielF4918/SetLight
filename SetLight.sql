@@ -166,3 +166,26 @@ VALUES (
     NULL, -- Se completa cuando el usuario se registra en el sistema
     1
 );
+
+
+---Modificaciones 13-09-2025
+ALTER TABLE dbo.Empleado
+ADD Cedula NVARCHAR(20) NULL,                          
+    ContactoEmergenciaNombre NVARCHAR(60) NULL,
+    ContactoEmergenciaTelefono NVARCHAR(20) NULL,
+    ContactoEmergenciaParentesco NVARCHAR(30) NULL,
+    TipoSangre NVARCHAR(3) NULL,                          
+    Alergias NVARCHAR(500) NULL,
+    InfoMedica NVARCHAR(1000) NULL;                   
+
+
+	USE SetLight;
+GO
+
+-- Agrega una sola columna para la imagen (ruta o URL)
+IF COL_LENGTH('dbo.Equipment', 'ImageUrl') IS NULL
+BEGIN
+    ALTER TABLE dbo.Equipment
+    ADD ImageUrl NVARCHAR(500) NULL;   
+END
+GO
