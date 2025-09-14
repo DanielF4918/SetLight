@@ -1,35 +1,32 @@
 ﻿using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SetLight.AccesoADatos.Equipment.CrearEquipment
 {
     public class CrearEquipmentAD : ICrearEquipmentAD
     {
-        private Contexto elContexto;
+        private readonly Contexto elContexto;
 
         public CrearEquipmentAD()
         {
             elContexto = new Contexto();
         }
-        public async Task<int> Guardar(EquipmentDto equipmentaguardar)
+
+        public async Task<int> Guardar(EquipmentDto equipmentAGuardar)
         {
-            elContexto.Equipment.Add(ConvierteEquipment(equipmentaguardar));
-            
+            var entidad = ConvierteEquipment(equipmentAGuardar);
+            elContexto.Equipment.Add(entidad);
+
             int resultado = await elContexto.SaveChangesAsync();
-            return resultado;
+            return resultado; 
         }
 
         private EquipmentDA ConvierteEquipment(EquipmentDto equipment)
         {
             return new EquipmentDA
             {
-                EquipmentId = equipment.EquipmentId,
                 EquipmentName = equipment.EquipmentName,
                 Brand = equipment.Brand,
                 Model = equipment.Model,
@@ -38,7 +35,9 @@ namespace SetLight.AccesoADatos.Equipment.CrearEquipment
                 RentalValue = equipment.RentalValue,
                 Stock = equipment.Stock,
                 CategoryId = equipment.CategoryId,
-                Status = equipment.Status
+                Status = equipment.Status,
+
+                ImageUrl = equipment.ImageUrl
             };
         }
     }

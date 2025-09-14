@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace SetLight.Abstracciones.ModelosParaUI
@@ -35,6 +31,21 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Display(Name = "Stock Disponible")]
         public int Stock { get; set; }
 
+        public int CategoryId { get; set; }
+        public int Status { get; set; }
+
+        [Display(Name = "Disponibles")]
+        public int Disponibles { get; set; }
+
+        [Display(Name = "Alquilados")]
+        public int Alquilados { get; set; }
+
+        [Display(Name = "En Mantenimiento")]
+        public int EnMantenimiento { get; set; }
+
+        [Display(Name = "Equipo")]
+        public string EquipoCompleto => $"{EquipmentName} {Brand} {Model}";
+
         [Display(Name = "Estado")]
         public string EstadoEnTexto
         {
@@ -50,28 +61,12 @@ namespace SetLight.Abstracciones.ModelosParaUI
             }
         }
 
-        public int CategoryId { get; set; }
-        public int Status { get; set; }
+        [Display(Name = "Imagen (URL o ruta)")]
+        [StringLength(500, ErrorMessage = "La ruta/URL de la imagen no debe superar 500 caracteres.")]
+        public string ImageUrl { get; set; } 
 
-        [Display(Name = "Disponibles")]
-        public int Disponibles { get; set; }
-
-        [Display(Name = "Alquilados")]
-        public int Alquilados { get; set; }
-
-        [Display(Name = "En Mantenimiento")]
-        public int EnMantenimiento { get; set; }
-
-
-        [Display(Name = "Equipo")]
-        public string EquipoCompleto
-        {
-            get
-            {
-                return $"{EquipmentName} {Brand} {Model}";
-            }
-        }
-
+        [Display(Name = "Tiene imagen")]
+        public bool TieneImagen => !string.IsNullOrWhiteSpace(ImageUrl);
     }
 
     public class EquipmentFiltroDto
@@ -80,6 +75,4 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int? CategoriaId { get; set; }
         public int? Estado { get; set; }
     }
-
-
 }

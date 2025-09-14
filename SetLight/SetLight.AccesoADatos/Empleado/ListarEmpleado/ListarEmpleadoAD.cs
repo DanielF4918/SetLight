@@ -18,7 +18,6 @@ namespace SetLight.AccesoADatos.Empleado.ListarEmpleado
 
         public List<EmpleadoDto> Obtener()
         {
-            List<EmpleadoDA> listaEmpleado = _elContexto.Empleado.ToList();
             List<EmpleadoDto> listaARetornar = (from empleado in _elContexto.Empleado
                                                 select new EmpleadoDto
                                                 {
@@ -29,7 +28,14 @@ namespace SetLight.AccesoADatos.Empleado.ListarEmpleado
                                                     TelefonoCelular = empleado.TelefonoCelular,
                                                     CorreoElectronico = empleado.CorreoElectronico,
                                                     RolId = empleado.RolId,
-                                                    Estado = empleado.Estado
+                                                    Estado = empleado.Estado,
+                                                    Cedula = empleado.Cedula,
+                                                    ContactoEmergenciaNombre = empleado.ContactoEmergenciaNombre,
+                                                    ContactoEmergenciaTelefono = empleado.ContactoEmergenciaTelefono,
+                                                    ContactoEmergenciaParentesco = empleado.ContactoEmergenciaParentesco,
+                                                    TipoSangre = empleado.TipoSangre,
+                                                    Alergias = empleado.Alergias,
+                                                    InfoMedica = empleado.InfoMedica
                                                 }).ToList();
 
             return listaARetornar;
