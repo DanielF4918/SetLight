@@ -1,0 +1,105 @@
+﻿@model SetLight.Abstracciones.ModelosParaUI.EmpleadoDto
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.IdEmpleado)
+    @Html.HiddenFor(m => m.IdEmpleadoGuid)
+
+    <!-- Cédula (visible pero no editable) -->
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Cedula)
+        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @readonly = "readonly" })
+        @Html.HiddenFor(m => m.Cedula) <!-- asegura que el valor viaje en el POST -->
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Nombre)
+        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Nombre)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Apellido)
+        @Html.TextBoxFor(m => m.Apellido, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Apellido)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.TelefonoCelular)
+        @Html.TextBoxFor(m => m.TelefonoCelular, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.TelefonoCelular)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.CorreoElectronico)
+        @Html.TextBoxFor(m => m.CorreoElectronico, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CorreoElectronico)
+    </div>
+
+    <!-- Dropdown de Roles -->
+    <div class="mb-3">
+        @Html.LabelFor(m => m.RolId, "Rol")
+        @Html.DropDownListFor(
+            m => m.RolId,
+            (IEnumerable<SelectListItem>)ViewBag.Roles,
+            "Seleccione un rol",
+            new { @class = "form-control" }
+        )
+        @Html.ValidationMessageFor(m => m.RolId)
+    </div>
+
+    <!-- Dropdown de Estado -->
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Estado, "Estado")
+        @Html.DropDownListFor(
+            m => m.Estado,
+            (IEnumerable<SelectListItem>)ViewBag.Estados,
+            new { @class = "form-control" }
+        )
+        @Html.ValidationMessageFor(m => m.Estado)
+    </div>
+
+    <!-- 🔹 Campos adicionales -->
+    <h5 class="mt-4">Contacto de Emergencia</h5>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaNombre)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaNombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaNombre)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaTelefono)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaTelefono, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaTelefono)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaParentesco)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaParentesco, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaParentesco)
+    </div>
+
+    <h5 class="mt-4">Información Médica</h5>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.TipoSangre)
+        @Html.TextBoxFor(m => m.TipoSangre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.TipoSangre)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Alergias)
+        @Html.TextAreaFor(m => m.Alergias, new { @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.Alergias)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.InfoMedica)
+        @Html.TextAreaFor(m => m.InfoMedica, new { @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.InfoMedica)
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    @Html.ActionLink("Volver", "ListarEmpleado", null, new { @class = "btn btn-secondary ms-2" })
+}

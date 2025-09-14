@@ -1,5 +1,8 @@
 ﻿@model List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>
-
+@using System.Globalization
+@{
+    var us = CultureInfo.GetCultureInfo("en-US"); // USD
+}
 <table class="table table-bordered table-striped" id="tablaEquipos">
     <thead>
         <tr>
@@ -21,7 +24,7 @@
                 <td>@Model[i].EquipmentName</td>
                 <td>@Model[i].Brand</td>
                 <td>@Model[i].Model</td>
-                <td>₡@Model[i].RentalValue.ToString("N0")</td>
+                <td>@Model[i].RentalValue.ToString("C0", us)</td>
                 <td id="stock-display-@Model[i].EquipmentId"><strong>@Model[i].Stock</strong></td>
                 <td>
                     @Html.TextBox(

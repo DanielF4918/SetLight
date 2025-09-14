@@ -9,7 +9,6 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [Key]
         public int IdEmpleado { get; set; }
 
-
         public Guid? IdEmpleadoGuid { get; set; } = Guid.NewGuid();
 
         [Required]
@@ -36,10 +35,42 @@ namespace SetLight.Abstracciones.ModelosParaUI
 
         [Required]
         [DisplayName("Rol del Empleado")]
-        public string RolId { get; set; } 
+        public string RolId { get; set; }
 
-        [DisplayName("Estado")]
+        [DisplayName("Rol")]
+        public string NombreRol { get; set; }
+
         [Required]
+        [DisplayName("Estado")]
         public bool Estado { get; set; } = true;
+
+
+        [StringLength(20)]
+        [DisplayName("Número de Cédula")]
+        public string Cedula { get; set; }
+
+        [StringLength(60)]
+        [DisplayName("Nombre del Contacto de Emergencia")]
+        public string ContactoEmergenciaNombre { get; set; }
+
+        [StringLength(20)]
+        [DisplayName("Teléfono del Contacto de Emergencia")]
+        public string ContactoEmergenciaTelefono { get; set; }
+
+        [StringLength(30)]
+        [DisplayName("Parentesco del Contacto de Emergencia")]
+        public string ContactoEmergenciaParentesco { get; set; }
+
+        [StringLength(3)]
+        [DisplayName("Tipo de Sangre")]
+        public string TipoSangre { get; set; }
+
+        [StringLength(500)]
+        [DisplayName("Alergias")]
+        public string Alergias { get; set; }
+
+        [StringLength(1000)]
+        [DisplayName("Información Médica")]
+        public string InfoMedica { get; set; }
     }
 }

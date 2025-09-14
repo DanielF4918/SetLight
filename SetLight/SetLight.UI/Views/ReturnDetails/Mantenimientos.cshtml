@@ -2,9 +2,7 @@
 
 @{
     ViewBag.Title = "Mantenimientos en curso";
-
 }
-
 
 <h2>Mantenimientos en curso</h2>
 
@@ -18,7 +16,7 @@
     )
 </div>
 
-<table class="table">
+<table class="styled-table">
     <thead>
         <tr>
             <th>Equipo</th>
@@ -46,8 +44,6 @@
                 <td>
                     @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
                 </td>
-
-                <td>@m.MaintenanceStatus</td>
                 <td>
                     @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
                     {

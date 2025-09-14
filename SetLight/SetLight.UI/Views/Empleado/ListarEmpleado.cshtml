@@ -4,51 +4,64 @@
     ViewBag.Title = "Listado de Empleados";
 }
 
-<h2 class="mb-4">Listado de Empleados</h2>
+<div class="container mt-4 mb-5">
+    <h2 class="mb-4">Listado de Empleados</h2>
 
-<div class="text-end mb-3">
-    @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
+    <div class="text-end mb-3">
+        @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
+    </div>
+
+    <div class="table-responsive">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th style="width:220px">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@(string.IsNullOrWhiteSpace(item.Cedula) ? "-" : item.Cedula)</td>
+                            <td>@item.Nombre</td>
+                            <td>@item.Apellido</td>
+                            <td>@item.TelefonoCelular</td>
+                            <td>@item.CorreoElectronico</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.NombreRol) ? item.RolId : item.NombreRol)</td>
+                            <td>
+                                @if (item.Estado)
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                }
+                            </td>
+                            <td>
+                                @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
+                                @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No hay empleados registrados.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<table class="table table-bordered table-striped table-hover">
-    <thead class="table-dark text-white">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.First().IdEmpleadoGuid)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Apellido)</th>
-            <th>@Html.DisplayNameFor(model => model.First().TelefonoCelular)</th>
-            <th>@Html.DisplayNameFor(model => model.First().CorreoElectronico)</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.IdEmpleadoGuid</td>
-                <td>@item.Nombre</td>
-                <td>@item.Apellido</td>
-                <td>@item.TelefonoCelular</td>
-                <td>@item.CorreoElectronico</td>
-                <td>@item.RolId</td>
-                <td>
-                    @if (item.Estado)
-                    {
-                        <span class="badge bg-success">Activo</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Inactivo</span>
-                    }
-                </td>
-                <td>
-                    @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
-                    @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
-                    @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>

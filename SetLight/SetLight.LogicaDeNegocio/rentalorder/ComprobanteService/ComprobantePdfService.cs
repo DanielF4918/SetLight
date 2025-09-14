@@ -1,11 +1,9 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using SetLight.Abstracciones.ModelosParaUI;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Globalization; // USD
 
 namespace SetLight.LogicaDeNegocio.Services
 {
@@ -25,7 +23,10 @@ namespace SetLight.LogicaDeNegocio.Services
                 var tableHeaderFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
                 var tableBodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
 
-                // Título centrado
+                // Cultura USD
+                var us = CultureInfo.GetCultureInfo("en-US");
+
+                // Título
                 Paragraph title = new Paragraph("ORDEN DE ALQUILER", titleFont)
                 {
                     Alignment = Element.ALIGN_CENTER,
@@ -33,20 +34,18 @@ namespace SetLight.LogicaDeNegocio.Services
                 };
                 doc.Add(title);
 
-                // Datos Empresa / Cliente
+                // Datos empresa y cliente
                 PdfPTable headerTable = new PdfPTable(2);
                 headerTable.WidthPercentage = 100;
                 headerTable.SetWidths(new float[] { 1, 1 });
 
-                PdfPCell left = new PdfPCell();
-                left.Border = Rectangle.NO_BORDER;
+                PdfPCell left = new PdfPCell { Border = Rectangle.NO_BORDER };
                 left.AddElement(new Paragraph("Emitido por:", labelFont));
                 left.AddElement(new Paragraph("Light Project Films", valueFont));
                 left.AddElement(new Paragraph("San José, Costa Rica", valueFont));
                 left.AddElement(new Paragraph("Tel: 2222-0000", valueFont));
 
-                PdfPCell right = new PdfPCell();
-                right.Border = Rectangle.NO_BORDER;
+                PdfPCell right = new PdfPCell { Border = Rectangle.NO_BORDER };
                 right.AddElement(new Paragraph("Cliente:", labelFont));
                 right.AddElement(new Paragraph(orden.ClientName, valueFont));
                 right.AddElement(new Paragraph("Orden ID: " + orden.OrderId, valueFont));
@@ -59,10 +58,7 @@ namespace SetLight.LogicaDeNegocio.Services
                 doc.Add(new Paragraph("\n"));
 
                 // Tabla de equipos
-                PdfPTable equipoTable = new PdfPTable(6)
-                {
-                    WidthPercentage = 100
-                };
+                PdfPTable equipoTable = new PdfPTable(6) { WidthPercentage = 100 };
                 equipoTable.SetWidths(new float[] { 3, 2, 2, 1, 2, 2 });
 
                 string[] headers = { "Equipo", "Marca", "Modelo", "Cant.", "Precio Unitario", "Subtotal" };
@@ -76,26 +72,33 @@ namespace SetLight.LogicaDeNegocio.Services
                     equipoTable.AddCell(cell);
                 }
 
+                // Cálculo por días de alquiler
+                int cantidadDias = (orden.EndDate - orden.StartDate).Days + 1;
                 decimal total = 0;
                 foreach (var item in orden.Details)
                 {
-                    decimal subtotal = item.RentalValue * item.Quantity;
+                    decimal subtotal = item.RentalValue * item.Quantity * cantidadDias;
                     total += subtotal;
 
                     equipoTable.AddCell(new Phrase(item.EquipmentName, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Brand, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Model, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Quantity.ToString(), tableBodyFont));
-                    equipoTable.AddCell(new Phrase("₡" + item.RentalValue.ToString("N2"), tableBodyFont));
-                    equipoTable.AddCell(new Phrase("₡" + subtotal.ToString("N2"), tableBodyFont));
+                    equipoTable.AddCell(new Phrase(item.RentalValue.ToString("C2", us), tableBodyFont)); // USD
+                    equipoTable.AddCell(new Phrase(subtotal.ToString("C2", us), tableBodyFont));         // USD
                 }
-                doc.Add(equipoTable);
 
+                doc.Add(equipoTable);
                 doc.Add(new Paragraph("\n"));
 
-                decimal impuestos = total * 0.13m;
-                decimal totalFinal = total + impuestos;
+                // Cálculos con descuento como porcentaje
+                decimal porcentajeDescuento = orden.DescuentoManual ?? 0;
+                decimal montoDescuento = total * (porcentajeDescuento / 100m);
+                decimal totalConDescuento = total - montoDescuento;
+                decimal impuestos = totalConDescuento * 0.13m;
+                decimal totalFinal = totalConDescuento + impuestos;
 
+                // Resumen
                 PdfPTable resumen = new PdfPTable(2)
                 {
                     HorizontalAlignment = Element.ALIGN_RIGHT,
@@ -104,19 +107,26 @@ namespace SetLight.LogicaDeNegocio.Services
                 };
                 resumen.SetWidths(new float[] { 1, 1 });
 
-                void AddResumenRow(string label, decimal amount, bool bold = false)
+                void AddResumenRow(string label, string value, bool bold = false)
                 {
                     resumen.AddCell(new PdfPCell(new Phrase(label, bold ? tableHeaderFont : tableBodyFont)) { Border = Rectangle.NO_BORDER });
-                    resumen.AddCell(new PdfPCell(new Phrase("₡" + amount.ToString("N2"), bold ? tableHeaderFont : tableBodyFont)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
+                    resumen.AddCell(new PdfPCell(new Phrase(value, bold ? tableHeaderFont : tableBodyFont))
+                    {
+                        Border = Rectangle.NO_BORDER,
+                        HorizontalAlignment = Element.ALIGN_RIGHT
+                    });
                 }
 
-                AddResumenRow("SUBTOTAL", total);
-                AddResumenRow("IVA (13%)", impuestos);
-                AddResumenRow("TOTAL A PAGAR", totalFinal, true);
+                resumen.AddCell(new PdfPCell(new Phrase("DÍAS DE ALQUILER", tableBodyFont)) { Border = Rectangle.NO_BORDER });
+                resumen.AddCell(new PdfPCell(new Phrase(cantidadDias.ToString(), tableBodyFont)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
 
+                AddResumenRow("SUBTOTAL", total.ToString("C2", us));
+                AddResumenRow($"DESCUENTO ({porcentajeDescuento:N0}%)", "-" + montoDescuento.ToString("C2", us));
+                AddResumenRow("IVA (13%)", impuestos.ToString("C2", us));
+                AddResumenRow("TOTAL A PAGAR", totalFinal.ToString("C2", us), true);
+
+                // Firma
                 doc.Add(resumen);
-
-                // Observaciones y firma
                 doc.Add(new Paragraph("\n\nNotas: El cliente es responsable por el uso adecuado del equipo durante el periodo de alquiler.\n\n", valueFont));
                 doc.Add(new Paragraph("____________________________", valueFont));
                 doc.Add(new Paragraph("Firma de la Empresa", valueFont));

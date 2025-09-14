@@ -1,5 +1,5 @@
 ﻿body {
-    background-color: #ffffff;
+    background-color: #bdbaba;
     color: #000000;
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
@@ -7,7 +7,7 @@
 }
 
 .navbar {
-    background-color: #000000;
+    background-color: #0D0D0D;
     border-bottom: 3px solid #D71920;
     padding: 10px 20px;
 }
@@ -27,20 +27,23 @@
 .body-content {
     margin-top: 30px;
     padding: 30px 40px;
+    background-color: #dee2e6;
+    min-height: calc(100vh - 60px);
 }
 
 .table-inventario {
     width: 100%;
     border-collapse: collapse;
-    background-color: #ffffff;
+    background-color: #212529;
     font-size: 15px;
     border: 1px solid #dee2e6;
     margin-top: 20px;
+    color: #ffffff;
 }
 
     .table-inventario thead {
-        background-color: #f5f5f5;
-        color: #000000;
+        background-color: #000000;
+        color: #ffffff;
         font-weight: bold;
     }
 
@@ -52,7 +55,7 @@
     }
 
     .table-inventario tr:hover {
-        background-color: #f0f0f0;
+        background-color: #929292;
     }
 
 .btn-ver,
@@ -166,6 +169,7 @@
         min-width: 140px;
         font-size: 14px;
     }
+
 .navbar {
     background-color: #000000 !important; /* Fondo negro */
     border-bottom: 3px solid #D71920; /* Línea roja al fondo */
@@ -177,3 +181,355 @@
     /* Elimina el background-color o ajústalo si es necesario */
     background-color: #000000 !important; /* Asegura que el fondo sea negro */
 }
+
+
+/* Botones de acción personalizados */
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+
+/* Botón "Registrar nuevo equipo" */
+.btn-registrar {
+    background-color: #a30c10; /* Nuevo color */
+    border-color: #a30c10; /* Borde del mismo color */
+    color: white; /* Texto en blanco */
+    font-size: 14px; /* Más pequeño */
+    padding: 6px 14px; /* Menos alto y ancho */
+    float: right; /* Alineación a la derecha */
+}
+
+    .btn-registrar:hover {
+        background-color: #d3d3d3; /* Gris claro */
+        border-color: #d3d3d3;
+        color: black; /* Texto oscuro para contraste */
+    }
+
+html, body {
+    background-color: #0d0d0d !important;
+    height: 100%;
+}
+
+.filtros-inventario {
+    display: flex;
+    gap: 15px; /* espacio entre los filtros */
+    align-items: flex-end; /* alinea etiquetas e inputs por la base para que queden a la misma altura */
+    flex-wrap: wrap; /* para que baje a otra línea si no cabe */
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.boton-filtrar {
+    display: flex;
+    align-items: flex-end; /* para que el botón esté alineado con el input */
+}
+
+
+/* Botones personalizados para la tabla inventario */
+.table-inventario .btn {
+    min-width: 80px;
+    height: 32px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 4px;
+    color: white !important;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Colores y bordes */
+.table-inventario .btn-danger {
+    background-color: #c0392b;
+    border: 1px solid #922b21;
+}
+
+    .table-inventario .btn-danger:hover {
+        background-color: #e74c3c;
+        border-color: #b03528;
+    }
+
+.table-inventario .btn-success {
+    background-color: #27ae60;
+    border: 1px solid #1e8449;
+}
+
+    .table-inventario .btn-success:hover {
+        background-color: #2ecc71;
+        border-color: #28b463;
+    }
+
+.table-inventario .btn-warning {
+    background-color: #f39c12;
+    border: 1px solid #b9770e;
+    color: #1c1c1c !important;
+}
+
+    .table-inventario .btn-warning:hover {
+        background-color: #929292;
+        border-color: #aa7f0f;
+        color: #000 !important;
+    }
+
+.table-inventario .btn-info {
+    background-color: #2980b9;
+    border: 1px solid #21618c;
+}
+
+    .table-inventario .btn-info:hover {
+        background-color: #3498db;
+        border-color: #2874a6;
+    }
+
+.table-inventario .btn-secondary {
+    background-color: #7f8c8d;
+    border: 1px solid #626f70;
+}
+
+    .table-inventario .btn-secondary:hover {
+        background-color: #873e06;
+        border-color: #707b7c;
+    }
+
+/* Asegura que los botones se envuelvan si no caben */
+.table-inventario td .d-flex {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+
+/* Tabla con estilos personalizados para LISTAR CLIENTES */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    background-color: #212529;
+    color: #ffffff;
+}
+
+    .styled-table thead {
+        background-color: #212529;
+        color: white;
+    }
+
+    .styled-table th,
+    .styled-table td {
+        padding: 12px 8px;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+    }
+
+    /* Botones dentro de tablas con clase styled-table */
+    .styled-table .btn {
+        min-width: 80px;
+        height: 32px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Colores y hover para botones */
+    .styled-table .btn-dark {
+        background-color: #34495e;
+        border: 1px solid #2c3e50;
+    }
+
+        .styled-table .btn-dark:hover {
+            background-color: #2c3e50;
+            border-color: #22313f;
+        }
+
+    .styled-table .btn-success {
+        background-color: #27ae60;
+        border: 1px solid #1e8449;
+    }
+
+        .styled-table .btn-success:hover {
+            background-color: #2ecc71;
+            border-color: #28b463;
+        }
+
+    .styled-table .btn-secondary {
+        background-color: #7f8c8d;
+        border: 1px solid #626f70;
+    }
+
+        .styled-table .btn-secondary:hover {
+            background-color: #95a5a6;
+            border-color: #707b7c;
+        }
+
+    .styled-table .btn-danger {
+        background-color: #c0392b;
+        border: 1px solid #922b21;
+    }
+
+        .styled-table .btn-danger:hover {
+            background-color: #e74c3c;
+            border-color: #b03528;
+        }
+
+    /* Para ajustar el espaciado entre botones en la misma celda */
+    .styled-table td > .btn + .btn {
+        margin-left: 6px;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+.styled-table, .table-inventario {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    background-color: #212529;
+    color: #ffffff;
+}
+
+    .styled-table thead, .table-inventario thead {
+        background-color: #212529;
+        color: white;
+    }
+
+    .styled-table th, .styled-table td,
+    .table-inventario th, .table-inventario td {
+        padding: 12px 8px;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+    }
+
+    /* Botones para ambas tablas */
+    .styled-table .btn, .table-inventario .btn {
+        min-width: 80px;
+        height: 32px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Botones - Colores y hover */
+    .styled-table .btn-dark, .table-inventario .btn-dark {
+        background-color: #34495e;
+        border: 1px solid #2c3e50;
+    }
+
+        .styled-table .btn-dark:hover, .table-inventario .btn-dark:hover {
+            background-color: #2c3e50;
+            border-color: #22313f;
+        }
+
+    .styled-table .btn-success, .table-inventario .btn-success {
+        background-color: #27ae60;
+        border: 1px solid #1e8449;
+    }
+
+        .styled-table .btn-success:hover, .table-inventario .btn-success:hover {
+            background-color: #2ecc71;
+            border-color: #28b463;
+        }
+
+    .styled-table .btn-secondary, .table-inventario .btn-secondary {
+        background-color: #7f8c8d;
+        border: 1px solid #626f70;
+    }
+
+        .styled-table .btn-secondary:hover, .table-inventario .btn-secondary:hover {
+            background-color: #95a5a6;
+            border-color: #707b7c;
+        }
+
+    .styled-table .btn-danger, .table-inventario .btn-danger {
+        background-color: #c0392b;
+        border: 1px solid #922b21;
+    }
+
+        .styled-table .btn-danger:hover, .table-inventario .btn-danger:hover {
+            background-color: #e74c3c;
+            border-color: #b03528;
+        }
+
+    /* Espaciado entre botones en la misma celda */
+    .styled-table td > .btn + .btn, .table-inventario td > .btn + .btn {
+        margin-left: 6px;
+    }
+    /* Botones comunes dentro de tablas (styled-table) */
+    .styled-table .btn {
+        min-width: 80px;
+        height: 32px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 4px;
+        color: white !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Botón amarillo (editar) */
+    .styled-table .btn-warning {
+        background-color: #f39c12;
+        border-color: #b9770e;
+        color: #1c1c1c !important;
+    }
+
+        .styled-table .btn-warning:hover {
+            background-color: #e1a921;
+            border-color: #a36c0b;
+            color: #000 !important;
+        }
+
+    /* Botón oscuro (detalles) */
+    .styled-table .btn-dark {
+        background-color: #34495e;
+        border-color: #2c3e50;
+    }
+
+        .styled-table .btn-dark:hover {
+            background-color: #2c3e50;
+            border-color: #22313f;
+        }
+
+    /* Botón rojo (eliminar) */
+    .styled-table .btn-danger {
+        background-color: #c0392b;
+        border-color: #922b21;
+    }
+
+        .styled-table .btn-danger:hover {
+            background-color: #e74c3c;
+            border-color: #b03528;
+        }

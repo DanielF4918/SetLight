@@ -1,12 +1,33 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
-
+@using System.Globalization
 @{
     ViewBag.Title = "Equipos";
+    var us = CultureInfo.GetCultureInfo("en-US"); // USD
+
+    Func<string, string> Src = (url) =>
+    {
+        var placeholder = Url.Content("~/content/img/placeholder-equipment.png");
+        if (string.IsNullOrWhiteSpace(url)) return placeholder;
+        return url.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? url : Url.Content(url);
+    };
+
+    Func<int, IHtmlString> BadgeEstado = (estado) =>
+    {
+        var texto = "Desconocido"; var cls = "badge bg-secondary";
+        switch (estado)
+        {
+            case 1: texto = "Activo"; cls = "badge bg-success"; break;
+            case 2: texto = "Alquilado"; cls = "badge bg-primary"; break;
+            case 3: texto = "Inactivo"; cls = "badge bg-secondary"; break;
+            case 4: texto = "Mantenimiento"; cls = "badge bg-warning text-dark"; break;
+        }
+        return new HtmlString($"<span class=\"{cls}\">{texto}</span>");
+    };
 }
 
 <div class="contenido-principal">
     <div class="contenido-card">
-        <div class="header-seccion">
+        <div class="header-seccion d-flex justify-content-between align-items-center">
             <h2>Gestión de Equipos</h2>
             @Html.ActionLink("+ Registrar nuevo equipo", "CrearEquipment", null, new { @class = "btn btn-success btn-sm" })
         </div>
@@ -36,6 +57,7 @@
             <table class="table-inventario">
                 <thead>
                     <tr>
+                        <th style="width:70px">Imagen</th>
                         <th>Equipo</th>
                         <th>Serie</th>
                         <th>Descripción</th>
@@ -49,34 +71,56 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @if (Model != null && Model.Any())
                     {
-                        <tr>
-                            <td>@item.EquipoCompleto</td>
-                            <td>@item.SerialNumber</td>
-                            <td>@item.Description</td>
-                            <td>@item.RentalValue.ToString("C")</td>
-                            <td>@item.Disponibles</td>
-                            <td>@item.Alquilados</td>
-                            <td>@item.EnMantenimiento</td>
-                            <td>@item.EstadoEnTexto</td>
-                            <td>@item.CategoriaNombre</td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    @if (item.Status == 1)
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@Src(item.ImageUrl)" alt="img @item.EquipmentName"
+                                         style="width:56px;height:56px;object-fit:cover;border-radius:8px;" />
+                                </td>
+                                <td>@item.EquipoCompleto</td>
+                                <td>@item.SerialNumber</td>
+                                <td>@item.Description</td>
+                                <td>@item.RentalValue.ToString("C2", us)</td>
+                                <td>@item.Disponibles</td>
+                                <td>@item.Alquilados</td>
+                                <td>
+                                    @if (item.EnMantenimiento > 0)
                                     {
-                                        @Html.ActionLink("Inactivar", "Inactivar", new { id = item.EquipmentId }, new { @class = "btn btn-eliminar btn-sm" })
+                                        <span class="badge bg-warning text-dark">@item.EnMantenimiento</span>
                                     }
                                     else
                                     {
-                                        @Html.ActionLink("Activar", "Activar", new { id = item.EquipmentId }, new { @class = "btn btn-success btn-sm" })
+                                        <span class="badge bg-light text-dark border">0</span>
                                     }
+                                </td>
 
-                                    @Html.ActionLink("Editar", "Edit", new { id = item.EquipmentId }, new { @class = "btn-editar btn-sm" })
-                                    @Html.ActionLink("Detalles", "Details", new { id = item.EquipmentId }, new { @class = "btn-ver btn-sm" })
-                                    @Html.ActionLink("Trazabilidad", "VerTrazabilidad", "Trazabilidad", new { equipoId = item.EquipmentId }, new { @class = "btn-trazabilidad btn-sm" })
-                                </div>
-                            </td>
+                                <td>@BadgeEstado(item.Status)</td>
+                                <td>@item.CategoriaNombre</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @if (item.Status == 1)
+                                        {
+                                            @Html.ActionLink("Inactivar", "Inactivar", new { id = item.EquipmentId }, new { @class = "btn btn-eliminar btn-sm" })
+                                        }
+                                        else
+                                        {
+                                            @Html.ActionLink("Activar", "Activar", new { id = item.EquipmentId }, new { @class = "btn btn-success btn-sm" })
+                                        }
+
+                                        @Html.ActionLink("Editar", "Edit", new { id = item.EquipmentId }, new { @class = "btn-editar btn-sm" })
+                                        @Html.ActionLink("Trazabilidad", "VerTrazabilidad", "Trazabilidad", new { equipoId = item.EquipmentId }, new { @class = "btn-trazabilidad btn-sm" })
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">No hay equipos para mostrar.</td>
                         </tr>
                     }
                 </tbody>
