@@ -76,10 +76,42 @@ namespace SetLight.UI.Controllers
         }
 
         // GET: Empleado/Details/5
+        [HttpGet]
         public ActionResult Details(int id)
         {
-            return View();
+            EmpleadoDto model;
+
+            using (var contexto = new Contexto())
+            {
+                model = contexto.Empleado
+                    .Where(e => e.IdEmpleado == id)
+                    .Select(e => new EmpleadoDto
+                    {
+                        IdEmpleado = e.IdEmpleado,
+                        IdEmpleadoGuid = e.IdEmpleadoGuid,
+                        Nombre = e.Nombre,
+                        Apellido = e.Apellido,
+                        TelefonoCelular = e.TelefonoCelular,
+                        CorreoElectronico = e.CorreoElectronico,
+                        RolId = e.RolId,
+                        Estado = e.Estado,
+
+                        Cedula = e.Cedula,
+                        ContactoEmergenciaNombre = e.ContactoEmergenciaNombre,
+                        ContactoEmergenciaTelefono = e.ContactoEmergenciaTelefono,
+                        ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
+                        TipoSangre = e.TipoSangre,
+                        Alergias = e.Alergias,
+                        InfoMedica = e.InfoMedica
+                    })
+                    .FirstOrDefault();
+            }
+
+            if (model == null) return HttpNotFound();
+
+            return View("Details", model);
         }
+
 
         // GET: Empleado/Edit/5
         [HttpGet]
@@ -94,20 +126,28 @@ namespace SetLight.UI.Controllers
                     .Select(e => new EmpleadoDto
                     {
                         IdEmpleado = e.IdEmpleado,
-                        IdEmpleadoGuid = e.IdEmpleadoGuid, 
+                        IdEmpleadoGuid = e.IdEmpleadoGuid,
+
                         Nombre = e.Nombre,
                         Apellido = e.Apellido,
                         TelefonoCelular = e.TelefonoCelular,
                         CorreoElectronico = e.CorreoElectronico,
-                        RolId = e.RolId,     
-                        Estado = e.Estado   
+                        RolId = e.RolId,
+                        Estado = e.Estado,
+                        Cedula = e.Cedula,
+                        ContactoEmergenciaNombre = e.ContactoEmergenciaNombre,
+                        ContactoEmergenciaTelefono = e.ContactoEmergenciaTelefono,
+                        ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
+                        TipoSangre = e.TipoSangre,
+                        Alergias = e.Alergias,
+                        InfoMedica = e.InfoMedica
                     })
                     .FirstOrDefault();
             }
 
             if (model == null) return HttpNotFound();
 
-
+            ViewBag.Roles = ObtenerListaRoles(model.RolId);
             ViewBag.Roles = ObtenerListaRoles(model.RolId);
 
             ViewBag.Estados = new[]
@@ -116,8 +156,9 @@ namespace SetLight.UI.Controllers
         new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
     };
 
-            return View("Edit", model); 
+            return View("Edit", model);
         }
+
 
         // POST: Empleado/Edit/5
         [HttpPost]
@@ -125,19 +166,17 @@ namespace SetLight.UI.Controllers
         public ActionResult Edit(EmpleadoDto model)
         {
             if (string.IsNullOrWhiteSpace(model.RolId))
-            {
                 ModelState.AddModelError(nameof(model.RolId), "Debe seleccionar un rol.");
-            }
 
             if (!ModelState.IsValid)
             {
                 ViewBag.Roles = ObtenerListaRoles(model.RolId);
                 ViewBag.Estados = new[]
-                {
-            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-        };
-                return View("EditEmployee", model); 
+                    {
+                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+                };
+                return View("Edit", model); 
             }
 
             try
@@ -149,28 +188,30 @@ namespace SetLight.UI.Controllers
                     ModelState.AddModelError("", "No se pudo actualizar el empleado.");
                     ViewBag.Roles = ObtenerListaRoles(model.RolId);
                     ViewBag.Estados = new[]
-                    {
+                        {
                 new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
                 new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-            };
-                    return View("EditEmployee", model);
+                };
+                    return View("Edit", model);
                 }
 
                 TempData["Ok"] = "Empleado actualizado correctamente.";
-                return RedirectToAction("ListarEmpleado"); 
+                return RedirectToAction("ListarEmpleado");
             }
             catch (Exception)
             {
                 ModelState.AddModelError("", "Ocurrió un error al actualizar el empleado.");
                 ViewBag.Roles = ObtenerListaRoles(model.RolId);
                 ViewBag.Estados = new[]
-                {
-            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-        };
-                return View("EditEmployee", model);
+                    {
+                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+                };
+                return View("Edit", model);
             }
         }
+
+
 
 
         // GET: Empleado/Delete/5
@@ -227,5 +268,9 @@ namespace SetLight.UI.Controllers
             return RedirectToAction("ListarEmpleado");
         }
 
+
+
     }
+
+
 }

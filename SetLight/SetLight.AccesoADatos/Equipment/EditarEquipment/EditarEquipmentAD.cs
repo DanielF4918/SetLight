@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using SetLight.Abstracciones.AccesoADatos.Equipment.EditarEquipment;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
@@ -12,26 +7,37 @@ namespace SetLight.AccesoADatos.Equipment.EditarEquipment
 {
     public class EditarEquipmentAD : IEditarEquipmentAD
     {
-        private Contexto elContexto;
+        private readonly Contexto elContexto;
+
         public EditarEquipmentAD()
         {
             elContexto = new Contexto();
         }
+
         public int Editar(EquipmentDto elEquipmentParaActualizar)
         {
-            EquipmentDA elEquipmentEnBaseDeDatos = elContexto.Equipment.Where(elEquipment => elEquipment.EquipmentId == elEquipmentParaActualizar.EquipmentId).FirstOrDefault();
-            elEquipmentEnBaseDeDatos.EquipmentName = elEquipmentParaActualizar.EquipmentName;
-            elEquipmentEnBaseDeDatos.Brand = elEquipmentParaActualizar.Brand;
-            elEquipmentEnBaseDeDatos.Model = elEquipmentParaActualizar.Model;
-            elEquipmentEnBaseDeDatos.SerialNumber = elEquipmentParaActualizar.SerialNumber;
-            elEquipmentEnBaseDeDatos.Description = elEquipmentParaActualizar.Description;
-            elEquipmentEnBaseDeDatos.RentalValue = elEquipmentParaActualizar.RentalValue;
-            elEquipmentEnBaseDeDatos.Stock = elEquipmentParaActualizar.Stock;
-            elEquipmentEnBaseDeDatos.CategoryId = elEquipmentParaActualizar.CategoryId;
+            var entidad = elContexto.Equipment
+                .FirstOrDefault(e => e.EquipmentId == elEquipmentParaActualizar.EquipmentId);
 
-            elEquipmentEnBaseDeDatos.Status = elEquipmentParaActualizar.Status;
-            int seGuardoElEquipment = elContexto.SaveChanges();
-            return seGuardoElEquipment;
+            if (entidad == null)
+                return 0;
+
+            entidad.EquipmentName = elEquipmentParaActualizar.EquipmentName;
+            entidad.Brand = elEquipmentParaActualizar.Brand;
+            entidad.Model = elEquipmentParaActualizar.Model;
+            entidad.SerialNumber = elEquipmentParaActualizar.SerialNumber;
+            entidad.Description = elEquipmentParaActualizar.Description;
+            entidad.RentalValue = elEquipmentParaActualizar.RentalValue;
+            entidad.Stock = elEquipmentParaActualizar.Stock;
+            entidad.CategoryId = elEquipmentParaActualizar.CategoryId;
+            entidad.Status = elEquipmentParaActualizar.Status;
+
+
+            entidad.ImageUrl = string.IsNullOrWhiteSpace(elEquipmentParaActualizar.ImageUrl)
+                ? null
+                : elEquipmentParaActualizar.ImageUrl;
+
+            return elContexto.SaveChanges();
         }
     }
 }

@@ -82,9 +82,24 @@ namespace SetLight.UI.Controllers
                 return View(model);
             }
 
-            // No cuenta los errores de inicio de sesión para el bloqueo de la cuenta
-            // Para permitir que los errores de contraseña desencadenen el bloqueo de la cuenta, cambie a shouldLockout: true
-            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            using (var contexto = new Contexto())
+            {
+                var empleado = contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == model.Email);
+
+                if (empleado != null && !empleado.Estado)
+                {
+                    ModelState.AddModelError("", "Tu cuenta está inactiva. Contacta al administrador.");
+                    return View(model);
+                }
+            }
+
+            var result = await SignInManager.PasswordSignInAsync(
+                model.Email,                 
+                model.Password,
+                model.RememberMe,
+                shouldLockout: false
+            );
+
             switch (result)
             {
                 case SignInStatus.Success:
@@ -99,6 +114,7 @@ namespace SetLight.UI.Controllers
                     return View(model);
             }
         }
+
 
         //
         // GET: /Account/VerifyCode

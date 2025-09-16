@@ -5,7 +5,14 @@
     @Html.AntiForgeryToken()
 
     @Html.HiddenFor(m => m.IdEmpleado)
-    @Html.HiddenFor(m => m.IdEmpleadoGuid) <!-- Oculto -->
+    @Html.HiddenFor(m => m.IdEmpleadoGuid)
+
+    <!-- Cédula (visible pero no editable) -->
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Cedula)
+        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @readonly = "readonly" })
+        @Html.HiddenFor(m => m.Cedula) <!-- asegura que el valor viaje en el POST -->
+    </div>
 
     <div class="mb-3">
         @Html.LabelFor(m => m.Nombre)
@@ -52,6 +59,45 @@
             new { @class = "form-control" }
         )
         @Html.ValidationMessageFor(m => m.Estado)
+    </div>
+
+    <!-- 🔹 Campos adicionales -->
+    <h5 class="mt-4">Contacto de Emergencia</h5>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaNombre)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaNombre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaNombre)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaTelefono)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaTelefono, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaTelefono)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.ContactoEmergenciaParentesco)
+        @Html.TextBoxFor(m => m.ContactoEmergenciaParentesco, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ContactoEmergenciaParentesco)
+    </div>
+
+    <h5 class="mt-4">Información Médica</h5>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.TipoSangre)
+        @Html.TextBoxFor(m => m.TipoSangre, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.TipoSangre)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Alergias)
+        @Html.TextAreaFor(m => m.Alergias, new { @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.Alergias)
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.InfoMedica)
+        @Html.TextAreaFor(m => m.InfoMedica, new { @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.InfoMedica)
     </div>
 
     <button type="submit" class="btn btn-success">Guardar</button>
