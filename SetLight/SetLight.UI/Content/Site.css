@@ -1,535 +1,255 @@
-﻿body {
-    background-color: #bdbaba;
-    color: #000000;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
+﻿/* =========================
+   SetLight - site.css (COMPLETO)
+   ========================= */
+
+/* ===== Vars (colores del logo + altura del header) ===== */
+:root{
+  --nav-h: 110px;         /* alto efectivo del header (ajústalo si cambias el logo) */
+  --bg: #f3f4f6;          /* fondo general */
+  --panel: #ffffff;       /* panel/card */
+  --text: #111827;        /* texto base */
+  --muted: #6b7280;       /* texto tenue */
+  --brand: #D71920;       /* rojo del logo */
+  --bd: #e5e7eb;          /* borde suave */
+  --shadow-sm: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.14);
+  --r: 12px;              /* radio base de cards */
 }
 
-.navbar {
-    background-color: #0D0D0D;
-    border-bottom: 3px solid #D71920;
-    padding: 10px 20px;
+/* =========================
+   NAVBAR FIJA (mismo tamaño)
+   ========================= */
+.sl-navbar{
+  background:#0d0d0d !important;     /* negro del logo */
+  border-bottom:2px solid var(--brand);
+}
+.sl-navbar .nav-link{ color:#f5f6f7 !important; }
+.sl-navbar .nav-link:hover,
+.sl-navbar .nav-link:focus{ color:var(--brand) !important; }
+.sl-navbar .navbar-toggler{ border-color:rgba(255,255,255,.35); }
+.sl-navbar .navbar-toggler-icon{ filter:invert(100%); }
+
+/* Empuja el contenido para que la barra fija no lo tape */
+body{ padding-top:var(--nav-h); }
+
+/* Miscelánea base */
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--text);
+  background:var(--bg);
 }
 
-.navbar-brand, .nav-link {
-    color: #ffffff !important;
-    font-weight: 500;
-    margin-right: 20px;
-    font-size: 16px;
-    transition: color 0.3s ease;
+/* Alturas menores en pantallas pequeñas (si tu logo se ve más chico) */
+@media (max-width:991.98px){
+  :root{ --nav-h: 90px; }
+}
+@media (max-width:575.98px){
+  :root{ --nav-h: 78px; }
 }
 
-    .navbar-brand:hover, .nav-link:hover {
-        color: #D71920 !important;
-    }
+/* =========================
+   AUTH (Login / Register)
+   ========================= */
 
-.body-content {
-    margin-top: 30px;
-    padding: 30px 40px;
-    background-color: #dee2e6;
-    min-height: calc(100vh - 60px);
+/* Contenedor centrado verticalmente para auth */
+.container-auth{
+  min-height: calc(100vh - var(--nav-h) - 40px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px 12px;
 }
 
-.table-inventario {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #212529;
-    font-size: 15px;
-    border: 1px solid #dee2e6;
-    margin-top: 20px;
-    color: #ffffff;
+/* Card para formularios de auth (igual que login) */
+.card-auth{
+  width:100%;
+  max-width:500px;
+  background:var(--panel);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  box-shadow:var(--shadow-lg);
+  padding:1.25rem;
 }
 
-    .table-inventario thead {
-        background-color: #000000;
-        color: #ffffff;
-        font-weight: bold;
-    }
-
-    .table-inventario th,
-    .table-inventario td {
-        padding: 14px 12px;
-        text-align: left;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .table-inventario tr:hover {
-        background-color: #929292;
-    }
-
-.btn-ver,
-.btn-editar,
-.btn-trazabilidad {
-    background-color: #000000;
-    color: #ffffff;
-    padding: 8px 16px;
-    border: none;
-    margin-right: 5px;
-    border-radius: 4px;
-    font-size: 14px;
+/* Marca de agua del logo con 25% de opacidad
+   ÚSALO añadiendo la clase "auth-watermark" al contenedor blanco
+   (por ejemplo: <div class="container body-content auth-watermark">) */
+.auth-watermark{
+  position:relative;
+  isolation:isolate;
+}
+.auth-watermark::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    url("/Content/Logo.jpg") no-repeat center center / 520px auto;
+  opacity:.25;                 /* 25% */
+  pointer-events:none;
+  z-index:-1;                  /* detrás del contenido */
 }
 
-    .btn-ver:hover,
-    .btn-editar:hover,
-    .btn-trazabilidad:hover {
-        background-color: #D71920;
-        color: #ffffff;
-    }
+/* =========================
+   Inventario: página, filtros y cards
+   ========================= */
 
-.btn-eliminar {
-    background-color: #D71920;
-    color: #ffffff;
-    padding: 8px 16px;
-    border: none;
-    margin-right: 5px;
-    border-radius: 4px;
-    font-size: 14px;
+.inv-page{
+  max-width:1200px;
+  margin:28px auto;
+  padding:0 16px 40px;
 }
 
-    .btn-eliminar:hover {
-        background-color: #a30c10;
-    }
+.inv-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.inv-title{ font-size:28px; font-weight:800; }
 
-.btn-dark {
-    background-color: #212529;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 14px;
+/* Filtros */
+.inv-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:flex-end;
+  margin:14px 0 20px;
+}
+.inv-filters .form-control,
+.inv-filters select{
+  height:36px;
+  padding:6px 10px;
+  border:1px solid var(--bd);
+  border-radius:10px;
+  background:#fff;
+  min-width:210px;
+}
+.inv-filters .btn{
+  height:36px;
+  padding:0 14px;
+  border-radius:10px;
+  border:1px solid var(--brand);
+  background:var(--brand);
+  color:#fff;
+  font-weight:700;
 }
 
-    .btn-dark:hover {
-        background-color: #000000;
-    }
-
-.filtros-inventario {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 30px;
-    align-items: center;
+/* Grid 3 por fila */
+.equip-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:22px;
+  align-items:stretch;
+}
+@media (max-width:1199px){
+  .equip-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+@media (max-width:699px){
+  .equip-grid{ grid-template-columns:1fr; }
 }
 
-    .filtros-inventario input,
-    .filtros-inventario select {
-        padding: 6px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-    }
+/* Card */
+.form-card{
+  background:var(--panel);
+  border:1px solid var(--bd);
+  border-radius:var(--r);
+  box-shadow:var(--shadow-sm);
+  height:100%;
+  display:block;
+}
+.form-card:hover{ box-shadow:var(--shadow-lg); }
 
-    .filtros-inventario button {
-        padding: 8px 16px;
-        background-color: #D71920;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-    }
+.shadow-sm{ box-shadow:var(--shadow-sm); }
+.p-4{ padding:1.25rem; }
+.p-5{ padding:1.75rem; }
 
-        .filtros-inventario button:hover {
-            background-color: #a30c10;
-        }
+/* Contenido de card de equipo */
+.equip-card{ display:flex; gap:16px; height:100%; }
+.equip-photo{
+  width:150px; height:150px; flex:0 0 150px;
+  border-radius:10px; object-fit:cover; background:#eef1f5;
+}
+.equip-info{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
 
-.form-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 0;
+.equip-name{
+  font-size:1.1rem; font-weight:800; line-height:1.25; margin-bottom:6px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
-.form-card {
-    width: 100%;
-    max-width: 600px;
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 10px;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.equip-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.chip{
+  background:#f6f7fb; border:1px solid var(--bd); color:#374151;
+  font-weight:700; padding:.28rem .55rem; border-radius:9px; font-size:.93rem;
 }
 
-    .form-card .form-label {
-        font-weight: 600;
-        color: #000000;
-    }
+.equip-price{ font-weight:900; font-size:1.1rem; margin-top:2px; }
 
-    .form-card .form-control {
-        width: 100%;
-        max-width: 100%;
-        font-size: 14px;
-    }
-
-    .form-card .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-card .btn {
-        min-width: 140px;
-        font-size: 14px;
-    }
-
-.navbar {
-    background-color: #000000 !important; /* Fondo negro */
-    border-bottom: 3px solid #D71920; /* Línea roja al fondo */
-    padding: 10px 20px;
+.equip-actions{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto;
 }
 
-/* Modificación o eliminación de la clase .bg-dark */
-.bg-dark {
-    /* Elimina el background-color o ajústalo si es necesario */
-    background-color: #000000 !important; /* Asegura que el fondo sea negro */
+/* Botón icono */
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; border-radius:12px; background:#f5f6f8;
+  border:1px solid var(--bd); text-decoration:none;
+}
+.icon-btn:hover{ background:#eef0f3; }
+.icon-btn i{ font-size:20px; color:#222; }
+
+/* Switch rojo/verde */
+.toggle{
+  --w:52px; --h:28px; --p:3px;
+  position:relative; width:var(--w); height:var(--h); display:inline-block; user-select:none;
+}
+.toggle input{ display:none; }
+.toggle .track{
+  position:absolute; inset:0; border-radius:var(--h);
+  background:#c62828; border:1px solid var(--bd); transition:background .2s ease;
+}
+.toggle .track::before{
+  content:""; position:absolute; left:var(--p); top:var(--p);
+  width:calc(var(--h) - var(--p)*2); height:calc(var(--h) - var(--p)*2);
+  border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25);
+  transition:transform .2s ease;
+}
+.toggle input:checked + .track{ background:#2e7d32; }
+.toggle input:checked + .track::before{ transform:translateX(calc(var(--w) - var(--h))); }
+
+/* Detalles dentro del card */
+.equip-details{
+  margin-top:10px; border-top:1px dashed var(--bd); padding-top:10px; color:#374151;
 }
 
-
-/* Botones de acción personalizados */
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 14px;
+/* Utilidades */
+.text-muted{ color:var(--muted); }
+.btn-primary{
+  background:var(--brand); border:1px solid var(--brand);
+  color:#fff; border-radius:10px; padding:8px 14px;
+}
+/* ===== Fondo con marca de agua (logo 25%) para páginas de auth ===== */
+.auth-bg {
+    position: relative;
 }
 
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-
-/* Botón "Registrar nuevo equipo" */
-.btn-registrar {
-    background-color: #a30c10; /* Nuevo color */
-    border-color: #a30c10; /* Borde del mismo color */
-    color: white; /* Texto en blanco */
-    font-size: 14px; /* Más pequeño */
-    padding: 6px 14px; /* Menos alto y ancho */
-    float: right; /* Alineación a la derecha */
-}
-
-    .btn-registrar:hover {
-        background-color: #d3d3d3; /* Gris claro */
-        border-color: #d3d3d3;
-        color: black; /* Texto oscuro para contraste */
+    /* Capa fija que no tapa los clics y no afecta el resto del layout */
+    .auth-bg::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: url("/Content/Logo.jpg") no-repeat center center;
+        background-size: 520px auto; /* ajusta tamaño del logo si gustas */
+        opacity: .50; /* 25% */
+        pointer-events: none; /* no bloquea interacción */
+        z-index: 0;
     }
 
-html, body {
-    background-color: #0d0d0d !important;
-    height: 100%;
-}
-
-.filtros-inventario {
-    display: flex;
-    gap: 15px; /* espacio entre los filtros */
-    align-items: flex-end; /* alinea etiquetas e inputs por la base para que queden a la misma altura */
-    flex-wrap: wrap; /* para que baje a otra línea si no cabe */
-}
-
-.filtro-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.boton-filtrar {
-    display: flex;
-    align-items: flex-end; /* para que el botón esté alineado con el input */
-}
-
-
-/* Botones personalizados para la tabla inventario */
-.table-inventario .btn {
-    min-width: 80px;
-    height: 32px;
-    padding: 4px 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 4px;
-    color: white !important;
-    text-align: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Colores y bordes */
-.table-inventario .btn-danger {
-    background-color: #c0392b;
-    border: 1px solid #922b21;
-}
-
-    .table-inventario .btn-danger:hover {
-        background-color: #e74c3c;
-        border-color: #b03528;
+    /* Asegura que el contenido quede sobre la marca de agua */
+    .auth-bg > * {
+        position: relative;
+        z-index: 1;
     }
-
-.table-inventario .btn-success {
-    background-color: #27ae60;
-    border: 1px solid #1e8449;
-}
-
-    .table-inventario .btn-success:hover {
-        background-color: #2ecc71;
-        border-color: #28b463;
-    }
-
-.table-inventario .btn-warning {
-    background-color: #f39c12;
-    border: 1px solid #b9770e;
-    color: #1c1c1c !important;
-}
-
-    .table-inventario .btn-warning:hover {
-        background-color: #929292;
-        border-color: #aa7f0f;
-        color: #000 !important;
-    }
-
-.table-inventario .btn-info {
-    background-color: #2980b9;
-    border: 1px solid #21618c;
-}
-
-    .table-inventario .btn-info:hover {
-        background-color: #3498db;
-        border-color: #2874a6;
-    }
-
-.table-inventario .btn-secondary {
-    background-color: #7f8c8d;
-    border: 1px solid #626f70;
-}
-
-    .table-inventario .btn-secondary:hover {
-        background-color: #873e06;
-        border-color: #707b7c;
-    }
-
-/* Asegura que los botones se envuelvan si no caben */
-.table-inventario td .d-flex {
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-
-/* Tabla con estilos personalizados para LISTAR CLIENTES */
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-    background-color: #212529;
-    color: #ffffff;
-}
-
-    .styled-table thead {
-        background-color: #212529;
-        color: white;
-    }
-
-    .styled-table th,
-    .styled-table td {
-        padding: 12px 8px;
-        border: 1px solid #ddd;
-        vertical-align: middle;
-    }
-
-    /* Botones dentro de tablas con clase styled-table */
-    .styled-table .btn {
-        min-width: 80px;
-        height: 32px;
-        padding: 4px 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: 4px;
-        color: white !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Colores y hover para botones */
-    .styled-table .btn-dark {
-        background-color: #34495e;
-        border: 1px solid #2c3e50;
-    }
-
-        .styled-table .btn-dark:hover {
-            background-color: #2c3e50;
-            border-color: #22313f;
-        }
-
-    .styled-table .btn-success {
-        background-color: #27ae60;
-        border: 1px solid #1e8449;
-    }
-
-        .styled-table .btn-success:hover {
-            background-color: #2ecc71;
-            border-color: #28b463;
-        }
-
-    .styled-table .btn-secondary {
-        background-color: #7f8c8d;
-        border: 1px solid #626f70;
-    }
-
-        .styled-table .btn-secondary:hover {
-            background-color: #95a5a6;
-            border-color: #707b7c;
-        }
-
-    .styled-table .btn-danger {
-        background-color: #c0392b;
-        border: 1px solid #922b21;
-    }
-
-        .styled-table .btn-danger:hover {
-            background-color: #e74c3c;
-            border-color: #b03528;
-        }
-
-    /* Para ajustar el espaciado entre botones en la misma celda */
-    .styled-table td > .btn + .btn {
-        margin-left: 6px;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-.styled-table, .table-inventario {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-    background-color: #212529;
-    color: #ffffff;
-}
-
-    .styled-table thead, .table-inventario thead {
-        background-color: #212529;
-        color: white;
-    }
-
-    .styled-table th, .styled-table td,
-    .table-inventario th, .table-inventario td {
-        padding: 12px 8px;
-        border: 1px solid #ddd;
-        vertical-align: middle;
-    }
-
-    /* Botones para ambas tablas */
-    .styled-table .btn, .table-inventario .btn {
-        min-width: 80px;
-        height: 32px;
-        padding: 4px 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: 4px;
-        color: white !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Botones - Colores y hover */
-    .styled-table .btn-dark, .table-inventario .btn-dark {
-        background-color: #34495e;
-        border: 1px solid #2c3e50;
-    }
-
-        .styled-table .btn-dark:hover, .table-inventario .btn-dark:hover {
-            background-color: #2c3e50;
-            border-color: #22313f;
-        }
-
-    .styled-table .btn-success, .table-inventario .btn-success {
-        background-color: #27ae60;
-        border: 1px solid #1e8449;
-    }
-
-        .styled-table .btn-success:hover, .table-inventario .btn-success:hover {
-            background-color: #2ecc71;
-            border-color: #28b463;
-        }
-
-    .styled-table .btn-secondary, .table-inventario .btn-secondary {
-        background-color: #7f8c8d;
-        border: 1px solid #626f70;
-    }
-
-        .styled-table .btn-secondary:hover, .table-inventario .btn-secondary:hover {
-            background-color: #95a5a6;
-            border-color: #707b7c;
-        }
-
-    .styled-table .btn-danger, .table-inventario .btn-danger {
-        background-color: #c0392b;
-        border: 1px solid #922b21;
-    }
-
-        .styled-table .btn-danger:hover, .table-inventario .btn-danger:hover {
-            background-color: #e74c3c;
-            border-color: #b03528;
-        }
-
-    /* Espaciado entre botones en la misma celda */
-    .styled-table td > .btn + .btn, .table-inventario td > .btn + .btn {
-        margin-left: 6px;
-    }
-    /* Botones comunes dentro de tablas (styled-table) */
-    .styled-table .btn {
-        min-width: 80px;
-        height: 32px;
-        padding: 4px 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: 4px;
-        color: white !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        border: 1px solid transparent;
-        cursor: pointer;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
-    }
-
-    /* Botón amarillo (editar) */
-    .styled-table .btn-warning {
-        background-color: #f39c12;
-        border-color: #b9770e;
-        color: #1c1c1c !important;
-    }
-
-        .styled-table .btn-warning:hover {
-            background-color: #e1a921;
-            border-color: #a36c0b;
-            color: #000 !important;
-        }
-
-    /* Botón oscuro (detalles) */
-    .styled-table .btn-dark {
-        background-color: #34495e;
-        border-color: #2c3e50;
-    }
-
-        .styled-table .btn-dark:hover {
-            background-color: #2c3e50;
-            border-color: #22313f;
-        }
-
-    /* Botón rojo (eliminar) */
-    .styled-table .btn-danger {
-        background-color: #c0392b;
-        border-color: #922b21;
-    }
-
-        .styled-table .btn-danger:hover {
-            background-color: #e74c3c;
-            border-color: #b03528;
-        }
