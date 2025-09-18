@@ -1,86 +1,366 @@
 ﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
 @using System.Globalization
+@using System.Web
+
 @{
-    ViewBag.Title = "Equipos";
-    var us = CultureInfo.GetCultureInfo("en-US"); // USD
+    ViewBag.Title = "Inventario";
+
+    // Moneda
+    var us = CultureInfo.GetCultureInfo("en-US");
+
+    // Placeholder (OJO: 'Content' con C mayúscula)
+    var PLACEHOLDER = Url.Content("~/Content/img/placeholder-equipment.png");
+
+    // === Helper de imagen ===
+    Func<string, string> Src = (raw) =>
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
+
+        var url = raw.Trim();
+
+        // URLs absolutas o data-URI
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("//") ||
+            url.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        // Normaliza backslashes
+        url = url.Replace("\\", "/");
+
+        // ~/ o / (app-relative) -> resolver
+        if (url.StartsWith("~/")) return Url.Content(url);
+        if (url.StartsWith("/")) return Url.Content("~" + url);
+
+        // Sin prefijo -> forzar "~/" (ej. "Uploads/Equipment/xxx.jpg")
+        return Url.Content("~/" + url.TrimStart('/'));
+    };
+
+    // Chip de estado
+    Func<int, IHtmlString> ChipEstado = (estado) =>
+    {
+        var t = "Desconocido";
+        switch (estado)
+        {
+            case 1: t = "Activo"; break;
+            case 2: t = "Alquilado"; break;
+            case 3: t = "Inactivo"; break;
+            case 4: t = "Mantenimiento"; break;
+        }
+        return new HtmlString($"<span class=\"chip\">{t}</span>");
+    };
 }
 
-<div class="contenido-principal">
-    <div class="contenido-card">
-        <div class="header-seccion">
-            <h2>Gestión de Equipos</h2>
-            @Html.ActionLink("+ Registrar nuevo equipo", "CrearEquipment", null, new { @class = "btn btn-success btn-sm" })
-        </div>
+<!-- ====== ESTILOS: Grid 3 por fila, cards pequeños y uniformes ====== -->
+<style>
+    .inv-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
 
-        @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
-        {
-            <div class="filtros-inventario">
-                <div class="filtro-item">
-                    <label>Nombre del equipo</label>
-                    <input type="text" name="Nombre" class="form-control" value="@ViewBag.NombreBuscado" placeholder="Canon, Sony..." />
-                </div>
-                <div class="filtro-item">
-                    <label>Tipo</label>
-                    @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
-                </div>
-                <div class="filtro-item">
-                    <label>Estado</label>
-                    @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
-                </div>
-                <div class="filtro-item boton-filtrar">
-                    <button type="submit" class="btn btn-dark btn-sm">Filtrar</button>
-                </div>
-            </div>
+    .inv-title {
+        margin: 0;
+        font-weight: 800;
+    }
+
+    .equip-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr)); /* 3 por fila */
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    @@media (max-width: 992px) {
+        .equip-grid {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .equip-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .equip-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0,0,0,.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+        .equip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(0,0,0,.12);
         }
 
-        <div class="tabla-scroll">
-            <table class="table-inventario">
-                <thead>
-                    <tr>
-                        <th>Equipo</th>
-                        <th>Serie</th>
-                        <th>Descripción</th>
-                        <th>Alquiler</th>
-                        <th>Disponibles</th>
-                        <th>Alquilados</th>
-                        <th>Mantenimiento</th>
-                        <th>Estado</th>
-                        <th>Categoría</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.EquipoCompleto</td>
-                            <td>@item.SerialNumber</td>
-                            <td>@item.Description</td>
-                            <td>@item.RentalValue.ToString("C2", us)</td>
-                            <td>@item.Disponibles</td>
-                            <td>@item.Alquilados</td>
-                            <td>@item.EnMantenimiento</td>
-                            <td>@item.EstadoEnTexto</td>
-                            <td>@item.CategoriaNombre</td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    @if (item.Status == 1)
-                                    {
-                                        @Html.ActionLink("Inactivar", "Inactivar", new { id = item.EquipmentId }, new { @class = "btn btn-eliminar btn-sm" })
-                                    }
-                                    else
-                                    {
-                                        @Html.ActionLink("Activar", "Activar", new { id = item.EquipmentId }, new { @class = "btn btn-success btn-sm" })
-                                    }
+    .equip-photo {
+        width: 100%;
+        height: 180px; /* altura fija para uniformidad */
+        object-fit: cover;
+        background: #f3f3f3;
+        display: block;
+    }
 
-                                    @Html.ActionLink("Editar", "Edit", new { id = item.EquipmentId }, new { @class = "btn-editar btn-sm" })
-                                    @Html.ActionLink("Trazabilidad", "VerTrazabilidad", "Trazabilidad", new { equipoId = item.EquipmentId }, new { @class = "btn-trazabilidad btn-sm" })
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    .equip-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 14px;
+        flex: 1;
+    }
+
+    .equip-name {
+        font-size: .95rem;
+        font-weight: 800;
+        line-height: 1.25;
+        min-height: 2.4em; /* 2 líneas */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .equip-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: .82rem;
+        color: #6b7280;
+    }
+
+    .chip {
+        background: #f6f7f9;
+        border: 1px solid #e9ebf0;
+        padding: .22rem .45rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .equip-price {
+        font-size: 1.05rem;
+        font-weight: 900;
+    }
+
+    .equip-actions {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    /* Botón-ícono */
+    .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #f5f5f5;
+        border: 1px solid #e9e9e9;
+        text-decoration: none;
+    }
+
+        .icon-btn:hover {
+            background: #eee;
+        }
+
+        .icon-btn i {
+            font-size: 18px;
+            color: #222;
+        }
+
+    /* Switch rojo/verde */
+    .toggle {
+        position: relative;
+        display: inline-flex;
+        width: 44px;
+        height: 24px;
+        align-items: center;
+    }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle .track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #c62828;
+            border-radius: 999px;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+        }
+
+            .toggle .track::before {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                top: 2px;
+                left: 2px;
+                background: #fff;
+                border-radius: 50%;
+                box-shadow: 0 1px 3px rgba(0,0,0,.22);
+                transition: transform .18s ease;
+            }
+
+        .toggle input:checked + .track {
+            background: #2e7d32;
+        }
+
+            .toggle input:checked + .track::before {
+                transform: translateX(20px);
+            }
+
+    /* Filtros (compactos) */
+    .inv-filters {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin: 10px 0 18px;
+    }
+
+        .inv-filters .form-control {
+            min-width: 220px;
+        }
+
+    .btn-primary {
+        display: inline-block;
+        background: #198754;
+        color: #fff;
+        padding: .5rem .9rem;
+        border-radius: .5rem;
+        text-decoration: none;
+    }
+
+    .btn {
+        background: #d71920;
+        color: #fff;
+        border: none;
+        padding: .45rem .9rem;
+        border-radius: .5rem;
+    }
+</style>
+<!-- ====== FIN ESTILOS ====== -->
+
+<div class="inv-page">
+    <div class="inv-header">
+        <h2 class="inv-title">Inventario de equipos</h2>
+        @Html.ActionLink("+ Registrar equipo", "CrearEquipment", null, new { @class = "btn-primary" })
+    </div>
+
+    @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
+    {
+        <div class="inv-filters">
+            <div>
+                <label class="text-muted">Nombre</label><br />
+                <input type="text" name="Nombre" value="@ViewBag.NombreBuscado" class="form-control" placeholder="Canon, Sony..." />
+            </div>
+            <div>
+                <label class="text-muted">Tipo</label><br />
+                @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
+            </div>
+            <div>
+                <label class="text-muted">Estado</label><br />
+                @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
+            </div>
+            <div>
+                <button type="submit" class="btn">Filtrar</button>
+            </div>
         </div>
+    }
+
+    <div class="equip-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var e in Model)
+            {
+                var activo = (e.Status == 1);
+                var urlOn = Url.Action("Activar", "Equipment", new { id = e.EquipmentId });
+                var urlOff = Url.Action("Inactivar", "Equipment", new { id = e.EquipmentId });
+                var toggle = activo ? urlOff : urlOn;
+                var detId = $"det-{e.EquipmentId}";
+
+                <div class="equip-card">
+                    <img class="equip-photo"
+                         src="@Src(e.ImageUrl)"
+                         alt="Foto @e.EquipmentName"
+                         onerror="this.onerror=null;this.src='@PLACEHOLDER';" />
+
+                    <div class="equip-info">
+                        <div class="equip-name">
+                            @(!string.IsNullOrWhiteSpace(e.EquipoCompleto) ? e.EquipoCompleto : e.EquipmentName)
+                        </div>
+
+                        <div class="equip-chips">
+                            @if (!string.IsNullOrWhiteSpace(e.SerialNumber))
+                            {<span class="chip">SN: @e.SerialNumber</span>}
+
+                            @if (!string.IsNullOrWhiteSpace(e.CategoriaNombre))
+                            {<span class="chip">@e.CategoriaNombre</span>}
+
+                            <span class="chip">Disp: @e.Disponibles</span>
+
+                            @if (e.EnMantenimiento > 0)
+                            {<span class="chip">Mant: @e.EnMantenimiento</span>}
+
+                            @ChipEstado(e.Status)
+                        </div>
+
+                        <div class="equip-price">@e.RentalValue.ToString("C2", us)</div>
+
+                        <div class="equip-actions">
+                            <a href="@toggle" class="toggle" title="@(activo ? "Inactivar" : "Activar")" onclick="return confirm('¿Seguro?');">
+                                <input type="checkbox" @(activo ? "checked" : "") />
+                                <span class="track"></span>
+                            </a>
+
+                            <div style="display:flex;gap:10px;">
+                                <a class="icon-btn" title="Editar"
+                                   href="@Url.Action("Edit","Equipment",new { id = e.EquipmentId })">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <a class="icon-btn" title="Ver detalles"
+                                   href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#@detId" aria-expanded="false">
+                                    <i class="bi bi-search"></i>
+                                </a>
+
+                                <a class="icon-btn" title="Trazabilidad"
+                                   href="@Url.Action("VerTrazabilidad","Trazabilidad",new { equipoId = e.EquipmentId })">
+                                    <i class="bi bi-graph-up"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div id="@detId" class="collapse equip-details" style="margin-top:6px;">
+                            @if (!string.IsNullOrWhiteSpace(e.Description))
+                            {
+                                @Html.Raw(HttpUtility.HtmlEncode(e.Description).Replace("\n", "<br/>"))
+                            }
+                            else
+                            {
+                                <span class="text-muted">Sin descripción.</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">No hay equipos para mostrar.</div>
+        }
     </div>
 </div>

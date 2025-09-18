@@ -21,7 +21,7 @@ CREATE TABLE Clients (
     Email VARCHAR(100)
 );
 
--- Tabla de órdenes de alquiler
+-- Tabla de ï¿½rdenes de alquiler
 CREATE TABLE RentalOrders (
     OrderId INT PRIMARY KEY IDENTITY(1,1),
     OrderDate DATE NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE RentalOrders (
     FOREIGN KEY (ClientId) REFERENCES Clients(ClientId)
 );
 
--- Tabla de categorías de equipos
+-- Tabla de categorï¿½as de equipos
 CREATE TABLE EquipmentCategories (
     CategoryId INT PRIMARY KEY IDENTITY(1,1),
     CategoryName VARCHAR(100) NOT NULL
@@ -120,7 +120,7 @@ ADD Stock INT NOT NULL DEFAULT 0;
 
 
 ALTER TABLE Clients
-ADD Status INT NOT NULL;
+ADD Status INT NOTï¿½NULL;
 
 ALTER TABLE RentalOrders ADD RutaComprobante VARCHAR(255) NULL;
 
@@ -137,7 +137,7 @@ ALTER TABLE RentalOrders
 ADD DescuentoManual DECIMAL(18, 2) NULL;
 
 
-USE [SetLight]; -- Asegúrate de estar usando la base de datos correcta
+USE [SetLight]; -- Asegï¿½rate de estar usando la base de datos correcta
 GO
 
 SELECT *
@@ -159,10 +159,32 @@ INSERT INTO Empleado (
 )
 VALUES (
     'Carlos',
-    'Ramírez',
+    'Ramï¿½rez',
     '88889999',
     'admin@setlight.com',
     '48DA0F27-3C67-436A-8C3B-747AAAF09469', -- ID del rol Administrador
     NULL, -- Se completa cuando el usuario se registra en el sistema
     1
 );
+
+---Modificaciones 13-09-2025
+ALTER TABLE dbo.Empleado
+ADD Cedula NVARCHAR(20) NULL,                          
+    ContactoEmergenciaNombre NVARCHAR(60) NULL,
+    ContactoEmergenciaTelefono NVARCHAR(20) NULL,
+    ContactoEmergenciaParentesco NVARCHAR(30) NULL,
+    TipoSangre NVARCHAR(3) NULL,                          
+    Alergias NVARCHAR(500) NULL,
+    InfoMedica NVARCHAR(1000) NULL;                   
+
+
+	USE SetLight;
+GO
+
+-- Agrega una sola columna para la imagen (ruta o URL)
+IF COL_LENGTH('dbo.Equipment', 'ImageUrl') IS NULL
+BEGIN
+    ALTER TABLE dbo.Equipment
+    ADD ImageUrl NVARCHAR(500) NULL;   
+END
+

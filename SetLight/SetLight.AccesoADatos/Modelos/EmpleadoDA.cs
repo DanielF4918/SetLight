@@ -31,5 +31,26 @@ namespace SetLight.AccesoADatos.Modelos
 
         [Column("Estado")]
         public bool Estado { get; set; }
+
+        [Column("Cedula")]
+        public string Cedula { get; set; }
+
+        [Column("ContactoEmergenciaNombre")]
+        public string ContactoEmergenciaNombre { get; set; }
+
+        [Column("ContactoEmergenciaTelefono")]
+        public string ContactoEmergenciaTelefono { get; set; }
+
+        [Column("ContactoEmergenciaParentesco")]
+        public string ContactoEmergenciaParentesco { get; set; }
+
+        [Column("TipoSangre")]
+        public string TipoSangre { get; set; }
+
+        [Column("Alergias")]
+        public string Alergias { get; set; }
+
+        [Column("InfoMedica")]
+        public string InfoMedica { get; set; }
     }
 }
