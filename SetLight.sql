@@ -166,6 +166,7 @@ VALUES (
     NULL, -- Se completa cuando el usuario se registra en el sistema
     1
 );
+
 ---Modificaciones 13-09-2025
 ALTER TABLE dbo.Empleado
 ADD Cedula NVARCHAR(20) NULL,                          
@@ -186,4 +187,4 @@ BEGIN
     ALTER TABLE dbo.Equipment
     ADD ImageUrl NVARCHAR(500) NULL;   
 END
-GO
+
