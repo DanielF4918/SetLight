@@ -154,16 +154,14 @@ INSERT INTO Empleado (
     TelefonoCelular,
     CorreoElectronico,
     RolId,
-    IdUsuarioIdentity, -- esto normalmente se completa luego del registro en Identity
     Estado
 )
 VALUES (
     'Carlos',
-    'Ram�rez',
+    'Ramrez',
     '88889999',
-    'admin@setlight.com',
-    '48DA0F27-3C67-436A-8C3B-747AAAF09469', -- ID del rol Administrador
-    NULL, -- Se completa cuando el usuario se registra en el sistema
+    'admin69@setlight.com',
+    '31F16267-19E9-4FD8-B518-43706DF8000C', -- ID del rol Administrador
     1
 );
 
