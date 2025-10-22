@@ -1,4 +1,8 @@
-﻿@model List<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+@using PagedList.Mvc
+@using PagedList
+
+
 
 @{
     ViewBag.Title = "Órdenes de Alquiler";
@@ -75,57 +79,100 @@
             </tbody>
         </table>
     </div>
-</div>
 
-<!-- Modales -->
-@foreach (var orden in Model)
-{
-    <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="styled-table">
-                        <thead>
-                            <tr>
-                                <th>Equipo</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Cantidad</th>
-                                <th>Valor Unitario</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var detalle in orden.Details)
-                            {
+    <!-- Paginación -->
+    <div class="mt-3">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new
+        {
+            page,
+            orderId = ViewBag.FiltroOrderId,
+            estado = ViewBag.FiltroEstado,
+            cliente = ViewBag.FiltroCliente,
+            empleadoId = ViewBag.FiltroEmpleadoId,
+            desde = ViewBag.FiltroDesde,
+            hasta = ViewBag.FiltroHasta
+        }), PagedList.Mvc.PagedListRenderOptions.ClassicPlusFirstAndLast)
+    </div>
+
+    <style>
+
+        .pagination {
+            display: flex !important;
+            justify-content: center !important;
+            padding-left: 0;
+            list-style: none;
+        }
+
+            .pagination li a,
+            .pagination li span {
+                color: black !important;
+                margin: 0 5px;
+                border-radius: 4px;
+                padding: 5px 10px;
+                display: inline-block;
+            }
+
+            .pagination li.active span {
+                background-color: #e9ecef !important;
+                color: black !important;
+            }
+
+            .pagination li a:hover {
+                background-color: #f0f0f0;
+                color: black !important;
+            }
+    </style>
+
+
+    <!-- Modales -->
+    @foreach (var orden in Model)
+    {
+        <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="styled-table">
+                            <thead>
                                 <tr>
-                                    <td>@detalle.EquipmentName</td>
-                                    <td>@detalle.Brand</td>
-                                    <td>@detalle.Model</td>
-                                    <td>@detalle.Quantity</td>
-                                    <td>₡@detalle.RentalValue</td>
-                                    <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Cantidad</th>
+                                    <th>Valor Unitario</th>
+                                    <th>Subtotal</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in orden.Details)
+                                {
+                                    <tr>
+                                        <td>@detalle.EquipmentName</td>
+                                        <td>@detalle.Brand</td>
+                                        <td>@detalle.Model</td>
+                                        <td>@detalle.Quantity</td>
+                                        <td>₡@detalle.RentalValue</td>
+                                        <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
 
-@section Scripts {
-    <script>
-        function mostrarEquiposModal(orderId) {
-            $('#modalEquipos-' + orderId).modal('show');
-        }
-    </script>
-}
+    @section Scripts {
+        <script>
+            function mostrarEquiposModal(orderId) {
+                $('#modalEquipos-' + orderId).modal('show');
+            }
+        </script>
+    }
