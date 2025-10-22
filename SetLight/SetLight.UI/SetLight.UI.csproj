@@ -170,11 +170,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202508051953113_Inicial.cs" />
-    <Compile Include="Migrations\202508051953113_Inicial.Designer.cs">
-      <DependentUpon>202508051953113_Inicial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -325,11 +320,6 @@
       <Project>{8DD29673-BD64-40BD-8DF3-AEE30E8EF90D}</Project>
       <Name>SetLight.LogicaDeNegocio</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\202508051953113_Inicial.resx">
-      <DependentUpon>202508051953113_Inicial.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
