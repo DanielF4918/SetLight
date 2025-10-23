@@ -95,6 +95,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\CrearRentalOrderViewModel .cs" />
     <Compile Include="ViewModels\EquipmentReturnViewModel.cs" />
+    <Compile Include="ViewModels\PerfilUsuarioViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
