@@ -186,3 +186,14 @@ BEGIN
     ADD ImageUrl NVARCHAR(500) NULL;   
 END
 
+
+----Cambios 28/10/2025----
+
+ALTER TABLE dbo.Empleado
+ADD CONSTRAINT UQ_Empleado_Correo UNIQUE (CorreoElectronico);
+GO
+
+-- Crear restricción única para Cedula
+ALTER TABLE dbo.Empleado
+ADD CONSTRAINT UQ_Empleado_Cedula UNIQUE (Cedula);
+GO
