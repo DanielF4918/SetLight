@@ -1,20 +1,22 @@
 ﻿using System;
-using System.Linq;
-using System.Web.Mvc;
-using SetLight.Abstracciones.ModelosParaUI;
-using SetLight.AccesoADatos;
-using SetLight.AccesoADatos.Clientes.ObtenerClPorID;
-using SetLight.AccesoADatos.RentalOrder;
-using SetLight.Abstracciones.AccesoADatos.RentalOrder.CrearRentalOrder;
-using SetLight.Abstracciones.ViewModels;
-using System.Threading.Tasks;
-using SetLight.AccesoADatos.rentalorder.EditRentalOrder;
-using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
-using SetLight.AccesoADatos.Modelos;
-using SetLight.AccesoADatos.Equipment.ObtenerEqPorID;
-using SetLight.LogicaDeNegocio.Services;
 using System.Collections.Generic;
 using System.Data.Entity; // Para Include
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web.Mvc;
+using SetLight.Abstracciones.AccesoADatos.RentalOrder.CrearRentalOrder;
+using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.Abstracciones.ViewModels;
+using SetLight.AccesoADatos;
+using SetLight.AccesoADatos.Clientes.ObtenerClPorID;
+using SetLight.AccesoADatos.Equipment.ObtenerEqPorID;
+using SetLight.AccesoADatos.Modelos;
+using SetLight.AccesoADatos.rentalorder.EditRentalOrder;
+using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
+using SetLight.AccesoADatos.RentalOrder;
+using SetLight.LogicaDeNegocio.Services;
+using PagedList;
+
 
 namespace SetLight.UI.Controllers
 {
@@ -78,6 +80,7 @@ namespace SetLight.UI.Controllers
         // Listado de órdenes con filtros
         // GET: /RentalOrder
         public ActionResult Index(
+            int? page,
             int? orderId,
             int? estado,            // 1=Activa, 2=Completada, 3=Cancelada
             string cliente,         // parte del nombre
@@ -130,7 +133,11 @@ namespace SetLight.UI.Controllers
             if (hasta.HasValue) q = q.Where(o => o.EndDate <= hasta.Value);
 
             // Orden descendente por ID
-            var ordenes = q.OrderByDescending(o => o.OrderId).ToList();
+            int pageSize = 10;                 
+            int pageNumber = page ?? 1;
+            var ordenesPaged = q.OrderByDescending(o => o.OrderId)
+                     .ToPagedList(pageNumber, pageSize);
+
 
             // Para valores en la vista
             ViewBag.FiltroOrderId = orderId;
@@ -150,7 +157,7 @@ namespace SetLight.UI.Controllers
                 .OrderBy(x => x.Text)
                 .ToList();
 
-            return View(ordenes);
+            return View(ordenesPaged);
         }
 
         // Crear orden (GET)
