@@ -260,23 +260,29 @@ namespace SetLight.UI.Controllers
             return View("EditEquipment", elEquipment);
         }
 
-        // POST: Equipment/Edit/5
+        // Asegúrate de tener arriba del archivo:
+        // using System;
+        // using System.IO;
+        // using System.Linq;
+        // using System.Web;
+        // using System.Web.Mvc;
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(
             EquipmentDto elEquipment,
-            HttpPostedFileBase nuevaImagen, 
-            bool? eliminarImagen             
+            HttpPostedFileBase nuevaImagen,
+            bool? eliminarImagen
         )
         {
-            // 1) Validación de modelo
+            // Validación del modelo
             if (!ModelState.IsValid)
             {
                 CargarCategorias(elEquipment.CategoryId);
                 return View("EditEquipment", elEquipment);
             }
 
-            // 2) Obtener registro actual para conocer la ImageUrl previa
+            // Obtener registro actual (para preservar campos no editables y conocer la imagen previa)
             var actual = _ObtenerEqPorIDLN.Obtener(elEquipment.EquipmentId);
             if (actual == null)
             {
@@ -285,23 +291,29 @@ namespace SetLight.UI.Controllers
                 return View("EditEquipment", elEquipment);
             }
 
-            string oldUrl = actual.ImageUrl;
-            string newUrlGuardada = null;   
+            // ✅ Preservar estado (evita que se desactive por accidente)
+            elEquipment.Status = actual.Status;
+
+            // Imagen anterior
+            var oldUrl = actual.ImageUrl;
+            string newUrlGuardada = null;
 
             try
             {
-
+                // --- Manejo de imagen ---
                 if (eliminarImagen == true)
                 {
+                    // El usuario marcó eliminar
                     elEquipment.ImageUrl = null;
                 }
                 else if (nuevaImagen != null && nuevaImagen.ContentLength > 0)
                 {
+                    // Validar extensión/tamaño
                     var ext = Path.GetExtension(nuevaImagen.FileName)?.ToLowerInvariant();
                     var okExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                     if (!okExt.Contains(ext))
                     {
-                        ModelState.AddModelError("", "Formato inválido. Solo .jpg, .jpeg, .png, .webp");
+                        ModelState.AddModelError("", "Formato inválido. Solo se permite .jpg, .jpeg, .png o .webp");
                         CargarCategorias(elEquipment.CategoryId);
                         return View("EditEquipment", elEquipment);
                     }
@@ -312,30 +324,38 @@ namespace SetLight.UI.Controllers
                         return View("EditEquipment", elEquipment);
                     }
 
+                    // Ruta de carga (usa tu carpeta; cámbiala si ya tenías otra)
+                    const string UploadRoot = "~/Uploads/Equipment";
                     var carpetaFisica = Server.MapPath(UploadRoot);
                     Directory.CreateDirectory(carpetaFisica);
 
+                    // Guardar archivo
                     var fileName = $"{Guid.NewGuid():N}{ext}";
                     var rutaFisica = Path.Combine(carpetaFisica, fileName);
                     nuevaImagen.SaveAs(rutaFisica);
 
+                    // URL virtual (para BD)
                     newUrlGuardada = Url.Content($"{UploadRoot}/{fileName}");
-                    elEquipment.ImageUrl = newUrlGuardada; // asignamos nueva
+                    elEquipment.ImageUrl = newUrlGuardada; // asignar nueva
                 }
                 else
                 {
+                    // Mantener imagen anterior
                     elEquipment.ImageUrl = oldUrl;
                 }
 
+                // --- Persistir cambios ---
                 var filas = _equipmentLN.Actualizar(elEquipment);
                 if (filas <= 0)
                 {
+                    // Si algo falló, borra el archivo recién subido (si lo hubo)
                     BorrarArchivoFisicoSilencioso(newUrlGuardada);
                     ModelState.AddModelError("", "No se pudo actualizar el equipo.");
                     CargarCategorias(elEquipment.CategoryId);
                     return View("EditEquipment", elEquipment);
                 }
 
+                // Si se reemplazó o eliminó imagen, borra la antigua del disco
                 if ((eliminarImagen == true || newUrlGuardada != null) && !string.IsNullOrWhiteSpace(oldUrl))
                 {
                     BorrarArchivoFisicoSilencioso(oldUrl);
@@ -346,6 +366,7 @@ namespace SetLight.UI.Controllers
             }
             catch (Exception ex)
             {
+                // Limpieza si hubo subida
                 BorrarArchivoFisicoSilencioso(newUrlGuardada);
 
                 ModelState.AddModelError("", "Ocurrió un error al actualizar: " + ex.Message);
@@ -353,6 +374,7 @@ namespace SetLight.UI.Controllers
                 return View("EditEquipment", elEquipment);
             }
         }
+
 
         // Helpers
         private void CargarCategorias(int? seleccion = null)
