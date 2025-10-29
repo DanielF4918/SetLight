@@ -14,6 +14,8 @@ using System.Runtime.Remoting.Contexts;
 using SetLight.AccesoADatos;
 using SetLight.Abstracciones.AccesoADatos.Empleado;
 using SetLight.AccesoADatos.Empleado.EditarEmpleado;
+using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 
 namespace SetLight.UI.Controllers
 {
@@ -55,14 +57,63 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearEmpleado(EmpleadoDto empleadoDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _crearEmpleadoLN.Guardar(empleadoDto);
-                return RedirectToAction("ListarEmpleado");
+                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+                return View(empleadoDto);
             }
 
-            ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
-            return View(empleadoDto);
+            try
+            {
+                await _crearEmpleadoLN.Guardar(empleadoDto);
+                TempData["Ok"] = "Empleado registrado correctamente.";
+                return RedirectToAction("ListarEmpleado");
+            }
+            // EF6 suele envolver la SqlException dentro de DbUpdateException
+            catch (DbUpdateException ex)
+            {
+                if (EsViolacionUnicidad(ex))
+                {
+                    ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "No se pudo registrar el empleado. Intente nuevamente.");
+                }
+
+                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+                return View(empleadoDto);
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2601 || ex.Number == 2627) // UNIQUE KEY violation
+                    ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
+                else
+                    ModelState.AddModelError("", "No se pudo registrar el empleado. Intente nuevamente.");
+
+                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+                return View(empleadoDto);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error inesperado: " + ex.Message);
+                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+                return View(empleadoDto);
+            }
+        }
+
+        // Helper robusto para detectar violación de índice/constraint UNIQUE (2601/2627)
+        private static bool EsViolacionUnicidad(Exception ex)
+        {
+            while (ex != null)
+            {
+                var sqlEx = ex as SqlException;
+                if (sqlEx != null && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+                    return true;
+
+                ex = ex.InnerException;
+            }
+            return false;
         }
 
         private IEnumerable<SelectListItem> ObtenerListaRoles(string rolSeleccionado = null)
@@ -74,6 +125,8 @@ namespace SetLight.UI.Controllers
                 Selected = r.Id == rolSeleccionado
             }).ToList();
         }
+
+
 
         // GET: Empleado/Details/5
         [HttpGet]
@@ -172,44 +225,61 @@ namespace SetLight.UI.Controllers
             {
                 ViewBag.Roles = ObtenerListaRoles(model.RolId);
                 ViewBag.Estados = new[]
-                    {
-                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-                };
-                return View("Edit", model); 
+                {
+            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+        };
+                return View("Edit", model);
             }
 
             try
             {
-                var filasAfectadas = _editarEmpleadoAD.Editar(model);
+                int filasAfectadas = _editarEmpleadoAD.Editar(model);
 
                 if (filasAfectadas <= 0)
                 {
                     ModelState.AddModelError("", "No se pudo actualizar el empleado.");
-                    ViewBag.Roles = ObtenerListaRoles(model.RolId);
-                    ViewBag.Estados = new[]
-                        {
-                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-                };
-                    return View("Edit", model);
                 }
-
-                TempData["Ok"] = "Empleado actualizado correctamente.";
-                return RedirectToAction("ListarEmpleado");
+                else
+                {
+                    TempData["Ok"] = "Empleado actualizado correctamente.";
+                    return RedirectToAction("ListarEmpleado");
+                }
             }
-            catch (Exception)
+            catch (DbUpdateException ex)
+            {
+                var inner = ex.InnerException?.InnerException as SqlException;
+                if (inner != null && (inner.Number == 2601 || inner.Number == 2627))
+                {
+                    ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Ocurrió un error al actualizar el empleado.");
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2601 || ex.Number == 2627)
+                    ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
+                else
+                    ModelState.AddModelError("", "Ocurrió un error al actualizar el empleado.");
+            }
+            catch
             {
                 ModelState.AddModelError("", "Ocurrió un error al actualizar el empleado.");
-                ViewBag.Roles = ObtenerListaRoles(model.RolId);
-                ViewBag.Estados = new[]
-                    {
-                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-                };
-                return View("Edit", model);
             }
+
+            // Recargar combos si hay error y vuelve a la vista
+            ViewBag.Roles = ObtenerListaRoles(model.RolId);
+            ViewBag.Estados = new[]
+            {
+        new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+        new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+    };
+            return View("Edit", model);
         }
+
 
 
 
