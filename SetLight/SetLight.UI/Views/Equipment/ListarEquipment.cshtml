@@ -154,7 +154,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 16px; /* más separación switch <-> iconos */
     }
 
     /* Botón-ícono */
@@ -196,7 +196,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            background: #c62828;
+            background: #c62828; /* rojo (OFF) */
             border-radius: 999px;
             box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
         }
@@ -217,12 +217,12 @@
         .toggle input:checked + .track {
             background: #2e7d32;
         }
-
+            /* verde (ON) */
             .toggle input:checked + .track::before {
                 transform: translateX(20px);
             }
 
-    /* Filtros (compactos) */
+    /* ===== Filtros (estilo Empleados) ===== */
     .inv-filters {
         display: flex;
         gap: 12px;
@@ -235,22 +235,44 @@
             min-width: 220px;
         }
 
+    /* === Botones: estilos específicos (no global .btn) === */
+
+    /* Para "+ Registrar equipo" */
     .btn-primary {
         display: inline-block;
-        background: #198754;
+        background: #198754; /* verde */
         color: #fff;
         padding: .5rem .9rem;
         border-radius: .5rem;
+        border: 1px solid #198754;
         text-decoration: none;
     }
 
-    .btn {
-        background: #d71920;
+        .btn-primary:hover {
+            filter: brightness(1.05);
+        }
+
+    /* Filtrar */
+    .btn-dark {
+        background: #111827; /* gris muy oscuro */
         color: #fff;
-        border: none;
-        padding: .45rem .9rem;
-        border-radius: .5rem;
+        border: 1px solid #111827;
     }
+
+        .btn-dark:hover {
+            filter: brightness(1.08);
+        }
+
+    /* Limpiar */
+    .btn-outline-secondary {
+        background: #fff;
+        color: #111827;
+        border: 1px solid #9ca3af; /* gris */
+    }
+
+        .btn-outline-secondary:hover {
+            background: #f3f4f6;
+        }
 </style>
 <!-- ====== FIN ESTILOS ====== -->
 
@@ -262,21 +284,40 @@
 
     @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
     {
-        <div class="inv-filters">
-            <div>
-                <label class="text-muted">Nombre</label><br />
-                <input type="text" name="Nombre" value="@ViewBag.NombreBuscado" class="form-control" placeholder="Canon, Sony..." />
-            </div>
-            <div>
-                <label class="text-muted">Tipo</label><br />
-                @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
-            </div>
-            <div>
-                <label class="text-muted">Estado</label><br />
-                @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
-            </div>
-            <div>
-                <button type="submit" class="btn">Filtrar</button>
+        <!-- Filtros estilo Empleados -->
+        <div class="card p-3 mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="Nombre" value="@ViewBag.NombreBuscado"
+                           class="form-control" placeholder="Canon, Sony, SN..." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tipo</label>
+                    @Html.DropDownList(
+                        "CategoriaId",
+                        (IEnumerable<SelectListItem>)ViewBag.Categorias,
+                        "Todos",
+                        new { @class = "form-select" })
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    @Html.DropDownList(
+                        "Estado",
+                        (IEnumerable<SelectListItem>)ViewBag.Estados,
+                        "Todos",
+                        new { @class = "form-select" })
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark flex-fill">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a href="@Url.Action("ListarEquipment","Equipment")"
+                       class="btn btn-outline-secondary flex-fill">Limpiar</a>
+                </div>
             </div>
         </div>
     }

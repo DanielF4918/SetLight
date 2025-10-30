@@ -12,65 +12,133 @@
 
     @using (Html.BeginForm("ListarClient", "Client", FormMethod.Get))
     {
-        <div class="row g-3 align-items-end mb-4">
-            <div class="col-md-3">
-                <label class="form-label text-black">Nombre completo</label>
-                <input type="text" name="nombre" value="@ViewBag.NombreBuscado" class="form-control border-dark" placeholder="Ej: Daniel Fuentes" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label text-black">Teléfono</label>
-                <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado" class="form-control border-dark" placeholder="Ej: 8888-8888" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label text-black">Correo</label>
-                <input type="text" name="correo" value="@ViewBag.CorreoBuscado" class="form-control border-dark" placeholder="Ej: correo@ejemplo.com" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-black">Estado</label>
-                @Html.DropDownList("status", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control border-dark" })
-            </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+        <!-- Filtros estilo Empleados -->
+        <div class="card p-3 mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label text-black">Nombre completo</label>
+                    <input type="text" name="nombre" value="@ViewBag.NombreBuscado"
+                           class="form-control border-dark" placeholder="Ej: Daniel Fuentes" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-black">Teléfono</label>
+                    <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado"
+                           class="form-control border-dark" placeholder="Ej: 8888-8888" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-black">Correo</label>
+                    <input type="text" name="correo" value="@ViewBag.CorreoBuscado"
+                           class="form-control border-dark" placeholder="Ej: correo@ejemplo.com" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-black">Estado</label>
+                    @Html.DropDownList("status",
+                        (IEnumerable<SelectListItem>)ViewBag.Estados,
+                        "Todos",
+                        new { @class = "form-select border-dark" })
+                </div>
+                <div class="col-md-1 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end mt-1">
+                    <a href="@Url.Action("ListarClient","Client")" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
             </div>
         </div>
     }
 
-    <div class="table-responsive">
-        <table class="styled-table align-middle text-center w-100">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Estado</th>
-                    <th colspan="2">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.FirstName @item.LastName</td>
-                        <td>@item.Phone</td>
-                        <td>@item.Email</td>
-                        <td>@item.EstadoEnTexto</td>
-                        <td>
-                            @if (item.Status == 1)
+    <div class="card-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var c in Model)
+            {
+                bool isActivo = (c.Status == 1);
+                string nombre = string.Format("{0} {1}", c.FirstName ?? "", c.LastName ?? "");
+
+                <div class="sl-card">
+                    <div class="sl-body">
+                        <div class="sl-title">@nombre</div>
+                        <div class="sl-sub">Tel: <strong>@c.Phone</strong></div>
+                        <div class="sl-badges">
+                            <span class="badge-soft @(isActivo ? "badge-green" : "badge-gray")">
+                                @c.EstadoEnTexto
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sl-footer">
+                        <!-- Switch sin JS -->
+                        <div>
+                            @if (isActivo)
                             {
-                                @Html.ActionLink("Inactivar", "Inactivar", new { id = item.ClientId }, new { @class = "btn btn-dark" })
+                                <a class="sl-switch-link sl-switch--on" title="Inactivar"
+                                   href="@Url.Action("Inactivar","Client", new { id = c.ClientId })">
+                                    <span class="knob"></span>
+                                </a>
                             }
                             else
                             {
-                                @Html.ActionLink("Activar", "Activar", new { id = item.ClientId }, new { @class = "btn btn-success" })
+                                <a class="sl-switch-link sl-switch--off" title="Activar"
+                                   href="@Url.Action("Activar","Client", new { id = c.ClientId })">
+                                    <span class="knob"></span>
+                                </a>
                             }
-                        </td>
-                        <td>
-                            @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-secondary me-1" })
-                            @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-danger" })
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+
+                        <!-- Editar / Detalles (ojito) / Historial -->
+                        <div class="d-flex gap-2">
+                            <a class="btn-icon warning" title="Editar"
+                               href="@Url.Action("Edit","Client", new { id = c.ClientId })">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <button type="button" class="btn-icon info" title="Detalles"
+                                    data-bs-toggle="modal" data-bs-target="#cltModal_@c.ClientId">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <a class="btn-icon" title="Historial"
+                               href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })">
+                                <i class="bi bi-clock-history"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Detalles -->
+                <div class="modal fade" id="cltModal_@c.ClientId" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalles de cliente</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-2"><strong>Nombre:</strong> @nombre</div>
+                                <div class="mb-2"><strong>Teléfono:</strong> @c.Phone</div>
+                                <div class="mb-2"><strong>Correo:</strong> @c.Email</div>
+                                <div class="mb-2"><strong>Estado:</strong> @c.EstadoEnTexto</div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <a href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })" class="btn btn-outline-dark">
+                                    <i class="bi bi-clock-history"></i> Historial
+                                </a>
+                                <div>
+                                    <a href="@Url.Action("Edit","Client", new { id = c.ClientId })" class="btn btn-warning">Editar</a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">No hay clientes para los filtros seleccionados.</div>
+        }
     </div>
 </div>
