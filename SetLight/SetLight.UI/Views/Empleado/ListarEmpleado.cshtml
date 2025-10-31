@@ -5,63 +5,114 @@
 }
 
 <div class="container mt-4 mb-5">
-    <h2 class="mb-4">Listado de Empleados</h2>
-
-    <div class="text-end mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Empleados</h2>
         @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
     </div>
 
-    <div class="table-responsive">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Cédula</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th style="width:220px">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@(string.IsNullOrWhiteSpace(item.Cedula) ? "-" : item.Cedula)</td>
-                            <td>@item.Nombre</td>
-                            <td>@item.Apellido</td>
-                            <td>@item.TelefonoCelular</td>
-                            <td>@item.CorreoElectronico</td>
-                            <td>@(string.IsNullOrWhiteSpace(item.NombreRol) ? item.RolId : item.NombreRol)</td>
-                            <td>
-                                @if (item.Estado)
-                                {
-                                    <span class="badge bg-success">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                }
-                            </td>
-                            <td>
-                                @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
-                                @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
-                                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">No hay empleados registrados.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <!-- Filtros (front-end, sin tocar controller) -->
+    <div class="card p-3 mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input id="fNombre" class="form-control" placeholder="Ej: Daniel Fuentes" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select id="fEstado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button id="btnFiltrar" class="btn btn-dark flex-fill"><i class="bi bi-funnel"></i> Filtrar</button>
+                <button id="btnLimpiar" class="btn btn-outline-secondary flex-fill">Limpiar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div id="gridEmpleados" class="card-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var e in Model)
+            {
+                var nombreCompleto = (e.Nombre ?? "") + " " + (e.Apellido ?? "");
+                var cargo = string.IsNullOrWhiteSpace(e.NombreRol) ? e.RolId : e.NombreRol;
+
+                <div class="sl-card emp-card"
+                     data-nombre="@nombreCompleto.ToLower()"
+                     data-estado="@e.Estado.ToString().ToLower()">
+                    <div class="sl-body">
+                        <div class="sl-title">@nombreCompleto</div>
+                        <div class="sl-sub">Cargo: <strong>@cargo</strong></div>
+                        <div class="sl-badges">
+                            <span class="badge-soft @(e.Estado ? "badge-green" : "badge-gray")">
+                                @(e.Estado ? "Activo" : "Inactivo")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sl-footer">
+                        <!-- Switch sin JS -->
+                        <div>
+                            @if (e.Estado)
+                            {
+                                <a class="sl-switch-link sl-switch--on" title="Inactivar"
+                                   href="@Url.Action("Inactivar","Empleado", new { id = e.IdEmpleado })">
+                                    <span class="knob"></span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="sl-switch-link sl-switch--off" title="Activar"
+                                   href="@Url.Action("Activar","Empleado", new { id = e.IdEmpleado })">
+                                    <span class="knob"></span>
+                                </a>
+                            }
+                        </div>
+
+                        <!-- Editar / Detalles (ojito) -->
+                        <div class="d-flex gap-2">
+                            <a class="btn-icon warning" title="Editar"
+                               href="@Url.Action("Edit","Empleado", new { id = e.IdEmpleado })">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a class="btn-icon info" title="Detalles"
+                               href="@Url.Action("Details","Empleado", new { id = e.IdEmpleado })">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">No hay empleados registrados.</div>
+        }
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        (() => {
+            const $nombre = document.getElementById('fNombre');
+            const $estado = document.getElementById('fEstado');
+            const cards = Array.from(document.querySelectorAll('#gridEmpleados .emp-card'));
+            function filtrar() {
+                const q = ($nombre.value || '').trim().toLowerCase();
+                const s = ($estado.value || '').toLowerCase();
+                cards.forEach(c => {
+                    const okN = !q || (c.dataset.nombre || '').includes(q);
+                    const okS = !s || (c.dataset.estado || '') === s;
+                    c.style.display = (okN && okS) ? '' : 'none';
+                });
+            }
+            document.getElementById('btnFiltrar').addEventListener('click', filtrar);
+            document.getElementById('btnLimpiar').addEventListener('click', () => { $nombre.value = ''; $estado.value = ''; filtrar(); });
+            $nombre.addEventListener('keyup', e => { if (e.key === 'Enter') { filtrar(); } });
+        })();
+    </script>
+}
