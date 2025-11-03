@@ -156,3 +156,21 @@ C:\Users\kenca\OneDrive\Escritorio\22 del 10\SetLight\SetLight\SetLight.AccesoAD
 C:\Users\kenca\OneDrive\Escritorio\22 del 10\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.31911824.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\22 del 10\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
 C:\Users\kenca\OneDrive\Escritorio\22 del 10\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Baseline.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.GenerateResource.cache
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll.config
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.pdb
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.dll
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.xml
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.AssemblyReference.cache
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Baseline.resources
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.GenerateResource.cache
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.CoreCompileInputs.cache
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.31911824.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
+C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
