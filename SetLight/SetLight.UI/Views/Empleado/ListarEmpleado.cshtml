@@ -60,7 +60,7 @@
             foreach (var e in Model)
             {
                 var nombreCompleto = (e.Nombre ?? "") + " " + (e.Apellido ?? "");
-                var cargo = string.IsNullOrWhiteSpace(e.NombreRol) ? e.RolId : e.NombreRol;
+                var cargo = string.IsNullOrWhiteSpace(e.RolNombre) ? e.RolId : e.RolNombre;
 
                 <div class="sl-card emp-card"
                      data-nombre="@nombreCompleto.ToLower()"
