@@ -1,20 +1,21 @@
 ﻿using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Modelos;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using SetLight.Abstracciones.AccesoADatos.Empleado;
+
 
 namespace SetLight.AccesoADatos.Empleado.ListarEmpleado
 {
     public class ListarEmpleadoAD : IListarEmpleadoAD
     {
-        private Contexto _elContexto;
+        private readonly Contexto _elContexto;
 
         public ListarEmpleadoAD()
         {
             _elContexto = new Contexto();
         }
+
 
         public List<EmpleadoDto> Obtener()
         {
@@ -41,5 +42,6 @@ namespace SetLight.AccesoADatos.Empleado.ListarEmpleado
 
             return listaARetornar;
         }
+
     }
 }

@@ -72,8 +72,27 @@ namespace SetLight.UI.Controllers
         public ActionResult ListarEmpleado()
         {
             List<EmpleadoDto> listaEmpleados = _listarEmpleadoLN.Obtener();
+
+            using (var identityContext = new ApplicationDbContext())
+            {
+                var roles = identityContext.Roles.ToDictionary(r => r.Id, r => r.Name);
+
+                foreach (var emp in listaEmpleados)
+                {
+                    emp.RolNombre = (!string.IsNullOrWhiteSpace(emp.RolId) && roles.ContainsKey(emp.RolId))
+                        ? roles[emp.RolId]
+                        : "Sin rol";
+
+                    if (string.IsNullOrWhiteSpace(emp.FotoPerfil))
+                        emp.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+                    else if (!emp.FotoPerfil.StartsWith("~"))
+                        emp.FotoPerfil = "~" + emp.FotoPerfil;
+                }
+            }
+
             return View(listaEmpleados);
         }
+
 
         // GET: Empleado/Create
         public ActionResult CrearEmpleado()
@@ -176,29 +195,52 @@ namespace SetLight.UI.Controllers
                     .Select(e => new EmpleadoDto
                     {
                         IdEmpleado = e.IdEmpleado,
-                        IdEmpleadoGuid = e.IdEmpleadoGuid,
                         Nombre = e.Nombre,
                         Apellido = e.Apellido,
                         TelefonoCelular = e.TelefonoCelular,
                         CorreoElectronico = e.CorreoElectronico,
                         RolId = e.RolId,
                         Estado = e.Estado,
-
                         Cedula = e.Cedula,
                         ContactoEmergenciaNombre = e.ContactoEmergenciaNombre,
                         ContactoEmergenciaTelefono = e.ContactoEmergenciaTelefono,
                         ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
                         TipoSangre = e.TipoSangre,
                         Alergias = e.Alergias,
-                        InfoMedica = e.InfoMedica
+                        InfoMedica = e.InfoMedica,
+                        FotoPerfil = e.FotoPerfil
                     })
                     .FirstOrDefault();
             }
 
-            if (model == null) return HttpNotFound();
+            if (model == null)
+                return HttpNotFound();
+
+            using (var identityContext = new ApplicationDbContext())
+            {
+                if (!string.IsNullOrWhiteSpace(model.RolId))
+                {
+                    var rol = identityContext.Roles
+                        .Where(r => r.Id == model.RolId)
+                        .Select(r => r.Name)
+                        .FirstOrDefault();
+
+                    model.RolNombre = rol ?? "Sin rol asignado";
+                }
+                else
+                {
+                    model.RolNombre = "Sin rol asignado";
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(model.FotoPerfil))
+                model.FotoPerfil = "~/Content/img/placeholder-user.png";
+            else if (!model.FotoPerfil.StartsWith("~"))
+                model.FotoPerfil = "~" + model.FotoPerfil;
 
             return View("Details", model);
         }
+
 
 
         // GET: Empleado/Edit/5
@@ -228,14 +270,20 @@ namespace SetLight.UI.Controllers
                         ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
                         TipoSangre = e.TipoSangre,
                         Alergias = e.Alergias,
-                        InfoMedica = e.InfoMedica
+                        InfoMedica = e.InfoMedica,
+                        FotoPerfil = e.FotoPerfil
                     })
                     .FirstOrDefault();
             }
 
-            if (model == null) return HttpNotFound();
+            if (model == null)
+                return HttpNotFound();
 
-            ViewBag.Roles = ObtenerListaRoles(model.RolId);
+            if (string.IsNullOrWhiteSpace(model.FotoPerfil))
+                model.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+            else if (!model.FotoPerfil.StartsWith("~"))
+                model.FotoPerfil = "~" + model.FotoPerfil;
+
             ViewBag.Roles = ObtenerListaRoles(model.RolId);
 
             ViewBag.Estados = new[]
@@ -283,9 +331,7 @@ namespace SetLight.UI.Controllers
             }
 
             if (actual == null)
-            {
                 ModelState.AddModelError("", "El empleado no existe.");
-            }
 
             var correoCambio = actual != null && !string.Equals(actual.CorreoElectronico?.Trim(), model.CorreoElectronico?.Trim(), StringComparison.OrdinalIgnoreCase);
             if (actual != null && correoCambio)
@@ -326,6 +372,7 @@ namespace SetLight.UI.Controllers
 
             try
             {
+                // ✅ Manejo de la foto
                 if (nuevaFoto != null && nuevaFoto.ContentLength > 0)
                 {
                     var path = Server.MapPath("~/Content/img/empleados/");
@@ -344,77 +391,77 @@ namespace SetLight.UI.Controllers
                 }
 
                 var filas = _editarEmpleadoAD.Editar(model);
+
                 if (filas <= 0)
                 {
-                    ModelState.AddModelError("", "No se pudo actualizar el empleado.");
+                    TempData["Info"] = "No se detectaron cambios, pero el empleado sigue actualizado.";
+                    return RedirectToAction("ListarEmpleado");
                 }
-                else
+
+                if (correoCambio)
                 {
-                    if (correoCambio)
+                    var user = await UserManager.FindByEmailAsync(actual.CorreoElectronico);
+                    if (user != null)
                     {
-                        var user = await UserManager.FindByEmailAsync(actual.CorreoElectronico);
-                        if (user != null)
+                        user.Email = model.CorreoElectronico.Trim();
+                        user.UserName = model.CorreoElectronico.Trim();
+
+                        var upd = await UserManager.UpdateAsync(user);
+                        if (!upd.Succeeded)
                         {
-                            user.Email = model.CorreoElectronico.Trim();
-                            user.UserName = model.CorreoElectronico.Trim();
-
-                            var upd = await UserManager.UpdateAsync(user);
-                            if (!upd.Succeeded)
-                            {
-                                ModelState.AddModelError("", "No se pudo actualizar el correo en Identity: " + string.Join("; ", upd.Errors));
-                            }
-                            else
-                            {
-                                await UserManager.UpdateSecurityStampAsync(user.Id);
-
-                                if (User.Identity.GetUserId() == user.Id)
-                                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                            }
+                            ModelState.AddModelError("", "No se pudo actualizar el correo en Identity: " + string.Join("; ", upd.Errors));
                         }
                         else
                         {
-                            ModelState.AddModelError("", "Advertencia: no se encontró la cuenta de acceso en Identity para el correo anterior.");
+                            await UserManager.UpdateSecurityStampAsync(user.Id);
+
+                            if (User.Identity.GetUserId() == user.Id)
+                                await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         }
                     }
-
-                    var userIdIdentity = _contexto.Users
-                        .Where(u => u.Email == model.CorreoElectronico)
-                        .Select(u => u.Id)
-                        .FirstOrDefault();
-
-                    var rolNombre = _contexto.Roles
-                        .Where(r => r.Id == model.RolId)
-                        .Select(r => r.Name)
-                        .FirstOrDefault();
-
-                    if (!string.IsNullOrWhiteSpace(userIdIdentity) && !string.IsNullOrWhiteSpace(rolNombre))
+                    else
                     {
-                        var rolesActuales = await UserManager.GetRolesAsync(userIdIdentity);
-                        if (rolesActuales.Any())
-                            await UserManager.RemoveFromRolesAsync(userIdIdentity, rolesActuales.ToArray());
-
-                        var add = await UserManager.AddToRoleAsync(userIdIdentity, rolNombre);
-                        if (!add.Succeeded)
-                        {
-                            ModelState.AddModelError("", "No se pudo actualizar el rol en Identity: " + string.Join("; ", add.Errors));
-                        }
-                        else
-                        {
-                            await UserManager.UpdateSecurityStampAsync(userIdIdentity);
-
-                            if (User.Identity.GetUserId() == userIdIdentity)
-                            {
-                                var u = await UserManager.FindByIdAsync(userIdIdentity);
-                                await SignInManager.SignInAsync(u, isPersistent: false, rememberBrowser: false);
-                            }
-                        }
+                        ModelState.AddModelError("", "Advertencia: no se encontró la cuenta de acceso en Identity para el correo anterior.");
                     }
+                }
 
-                    if (!ModelState.Values.SelectMany(v => v.Errors).Any())
+                var userIdIdentity = _contexto.Users
+                    .Where(u => u.Email == model.CorreoElectronico)
+                    .Select(u => u.Id)
+                    .FirstOrDefault();
+
+                var rolNombre = _contexto.Roles
+                    .Where(r => r.Id == model.RolId)
+                    .Select(r => r.Name)
+                    .FirstOrDefault();
+
+                if (!string.IsNullOrWhiteSpace(userIdIdentity) && !string.IsNullOrWhiteSpace(rolNombre))
+                {
+                    var rolesActuales = await UserManager.GetRolesAsync(userIdIdentity);
+                    if (rolesActuales.Any())
+                        await UserManager.RemoveFromRolesAsync(userIdIdentity, rolesActuales.ToArray());
+
+                    var add = await UserManager.AddToRoleAsync(userIdIdentity, rolNombre);
+                    if (!add.Succeeded)
                     {
-                        TempData["Ok"] = "Empleado actualizado correctamente.";
-                        return RedirectToAction("ListarEmpleado");
+                        ModelState.AddModelError("", "No se pudo actualizar el rol en Identity: " + string.Join("; ", add.Errors));
                     }
+                    else
+                    {
+                        await UserManager.UpdateSecurityStampAsync(userIdIdentity);
+
+                        if (User.Identity.GetUserId() == userIdIdentity)
+                        {
+                            var u = await UserManager.FindByIdAsync(userIdIdentity);
+                            await SignInManager.SignInAsync(u, isPersistent: false, rememberBrowser: false);
+                        }
+                    }
+                }
+
+                if (!ModelState.Values.SelectMany(v => v.Errors).Any())
+                {
+                    TempData["Ok"] = "Empleado actualizado correctamente.";
+                    return RedirectToAction("ListarEmpleado");
                 }
             }
             catch (DbUpdateException ex)
