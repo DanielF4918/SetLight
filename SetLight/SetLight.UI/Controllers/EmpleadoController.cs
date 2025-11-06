@@ -85,7 +85,7 @@ namespace SetLight.UI.Controllers
         // POST: Empleado/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CrearEmpleado(EmpleadoDto empleadoDto)
+        public async Task<ActionResult> CrearEmpleado(EmpleadoDto empleadoDto, HttpPostedFileBase foto)
         {
             if (!ModelState.IsValid)
             {
@@ -95,6 +95,21 @@ namespace SetLight.UI.Controllers
 
             try
             {
+                // 🆕 Guardar foto si se sube
+                if (foto != null && foto.ContentLength > 0)
+                {
+                    var path = Server.MapPath("~/Content/img/empleados/");
+                    if (!System.IO.Directory.Exists(path))
+                        System.IO.Directory.CreateDirectory(path);
+
+                    var fileName = $"{Guid.NewGuid()}_{System.IO.Path.GetFileName(foto.FileName)}";
+                    var fullPath = System.IO.Path.Combine(path, fileName);
+                    foto.SaveAs(fullPath);
+
+                    // Guardamos la ruta relativa
+                    empleadoDto.FotoPerfil = $"/Content/img/empleados/{fileName}";
+                }
+
                 await _crearEmpleadoLN.Guardar(empleadoDto);
                 TempData["Ok"] = "Empleado registrado correctamente.";
                 return RedirectToAction("ListarEmpleado");
@@ -102,34 +117,26 @@ namespace SetLight.UI.Controllers
             catch (DbUpdateException ex)
             {
                 if (EsViolacionUnicidad(ex))
-                {
                     ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
-                }
                 else
-                {
                     ModelState.AddModelError("", "No se pudo registrar el empleado. Intente nuevamente.");
-                }
-
-                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
-                return View(empleadoDto);
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2601 || ex.Number == 2627) // UNIQUE KEY violation
+                if (ex.Number == 2601 || ex.Number == 2627)
                     ModelState.AddModelError("", "Ya existe un empleado con la misma cédula o correo electrónico.");
                 else
                     ModelState.AddModelError("", "No se pudo registrar el empleado. Intente nuevamente.");
-
-                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
-                return View(empleadoDto);
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Error inesperado: " + ex.Message);
-                ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
-                return View(empleadoDto);
             }
+
+            ViewBag.Roles = ObtenerListaRoles(empleadoDto.RolId);
+            return View(empleadoDto);
         }
+
 
         private static bool EsViolacionUnicidad(Exception ex)
         {
@@ -244,7 +251,7 @@ namespace SetLight.UI.Controllers
         // POST: Empleado/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(EmpleadoDto model)
+        public async Task<ActionResult> Edit(EmpleadoDto model, HttpPostedFileBase nuevaFoto)
         {
             if (string.IsNullOrWhiteSpace(model.RolId))
                 ModelState.AddModelError(nameof(model.RolId), "Debe seleccionar un rol.");
@@ -269,7 +276,8 @@ namespace SetLight.UI.Controllers
                         ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
                         TipoSangre = e.TipoSangre,
                         Alergias = e.Alergias,
-                        InfoMedica = e.InfoMedica
+                        InfoMedica = e.InfoMedica,
+                        FotoPerfil = e.FotoPerfil
                     })
                     .FirstOrDefault();
             }
@@ -279,7 +287,6 @@ namespace SetLight.UI.Controllers
                 ModelState.AddModelError("", "El empleado no existe.");
             }
 
-            // Si cambiaron el correo, verificamos unicidad en Empleado y en AspNetUsers
             var correoCambio = actual != null && !string.Equals(actual.CorreoElectronico?.Trim(), model.CorreoElectronico?.Trim(), StringComparison.OrdinalIgnoreCase);
             if (actual != null && correoCambio)
             {
@@ -319,6 +326,23 @@ namespace SetLight.UI.Controllers
 
             try
             {
+                if (nuevaFoto != null && nuevaFoto.ContentLength > 0)
+                {
+                    var path = Server.MapPath("~/Content/img/empleados/");
+                    if (!System.IO.Directory.Exists(path))
+                        System.IO.Directory.CreateDirectory(path);
+
+                    var fileName = $"{Guid.NewGuid()}_{System.IO.Path.GetFileName(nuevaFoto.FileName)}";
+                    var fullPath = System.IO.Path.Combine(path, fileName);
+                    nuevaFoto.SaveAs(fullPath);
+
+                    model.FotoPerfil = $"/Content/img/empleados/{fileName}";
+                }
+                else
+                {
+                    model.FotoPerfil = actual?.FotoPerfil;
+                }
+
                 var filas = _editarEmpleadoAD.Editar(model);
                 if (filas <= 0)
                 {
@@ -354,7 +378,7 @@ namespace SetLight.UI.Controllers
                     }
 
                     var userIdIdentity = _contexto.Users
-                        .Where(u => u.Email == model.CorreoElectronico) 
+                        .Where(u => u.Email == model.CorreoElectronico)
                         .Select(u => u.Id)
                         .FirstOrDefault();
 
@@ -428,6 +452,7 @@ namespace SetLight.UI.Controllers
 
             return View("Edit", model);
         }
+
 
 
 

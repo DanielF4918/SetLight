@@ -1,17 +1,42 @@
 ﻿@model SetLight.Abstracciones.ModelosParaUI.EmpleadoDto
 
-@using (Html.BeginForm())
+@{
+    ViewBag.Title = "Editar Empleado";
+}
+
+<h2 class="mb-4">Editar empleado</h2>
+
+@using (Html.BeginForm("Edit", "Empleado", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
     @Html.HiddenFor(m => m.IdEmpleado)
     @Html.HiddenFor(m => m.IdEmpleadoGuid)
 
+    <!-- 🆕 Campo de Foto de Perfil -->
+    <div class="mb-4 text-center">
+        <label class="form-label fw-bold">Foto de perfil actual</label>
+        <div class="mb-3">
+            <img id="preview-img"
+                 src="@(!string.IsNullOrWhiteSpace(Model.FotoPerfil) ? Url.Content(Model.FotoPerfil) : Url.Content("~/Content/img/placeholder-user.png"))"
+                 alt="Foto actual"
+                 class="img-thumbnail rounded-circle shadow-sm"
+                 style="width: 120px; height: 120px; object-fit: cover;" />
+        </div>
+
+        <div class="mb-3">
+            <label for="nuevaFoto" class="form-label">Cambiar foto</label>
+            <input type="file" name="nuevaFoto" id="nuevaFoto" class="form-control" accept="image/*" onchange="previewFoto(this)" />
+        </div>
+    </div>
+
+    <hr />
+
     <!-- Cédula (visible pero no editable) -->
     <div class="mb-3">
         @Html.LabelFor(m => m.Cedula)
         @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @readonly = "readonly" })
-        @Html.HiddenFor(m => m.Cedula) <!-- asegura que el valor viaje en el POST -->
+        @Html.HiddenFor(m => m.Cedula)
     </div>
 
     <div class="mb-3">
@@ -61,7 +86,6 @@
         @Html.ValidationMessageFor(m => m.Estado)
     </div>
 
-    <!-- 🔹 Campos adicionales -->
     <h5 class="mt-4">Contacto de Emergencia</h5>
     <div class="mb-3">
         @Html.LabelFor(m => m.ContactoEmergenciaNombre)
@@ -100,6 +124,22 @@
         @Html.ValidationMessageFor(m => m.InfoMedica)
     </div>
 
-    <button type="submit" class="btn btn-success">Guardar</button>
-    @Html.ActionLink("Volver", "ListarEmpleado", null, new { @class = "btn btn-secondary ms-2" })
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        @Html.ActionLink("Volver", "ListarEmpleado", null, new { @class = "btn btn-secondary ms-2" })
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function previewFoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 }
