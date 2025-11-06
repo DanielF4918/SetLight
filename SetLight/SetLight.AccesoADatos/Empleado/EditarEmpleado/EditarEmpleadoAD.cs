@@ -21,7 +21,7 @@ namespace SetLight.AccesoADatos.Empleado.EditarEmpleado
                 .FirstOrDefault(e => e.IdEmpleado == elEmpleadoParaActualizar.IdEmpleado);
 
             if (elEmpleadoEnBaseDeDatos == null)
-                return 0; 
+                return 0;
 
             elEmpleadoEnBaseDeDatos.Nombre = elEmpleadoParaActualizar.Nombre;
             elEmpleadoEnBaseDeDatos.Apellido = elEmpleadoParaActualizar.Apellido;
@@ -39,6 +39,9 @@ namespace SetLight.AccesoADatos.Empleado.EditarEmpleado
             elEmpleadoEnBaseDeDatos.TipoSangre = elEmpleadoParaActualizar.TipoSangre;
             elEmpleadoEnBaseDeDatos.Alergias = elEmpleadoParaActualizar.Alergias;
             elEmpleadoEnBaseDeDatos.InfoMedica = elEmpleadoParaActualizar.InfoMedica;
+
+            if (!string.IsNullOrWhiteSpace(elEmpleadoParaActualizar.FotoPerfil))
+                elEmpleadoEnBaseDeDatos.FotoPerfil = elEmpleadoParaActualizar.FotoPerfil;
 
             return elContexto.SaveChanges();
         }

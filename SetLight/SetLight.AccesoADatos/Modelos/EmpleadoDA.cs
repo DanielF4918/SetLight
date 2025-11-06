@@ -52,5 +52,9 @@ namespace SetLight.AccesoADatos.Modelos
 
         [Column("InfoMedica")]
         public string InfoMedica { get; set; }
+
+        // 🆕 Nueva columna para la foto de perfil
+        [Column("FotoPerfil")]
+        public string FotoPerfil { get; set; }
     }
 }

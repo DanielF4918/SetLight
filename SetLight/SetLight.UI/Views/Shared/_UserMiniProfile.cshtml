@@ -1,0 +1,15 @@
+﻿@model SetLight.Abstracciones.ModelosParaUI.EmpleadoDto
+
+@{
+    string nombreCompleto = $"{Model?.Nombre} {Model?.Apellido}".Trim();
+    string foto = Url.Content(Model?.FotoPerfil ?? "~/Content/img/placeholder-equipment.png");
+}
+
+<a href="@Url.Action("Index", "Manage")"
+   class="d-flex align-items-center text-decoration-none text-light ms-2">
+    <img src="@foto"
+         alt="Foto de perfil"
+         class="rounded-circle me-2"
+         style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #aaa;">
+    <span>@nombreCompleto</span>
+</a>

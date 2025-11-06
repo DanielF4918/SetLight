@@ -57,19 +57,18 @@ namespace SetLight.UI.Controllers
 
 
 
-
         // GET: /Manage/Index
         [HttpGet]
         public ActionResult Index()
         {
-            var userId = User.Identity.GetUserId(); 
-
+            var userId = User.Identity.GetUserId(); // devuelve el Id de AspNetUsers (string)
             EmpleadoDto model;
 
             using (var contexto = new Contexto())
             {
+                // Buscamos por el GUID convertido a string
                 model = contexto.Empleado
-                    .Where(e => e.IdEmpleadoGuid.ToString() == userId) 
+                    .Where(e => e.IdEmpleadoGuid.ToString() == userId)
                     .Select(e => new EmpleadoDto
                     {
                         IdEmpleado = e.IdEmpleado,
@@ -87,7 +86,10 @@ namespace SetLight.UI.Controllers
                         ContactoEmergenciaParentesco = e.ContactoEmergenciaParentesco,
                         TipoSangre = e.TipoSangre,
                         Alergias = e.Alergias,
-                        InfoMedica = e.InfoMedica
+                        InfoMedica = e.InfoMedica,
+
+                        // 🔹 Importante: incluimos la foto aquí
+                        FotoPerfil = e.FotoPerfil
                     })
                     .FirstOrDefault();
             }
@@ -97,6 +99,7 @@ namespace SetLight.UI.Controllers
 
             return View("Index", model);
         }
+
 
 
 
@@ -134,6 +137,7 @@ namespace SetLight.UI.Controllers
 
         //
         // GET: /Manage/ChangePassword
+        [HttpGet]
         public ActionResult ChangePassword()
         {
             return View();
@@ -147,21 +151,31 @@ namespace SetLight.UI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return Json(new { success = false, message = "Por favor complete todos los campos correctamente." });
             }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                return Json(new { success = false, message = "Las contraseñas no coinciden." });
+            }
+
             var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
             if (result.Succeeded)
             {
                 var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
                 if (user != null)
-                {
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                }
-                return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
+
+                return Json(new { success = true, message = "La contraseña se cambió correctamente." });
             }
-            AddErrors(result);
-            return View(model);
+
+            string errorMsg = string.Join("<br>", result.Errors);
+            return Json(new { success = false, message = errorMsg });
         }
+
+
+
+
 
         //
         // GET: /Manage/ManageLogins
@@ -237,5 +251,44 @@ namespace SetLight.UI.Controllers
             Error
         }
         #endregion
+
+        [ChildActionOnly]
+        public ActionResult UserMiniProfile()
+        {
+            var userId = User.Identity.GetUserId();
+
+            using (var contexto = new Contexto())
+            {
+                var empleado = contexto.Empleado
+                    .Where(e => e.IdEmpleadoGuid.ToString() == userId)
+                    .Select(e => new EmpleadoDto
+                    {
+                        Nombre = e.Nombre,
+                        Apellido = e.Apellido,
+                        FotoPerfil = e.FotoPerfil
+                    })
+                    .FirstOrDefault();
+
+                if (empleado == null)
+                {
+                    // Devuelve un perfil vacío con placeholder
+                    empleado = new EmpleadoDto
+                    {
+                        Nombre = "Usuario",
+                        Apellido = "",
+                        FotoPerfil = "~/Content/img/placeholder-equipment.png"
+                    };
+                }
+                else if (string.IsNullOrWhiteSpace(empleado.FotoPerfil))
+                {
+                    empleado.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+                }
+
+                return PartialView("_UserMiniProfile", empleado);
+            }
+        }
+
+
+
     }
 }
