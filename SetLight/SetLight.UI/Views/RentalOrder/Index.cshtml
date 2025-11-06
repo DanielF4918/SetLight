@@ -2,11 +2,11 @@
 @using PagedList.Mvc
 @using PagedList
 
-
-
 @{
     ViewBag.Title = "Órdenes de Alquiler";
 }
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
     <h2 class="mb-4 text-dark fw-bold">Órdenes de Alquiler Registradas</h2>
@@ -15,73 +15,102 @@
         @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
     </div>
 
-    <div class="table-responsive">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th># Orden</th>
-                    <th>Cliente</th>
-                    <th>Fecha Orden</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Colaborador</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var orden in Model)
-                {
-                    <tr>
-                        <td>@orden.OrderId</td>
-                        <td>@orden.ClientName</td>
-                        <td>@orden.OrderDate.ToShortDateString()</td>
-                        <td>@orden.StartDate.ToShortDateString()</td>
-                        <td>@orden.EndDate.ToShortDateString()</td>
-                        <td>@orden.EmpleadoNombreCompleto</td>
-                        <td>
-                            @{
-                                string estado = orden.StatusOrder == 1 ? "Activa" :
-                                                orden.StatusOrder == 2 ? "Completada" :
-                                                "Cancelada";
-                            }
-                            @estado
-                        </td>
-                        <td>
-                            <button class="btn btn-dark mb-1" onclick="mostrarEquiposModal(@orden.OrderId)">
-                                Ver equipos
-                            </button>
+    <div class="row g-3">
+        @foreach (var orden in Model)
+        {
+            string estadoTexto = orden.StatusOrder == 1 ? "Activa"
+                                : orden.StatusOrder == 2 ? "Completada"
+                                : "Cancelada";
+            string estadoColor = orden.StatusOrder == 1 ? "bg-primary"
+                                : orden.StatusOrder == 2 ? "bg-success"
+                                : "bg-danger";
 
-                            @if (orden.StatusOrder == 1)
-                            {
-                                @Html.ActionLink("Editar", "Edit", new { id = orden.OrderId }, new { @class = "btn btn-warning mb-1" })
-                                @Html.ActionLink("Registrar devolución", "CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-secondary mb-1" })
-                            }
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm hover-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="fw-bold text-dark mb-2">
+                                Orden #@orden.OrderId
+                            </h5>
+                            <span class="badge @estadoColor text-white">@estadoTexto</span>
+                        </div>
 
-                            @if (orden.StatusOrder == 2)
-                            {
-                                @Html.ActionLink("Ver devolución", "DetallesDevolucion", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-secondary mb-1" })
-                            }
+                        <p class="mb-1"><strong>Cliente:</strong> @orden.ClientName</p>
+                        <p class="mb-1"><strong>Colaborador:</strong> @orden.EmpleadoNombreCompleto</p>
+                        <p class="mb-1"><strong>Fecha:</strong> @orden.OrderDate.ToShortDateString()</p>
+                        <p class="mb-1"><strong>Inicio:</strong> @orden.StartDate.ToShortDateString()</p>
+                        <p class="mb-3"><strong>Fin:</strong> @orden.EndDate.ToShortDateString()</p>
 
-                            @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
-                            {
-                                <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })" class="btn btn-success mb-1">
-                                    Descargar comprobante
-                                </a>
-                            }
-                            else
-                            {
-                                <span class="text-muted">No disponible</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group" role="group">
+
+
+                                <button class="btn btn-dark btn-sm rounded-circle" title="Ver equipos"
+                                        onclick="mostrarEquiposModal(@orden.OrderId)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+
+                                @if (orden.StatusOrder == 1)
+                                {
+                                    <a href="@Url.Action("Edit", "RentalOrder", new { id = orden.OrderId })"
+                                       class="btn btn-warning btn-sm rounded-circle" title="Editar orden">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                        <i class="bi bi-pencil-square text-muted"></i>
+                                    </button>
+                                }
+
+
+                                @if (orden.StatusOrder == 1)
+                                {
+                                    <a href="@Url.Action("CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId })"
+                                       class="btn btn-info btn-sm rounded-circle" title="Registrar devolución">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                }
+                                else if (orden.StatusOrder == 2)
+                                {
+                                    <a href="@Url.Action("DetallesDevolucion", "ReturnDetails", new { orderId = orden.OrderId })"
+                                       class="btn btn-secondary btn-sm rounded-circle" title="Ver devolución">
+                                        <i class="bi bi-box-seam"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                        <i class="bi bi-box-seam text-muted"></i>
+                                    </button>
+                                }
+
+
+                                @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
+                                {
+                                    <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })"
+                                       class="btn btn-success btn-sm rounded-circle" title="Descargar comprobante">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                        <i class="bi bi-download text-muted"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 
-    <!-- Paginación -->
-    <div class="mt-3">
+
+    <div class="mt-4">
         @Html.PagedListPager(Model, page => Url.Action("Index", new
         {
             page,
@@ -95,6 +124,43 @@
     </div>
 
     <style>
+
+        .card {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 10px;
+        }
+
+
+        .btn-group {
+            display: flex;
+            justify-content: center; 
+            gap: 10px;
+        }
+
+            .btn-group .btn {
+                border-radius: 50%; 
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+
+        .hover-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+            .hover-card:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+
 
         .pagination {
             display: flex !important;
@@ -124,19 +190,18 @@
     </style>
 
 
-    <!-- Modales -->
     @foreach (var orden in Model)
     {
-        <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+        <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <table class="styled-table">
-                            <thead>
+                        <table class="table table-striped">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Equipo</th>
                                     <th>Marca</th>
@@ -162,7 +227,7 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -172,7 +237,9 @@
     @section Scripts {
         <script>
             function mostrarEquiposModal(orderId) {
-                $('#modalEquipos-' + orderId).modal('show');
+                const modal = new bootstrap.Modal(document.getElementById('modalEquipos-' + orderId));
+                modal.show();
             }
         </script>
     }
+</div>

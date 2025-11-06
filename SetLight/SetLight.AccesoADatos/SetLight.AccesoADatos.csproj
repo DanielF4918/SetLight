@@ -71,6 +71,10 @@
     <Compile Include="Migrations\202510022359336_Baseline.Designer.cs">
       <DependentUpon>202510022359336_Baseline.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.cs" />
+    <Compile Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.Designer.cs">
+      <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EmpleadoDA.cs" />
@@ -102,6 +106,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202510022359336_Baseline.resx">
       <DependentUpon>202510022359336_Baseline.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.resx">
+      <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -44,7 +44,6 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [DisplayName("Estado")]
         public bool Estado { get; set; } = true;
 
-
         [StringLength(20)]
         [DisplayName("Número de Cédula")]
         public string Cedula { get; set; }
@@ -72,5 +71,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [StringLength(1000)]
         [DisplayName("Información Médica")]
         public string InfoMedica { get; set; }
+
+        [StringLength(500)]
+        [DisplayName("Foto de Perfil")]
+        public string FotoPerfil { get; set; }
     }
 }

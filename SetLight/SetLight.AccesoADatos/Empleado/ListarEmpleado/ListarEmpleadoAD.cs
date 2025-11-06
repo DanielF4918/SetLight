@@ -35,7 +35,8 @@ namespace SetLight.AccesoADatos.Empleado.ListarEmpleado
                                                     ContactoEmergenciaParentesco = empleado.ContactoEmergenciaParentesco,
                                                     TipoSangre = empleado.TipoSangre,
                                                     Alergias = empleado.Alergias,
-                                                    InfoMedica = empleado.InfoMedica
+                                                    InfoMedica = empleado.InfoMedica,
+                                                    FotoPerfil = empleado.FotoPerfil
                                                 }).ToList();
 
             return listaARetornar;

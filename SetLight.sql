@@ -197,3 +197,13 @@ GO
 ALTER TABLE dbo.Empleado
 ADD CONSTRAINT UQ_Empleado_Cedula UNIQUE (Cedula);
 GO
+
+--Agregar imagen para empleados
+IF COL_LENGTH('dbo.Empleado', 'FotoPerfil') IS NULL
+BEGIN
+    ALTER TABLE dbo.Empleado
+    ADD FotoPerfil NVARCHAR(500) NULL;
+END
+
+
+
