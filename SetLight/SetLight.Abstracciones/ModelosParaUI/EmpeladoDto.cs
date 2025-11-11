@@ -38,7 +38,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string RolId { get; set; }
 
         [DisplayName("Rol")]
-        public string NombreRol { get; set; }
+        public string RolNombre { get; set; }
 
         [Required]
         [DisplayName("Estado")]
@@ -75,5 +75,6 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [StringLength(500)]
         [DisplayName("Foto de Perfil")]
         public string FotoPerfil { get; set; }
+
     }
 }
