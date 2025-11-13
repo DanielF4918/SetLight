@@ -207,3 +207,23 @@ END
 
 
 
+---Cambios en Mantenimiento--
+ALTER TABLE dbo.Maintenance
+ADD Comments NVARCHAR(500) NULL,
+    Cost DECIMAL(10,2) NULL,
+    EvidencePath NVARCHAR(255) NULL;
+
+
+ALTER TABLE dbo.Maintenance
+ADD FinalizadoPor NVARCHAR(256) NULL;
+
+
+
+	----en caso de tener problemas con las migraciones
+	ALTER TABLE dbo.Maintenance
+DROP COLUMN Comments, Cost, EvidencePath;
+	ALTER TABLE dbo.Maintenance
+DROP COLUMN FinalizadoPor
+
+
+
