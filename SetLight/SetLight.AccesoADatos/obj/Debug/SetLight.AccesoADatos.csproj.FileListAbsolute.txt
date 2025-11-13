@@ -175,3 +175,5 @@ C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADa
 C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
 C:\Users\kenca\OneDrive\Escritorio\31 10 25\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.AgregarCampoFotoEmpleado.resources
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.ActualizarMaintenance.resources
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SyncSchema.resources

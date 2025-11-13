@@ -75,6 +75,14 @@
     <Compile Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.Designer.cs">
       <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511122252387_ActualizarMaintenance.cs" />
+    <Compile Include="Migrations\202511122252387_ActualizarMaintenance.Designer.cs">
+      <DependentUpon>202511122252387_ActualizarMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511130132004_SyncSchema.cs" />
+    <Compile Include="Migrations\202511130132004_SyncSchema.Designer.cs">
+      <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EmpleadoDA.cs" />
@@ -109,6 +117,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.resx">
       <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511122252387_ActualizarMaintenance.resx">
+      <DependentUpon>202511122252387_ActualizarMaintenance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511130132004_SyncSchema.resx">
+      <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
