@@ -23,7 +23,7 @@
                 <div class="col-md-3">
                     <label class="form-label text-black">Teléfono</label>
                     <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado"
-                           class="form-control border-dark" placeholder="Ej: 8888-8888" />
+                           class="form-control border-dark" placeholder="Tel. personal o de empresa" />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label text-black">Correo</label>
@@ -56,12 +56,33 @@
             foreach (var c in Model)
             {
                 bool isActivo = (c.Status == 1);
-                string nombre = string.Format("{0} {1}", c.FirstName ?? "", c.LastName ?? "");
+                string nombre = string.Format("{0} {1}", c.FirstName ?? "", c.LastName ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nombre))
+                {
+                    nombre = "(Sin nombre)";
+                }
+
+                // Teléfono a mostrar: primero personal, si no hay, el de empresa
+                var telefonoMostrar = !string.IsNullOrWhiteSpace(c.Phone)
+                    ? c.Phone
+                    : (string.IsNullOrWhiteSpace(c.EmpresaTelefono) ? "—" : c.EmpresaTelefono);
+
+                var empresaNombre = string.IsNullOrWhiteSpace(c.EmpresaNombre)
+                    ? "—"
+                    : c.EmpresaNombre;
 
                 <div class="sl-card">
                     <div class="sl-body">
                         <div class="sl-title">@nombre</div>
-                        <div class="sl-sub">Tel: <strong>@c.Phone</strong></div>
+
+                        <div class="sl-sub">
+                            Empresa: <strong>@empresaNombre</strong>
+                        </div>
+
+                        <div class="sl-sub">
+                            Tel: <strong>@telefonoMostrar</strong>
+                        </div>
+
                         <div class="sl-badges">
                             <span class="badge-soft @(isActivo ? "badge-green" : "badge-gray")">
                                 @c.EstadoEnTexto
@@ -118,8 +139,10 @@
                             </div>
                             <div class="modal-body">
                                 <div class="mb-2"><strong>Nombre:</strong> @nombre</div>
-                                <div class="mb-2"><strong>Teléfono:</strong> @c.Phone</div>
                                 <div class="mb-2"><strong>Correo:</strong> @c.Email</div>
+                                <div class="mb-2"><strong>Teléfono personal:</strong> @(string.IsNullOrWhiteSpace(c.Phone) ? "—" : c.Phone)</div>
+                                <div class="mb-2"><strong>Nombre de la empresa:</strong> @empresaNombre</div>
+                                <div class="mb-2"><strong>Teléfono de la empresa:</strong> @(string.IsNullOrWhiteSpace(c.EmpresaTelefono) ? "—" : c.EmpresaTelefono)</div>
                                 <div class="mb-2"><strong>Estado:</strong> @c.EstadoEnTexto</div>
                             </div>
                             <div class="modal-footer d-flex justify-content-between">

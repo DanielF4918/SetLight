@@ -93,6 +93,73 @@ namespace SetLight.UI.Controllers
         [HttpPost]
         public async Task<ActionResult> CrearReturnDetails(EquipmentReturnViewModel model)
         {
+            // ✅ Validaciones a nivel de modelo
+            if (model.Items != null)
+            {
+                for (int i = 0; i < model.Items.Count; i++)
+                {
+                    var item = model.Items[i];
+
+                    int buenas = item.CantidadBuenas;
+                    int danadas = item.CantidadDañadas;
+                    int faltantes = item.CantidadFaltante;
+                    int total = item.Quantity;
+
+                    // 0️⃣ No permitir negativos
+                    if (buenas < 0 || danadas < 0 || faltantes < 0)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "Las cantidades no pueden ser negativas."
+                        );
+                    }
+
+                    // 1️⃣ Solo pedir MaintenanceType si hay equipos dañados
+                    if (danadas > 0 && !item.MaintenanceType.HasValue)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].MaintenanceType",
+                            "Debe seleccionar el tipo de mantenimiento cuando hay equipos dañados."
+                        );
+                    }
+
+                    // 2️⃣ Cada campo individual no puede superar la cantidad alquilada
+                    if (buenas > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "La cantidad en buen estado no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    if (danadas > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadDañadas",
+                            "La cantidad dañada no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    if (faltantes > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadFaltante",
+                            "La cantidad faltante no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    // 3️⃣ La suma total debe igualar la cantidad alquilada
+                    int suma = buenas + danadas + faltantes;
+                    if (suma != total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "La suma de buenas, dañadas y faltantes debe ser igual a la cantidad alquilada."
+                        );
+                    }
+                }
+            }
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -149,25 +216,50 @@ namespace SetLight.UI.Controllers
 
                         using (var contexto = new Contexto())
                         {
+                            // 🔎 Obtenemos el empleado (técnico) a partir del usuario logueado
+                            var emailUsuario = User.Identity.Name;   // normalmente es el correo del AspNetUser
+                            var empleado = contexto.Empleado
+                                .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+
                             // 🔧 Creamos el mantenimiento en estado pendiente
                             var mantenimiento = new Maintenance
                             {
                                 StartDate = DateTime.Now,
-                                MaintenanceType = item.MaintenanceType,
+                                MaintenanceType = item.MaintenanceType.Value, // ya validado
                                 MaintenanceStatus = 0, // 0 = Pendiente
                                 EquipmentId = item.EquipmentId,
                                 Comments = item.Observaciones ?? "Pendiente de revisión",
                                 Cost = null,
-                                EvidencePath = null
+                                EvidencePath = null,
+                                IdEmpleado = empleado?.IdEmpleado   // 👈 técnico responsable
                             };
 
                             contexto.Maintenance.Add(mantenimiento);
                             contexto.SaveChanges();
                         }
                     }
+
+                    // ✅ 3️⃣ Equipos faltantes / no devueltos
+                    if (item.CantidadFaltante > 0)
+                    {
+                        var dtoFaltante = new ReturnDetailsDto
+                        {
+                            OrderId = model.OrderId,
+                            EquipmentId = item.EquipmentId,
+                            ReturnDate = DateTime.Now,
+                            ConditionReport = item.Observaciones ?? "Equipo no devuelto / perdido",
+                            IsReturned = false,
+                            RequiresMaintenance = false
+                        };
+
+                        for (int i = 0; i < item.CantidadFaltante; i++)
+                            await ln.Guardar(dtoFaltante);
+
+                        // No se suma al stock
+                    }
                 }
 
-                // ✅ 3️⃣ Verificar si la orden quedó completamente devuelta
+                // ✅ 4️⃣ Verificar si la orden quedó completamente gestionada
                 using (var contexto = new Contexto())
                 {
                     var orderDetails = contexto.OrderDetails
@@ -191,7 +283,6 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
-                    // ✅ 4️⃣ Si todos los equipos fueron devueltos, cerrar la orden
                     if (ordenCompletada)
                     {
                         var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
@@ -218,6 +309,8 @@ namespace SetLight.UI.Controllers
                 return View(model);
             }
         }
+
+
 
 
         // GET: ReturnDetails/Edit/5

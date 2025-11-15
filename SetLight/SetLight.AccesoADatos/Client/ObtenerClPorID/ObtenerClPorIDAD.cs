@@ -19,17 +19,22 @@ namespace SetLight.AccesoADatos.Clientes.ObtenerClPorID
 
         public ClientDto Obtener(int id)
         {
-            ClientDto clienteARetornar = (from c in _elContexto.Clients
-                                          where c.ClientId == id
-                                          select new ClientDto
-                                          {
-                                              ClientId = c.ClientId,
-                                              FirstName = c.FirstName,
-                                              LastName = c.LastName,
-                                              Phone = c.Phone,
-                                              Email = c.Email,
-                                              Status = c.Status
-                                          }).FirstOrDefault();
+            ClientDto clienteARetornar = (
+                from c in _elContexto.Clients
+                where c.ClientId == id
+                select new ClientDto
+                {
+                    ClientId = c.ClientId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Phone = c.Phone,
+                    Email = c.Email,
+                    Status = c.Status,
+
+                    EmpresaNombre = c.EmpresaNombre,
+                    EmpresaTelefono = c.EmpresaTelefono
+                }
+            ).FirstOrDefault();
 
             return clienteARetornar;
         }
