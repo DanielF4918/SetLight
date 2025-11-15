@@ -92,9 +92,15 @@
         <div id="inputsEquiposContainer"></div>
 
         <div class="form-group mt-4 text-center">
-            <input type="submit" value="Crear Orden" class="btn btn-success px-4 fw-semibold" />
+            <a href="@Url.Action("Index", "RentalOrder")" class="btn btn-secondary px-4 fw-semibold me-2">
+                Volver al listado
+            </a>
+
+            <input type="submit" value="Crear orden" class="btn btn-success px-4 fw-semibold" />
         </div>
     </div>
+}
+
 }
 
 <!-- Modal de equipos -->

@@ -83,6 +83,14 @@
     <Compile Include="Migrations\202511130132004_SyncSchema.Designer.cs">
       <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.cs" />
+    <Compile Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.Designer.cs">
+      <DependentUpon>202511151904010_Sync_Maintenance_IdEmpleado.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.cs" />
+    <Compile Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.Designer.cs">
+      <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EmpleadoDA.cs" />
@@ -123,6 +131,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202511130132004_SyncSchema.resx">
       <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.resx">
+      <DependentUpon>202511151904010_Sync_Maintenance_IdEmpleado.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.resx">
+      <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

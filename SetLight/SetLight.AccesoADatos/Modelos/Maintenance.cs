@@ -42,7 +42,10 @@ namespace SetLight.Entidades
 
         public virtual EquipmentDA Equipment { get; set; }
 
- 
+
+        public int? IdEmpleado { get; set; }
+
+
 
     }
 }
