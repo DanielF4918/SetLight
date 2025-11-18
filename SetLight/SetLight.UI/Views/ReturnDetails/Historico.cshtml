@@ -20,29 +20,29 @@
         @foreach (var m in Model)
         {
             <tr>
-                <td>@m.Equipment.EquipmentName</td>
+                <td>@(m.Equipment != null ? m.Equipment.EquipmentName : "—")</td>
                 <td>@m.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
-                    @(m.EndDate.HasValue
-                    ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
-                    : "<em>En curso</em>")
+                    @Html.Raw(
+                        m.EndDate.HasValue
+                        ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                        : "<em>En curso</em>"
+                    )
                 </td>
                 <td>
                     @(
-        m.MaintenanceType == 1 ? "Revisión por daño" :
-        m.MaintenanceType == 2 ? "Reparación mayor" :
-        m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
-        "—"
-    )
+                        m.MaintenanceType == 1 ? "Revisión por daño" :
+                        m.MaintenanceType == 2 ? "Reparación mayor" :
+                        m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
+                        "—"
+                    )
                 </td>
                 <td>
-                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
-                </td>
-
-                <td>
-                    @(m.MaintenanceStatus == 1
-                    ? "En curso"
-                    : "Finalizado")
+                    @(
+                        m.MaintenanceStatus == 0 ? "Pendiente" :
+                        m.MaintenanceStatus == 1 || m.MaintenanceStatus == 2 ? "Finalizado" :
+                        "Desconocido"
+                    )
                 </td>
             </tr>
         }

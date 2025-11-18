@@ -9,7 +9,7 @@ using SetLight.AccesoADatos.Modelos;
 
 namespace SetLight.AccesoADatos.Client.EditClient
 {
-    public class EditClientAD:IEditClientAD
+    public class EditClientAD : IEditClientAD
     {
         private Contexto ElContexto;
 
@@ -20,16 +20,23 @@ namespace SetLight.AccesoADatos.Client.EditClient
 
         public int Editar(ClientDto clientParaActualizar)
         {
-            ClientDa clientEnBaseDeDatos = ElContexto.Clients.Where(client => client.ClientId == clientParaActualizar.ClientId).FirstOrDefault();
+            ClientDa clientEnBaseDeDatos = ElContexto.Clients
+                .FirstOrDefault(client => client.ClientId == clientParaActualizar.ClientId);
+
+            if (clientEnBaseDeDatos == null)
+                return 0; 
+
             clientEnBaseDeDatos.FirstName = clientParaActualizar.FirstName;
             clientEnBaseDeDatos.LastName = clientParaActualizar.LastName;
             clientEnBaseDeDatos.Phone = clientParaActualizar.Phone;
             clientEnBaseDeDatos.Email = clientParaActualizar.Email;
             clientEnBaseDeDatos.Status = clientParaActualizar.Status;
 
+            clientEnBaseDeDatos.EmpresaNombre = clientParaActualizar.EmpresaNombre;
+            clientEnBaseDeDatos.EmpresaTelefono = clientParaActualizar.EmpresaTelefono;
+
             int seGuardo = ElContexto.SaveChanges();
             return seGuardo;
-
         }
     }
 }
