@@ -17,7 +17,6 @@ using SetLight.AccesoADatos.RentalOrder;
 using SetLight.LogicaDeNegocio.Services;
 using PagedList;
 
-
 namespace SetLight.UI.Controllers
 {
     [Authorize(Roles = "Administrador,Colaborador")]
@@ -133,11 +132,10 @@ namespace SetLight.UI.Controllers
             if (hasta.HasValue) q = q.Where(o => o.EndDate <= hasta.Value);
 
             // Orden descendente por ID
-            int pageSize = 10;                 
+            int pageSize = 10;
             int pageNumber = page ?? 1;
             var ordenesPaged = q.OrderByDescending(o => o.OrderId)
                      .ToPagedList(pageNumber, pageSize);
-
 
             // Para valores en la vista
             ViewBag.FiltroOrderId = orderId;
@@ -466,10 +464,10 @@ namespace SetLight.UI.Controllers
 
                     return RedirectToAction("Index");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     transaction.Rollback();
-                    ModelState.AddModelError("", "Error al guardar los cambios: " + ex.Message);
+                    ModelState.AddModelError("", "Error al guardar los cambios.");
                 }
             }
 
@@ -493,6 +491,56 @@ namespace SetLight.UI.Controllers
                 }).ToList();
 
             return View(model);
+        }
+
+        // 🔴 NUEVO: Cancelar orden
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Cancelar(int id)
+        {
+            using (var transaction = _contexto.Database.BeginTransaction())
+            {
+                try
+                {
+                    var orden = await _contexto.RentalOrders.FindAsync(id);
+                    if (orden == null)
+                        return HttpNotFound();
+
+                    // Solo se pueden cancelar órdenes activas
+                    if (orden.StatusOrder != 1)
+                        return RedirectToAction("Index");
+
+                    // Devolver stock de los equipos de la orden
+                    var detalles = _contexto.OrderDetails
+                        .Where(d => d.OrderId == id)
+                        .ToList();
+
+                    foreach (var detalle in detalles)
+                    {
+                        var equipo = await _contexto.Equipment.FindAsync(detalle.EquipmentId);
+                        if (equipo != null)
+                        {
+                            equipo.Stock += detalle.Quantity;
+
+                            if (equipo.Stock > 0 && equipo.Status == 2)
+                                equipo.Status = 1;
+                        }
+                    }
+
+                    // 3 = Cancelada
+                    orden.StatusOrder = 3;
+
+                    await _contexto.SaveChangesAsync();
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    // Aquí podrías loguear el error o usar TempData para un mensaje
+                }
+            }
+
+            return RedirectToAction("Index");
         }
 
         //GET: VerComprobante
