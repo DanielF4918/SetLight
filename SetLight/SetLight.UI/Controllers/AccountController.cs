@@ -228,7 +228,7 @@ namespace SetLight.UI.Controllers
                     }
 
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("ListarEquipment", "Equipment");
                 }
 
                 AddErrors(result);
@@ -448,7 +448,7 @@ namespace SetLight.UI.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         //
@@ -505,7 +505,7 @@ namespace SetLight.UI.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("ListarEquipment", "Equipment");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

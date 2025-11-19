@@ -5,38 +5,29 @@
 @{
     ViewBag.Title = "Inventario";
 
-    // Moneda
     var us = CultureInfo.GetCultureInfo("en-US");
-
-    // Placeholder (OJO: 'Content' con C mayúscula)
     var PLACEHOLDER = Url.Content("~/Content/img/placeholder-equipment.png");
 
-    // === Helper de imagen ===
     Func<string, string> Src = (raw) =>
     {
         if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
 
         var url = raw.Trim();
 
-        // URLs absolutas o data-URI
         if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
             url.StartsWith("//") ||
             url.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
             return url;
 
-        // Normaliza backslashes
         url = url.Replace("\\", "/");
 
-        // ~/ o / (app-relative) -> resolver
         if (url.StartsWith("~/")) return Url.Content(url);
         if (url.StartsWith("/")) return Url.Content("~" + url);
 
-        // Sin prefijo -> forzar "~/" (ej. "Uploads/Equipment/xxx.jpg")
         return Url.Content("~/" + url.TrimStart('/'));
     };
 
-    // Chip de estado
     Func<int, IHtmlString> ChipEstado = (estado) =>
     {
         var t = "Desconocido";
@@ -51,7 +42,6 @@
     };
 }
 
-<!-- ====== ESTILOS: Grid 3 por fila, cards pequeños y uniformes ====== -->
 <style>
     .inv-header {
         display: flex;
@@ -67,7 +57,7 @@
 
     .equip-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0,1fr)); /* 3 por fila */
+        grid-template-columns: repeat(3, minmax(0,1fr));
         gap: 18px;
         align-items: stretch;
     }
@@ -103,7 +93,7 @@
 
     .equip-photo {
         width: 100%;
-        height: 180px; /* altura fija para uniformidad */
+        height: 180px;
         object-fit: cover;
         background: #f3f3f3;
         display: block;
@@ -121,7 +111,7 @@
         font-size: .95rem;
         font-weight: 800;
         line-height: 1.25;
-        min-height: 2.4em; /* 2 líneas */
+        min-height: 2.4em;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -154,10 +144,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px; /* más separación switch <-> iconos */
+        gap: 16px;
     }
 
-    /* Botón-ícono */
     .icon-btn {
         display: inline-flex;
         align-items: center;
@@ -179,7 +168,6 @@
             color: #222;
         }
 
-    /* Switch rojo/verde */
     .toggle {
         position: relative;
         display: inline-flex;
@@ -196,7 +184,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            background: #c62828; /* rojo (OFF) */
+            background: #c62828;
             border-radius: 999px;
             box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
         }
@@ -217,12 +205,11 @@
         .toggle input:checked + .track {
             background: #2e7d32;
         }
-            /* verde (ON) */
+
             .toggle input:checked + .track::before {
                 transform: translateX(20px);
             }
 
-    /* ===== Filtros (estilo Empleados) ===== */
     .inv-filters {
         display: flex;
         gap: 12px;
@@ -235,12 +222,9 @@
             min-width: 220px;
         }
 
-    /* === Botones: estilos específicos (no global .btn) === */
-
-    /* Para "+ Registrar equipo" */
     .btn-primary {
         display: inline-block;
-        background: #198754; /* verde */
+        background: #198754;
         color: #fff;
         padding: .5rem .9rem;
         border-radius: .5rem;
@@ -252,9 +236,8 @@
             filter: brightness(1.05);
         }
 
-    /* Filtrar */
     .btn-dark {
-        background: #111827; /* gris muy oscuro */
+        background: #111827;
         color: #fff;
         border: 1px solid #111827;
     }
@@ -263,18 +246,16 @@
             filter: brightness(1.08);
         }
 
-    /* Limpiar */
     .btn-outline-secondary {
         background: #fff;
         color: #111827;
-        border: 1px solid #9ca3af; /* gris */
+        border: 1px solid #9ca3af;
     }
 
         .btn-outline-secondary:hover {
             background: #f3f4f6;
         }
 </style>
-<!-- ====== FIN ESTILOS ====== -->
 
 <div class="inv-page">
     <div class="inv-header">
@@ -284,7 +265,6 @@
 
     @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
     {
-        <!-- Filtros estilo Empleados -->
         <div class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-md-4">
@@ -352,6 +332,10 @@
                             {<span class="chip">@e.CategoriaNombre</span>}
 
                             <span class="chip">Disp: @e.Disponibles</span>
+
+                            @* NUEVO: chip de alquilados *@
+                            @if (e.Alquilados > 0)
+                            {<span class="chip">Alq: @e.Alquilados</span>}
 
                             @if (e.EnMantenimiento > 0)
                             {<span class="chip">Mant: @e.EnMantenimiento</span>}

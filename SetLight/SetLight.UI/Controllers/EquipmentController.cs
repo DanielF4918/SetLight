@@ -49,21 +49,36 @@ namespace SetLight.UI.Controllers
                     .Where(o => o.StatusOrder == 1)
                     .SelectMany(o => o.OrderDetails)
                     .GroupBy(d => d.EquipmentId)
-                    .Select(g => new { EquipmentId = g.Key, Cant = g.Sum(x => (int?)x.Quantity) ?? 0 })
+                    .Select(g => new
+                    {
+                        EquipmentId = g.Key,
+                        Cant = g.Sum(x => (int?)x.Quantity) ?? 0
+                    })
                     .ToDictionary(x => x.EquipmentId, x => x.Cant);
 
-                // MANTENIMIENTO: cantidad de mantenimientos activos por equipo
+                // Mantenimientos activos por equipo
                 var mantenimientoPorEquipo = contexto.Maintenance
-                    .Where(m => m.MaintenanceStatus != 2) 
+                    .Where(m => m.MaintenanceStatus != 2)
                     .GroupBy(m => m.EquipmentId)
-                    .Select(g => new { EquipmentId = g.Key, Cant = g.Count() })
+                    .Select(g => new
+                    {
+                        EquipmentId = g.Key,
+                        Cant = g.Count()
+                    })
                     .ToDictionary(x => x.EquipmentId, x => x.Cant);
 
                 foreach (var e in lista)
                 {
-                    e.Alquilados = alquiladosPorEquipo.TryGetValue(e.EquipmentId, out var cantAlq) ? cantAlq : 0;
-                    e.EnMantenimiento = mantenimientoPorEquipo.TryGetValue(e.EquipmentId, out var cantMant) ? cantMant : 0; 
-                    e.Disponibles = Math.Max(0, e.Stock - e.Alquilados); 
+                    e.Alquilados = alquiladosPorEquipo.TryGetValue(e.EquipmentId, out var cantAlq)
+                        ? cantAlq
+                        : 0;
+
+                    e.EnMantenimiento = mantenimientoPorEquipo.TryGetValue(e.EquipmentId, out var cantMant)
+                        ? cantMant
+                        : 0;
+
+                    // Stock en BD ya refleja lo disponible, no restamos alquilados otra vez
+                    e.Disponibles = e.Stock < 0 ? 0 : e.Stock;
                 }
 
                 // ViewBags para combos
@@ -108,23 +123,19 @@ namespace SetLight.UI.Controllers
             }
 
             ViewBag.Estados = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "0", Text = "Todos",             Selected = Estado == null || Estado == 0 },
-        new SelectListItem { Value = "1", Text = "Activo",            Selected = Estado == 1 },
-               new SelectListItem { Value = "2", Text = "Alquilado",         Selected = Estado == 2 },
-        new SelectListItem { Value = "3", Text = "Inactivo",          Selected = Estado == 3 },
-        new SelectListItem { Value = "4", Text = "En mantenimiento",  Selected = Estado == 4 }
-    };
+            {
+                new SelectListItem { Value = "0", Text = "Todos",             Selected = Estado == null || Estado == 0 },
+                new SelectListItem { Value = "1", Text = "Activo",            Selected = Estado == 1 },
+                new SelectListItem { Value = "2", Text = "Alquilado",         Selected = Estado == 2 },
+                new SelectListItem { Value = "3", Text = "Inactivo",          Selected = Estado == 3 },
+                new SelectListItem { Value = "4", Text = "En mantenimiento",  Selected = Estado == 4 }
+            };
 
             ViewBag.NombreBuscado = Nombre;
             ViewBag.PlaceholderImagen = Url.Content("~/content/img/placeholder-equipment.png");
 
             return View(lista);
         }
-
-
-
-
 
         // GET: Equipment/Details/5
         public ActionResult Details(int id)
@@ -150,7 +161,6 @@ namespace SetLight.UI.Controllers
 
             return View();
         }
-
 
         // POST: Equipment/Create
         [HttpPost]
@@ -178,25 +188,21 @@ namespace SetLight.UI.Controllers
                         return View(equipmentguardar);
                     }
 
-                    if (imagen.ContentLength > 5 * 1024 * 1024) 
+                    if (imagen.ContentLength > 5 * 1024 * 1024)
                     {
                         ModelState.AddModelError("", "La imagen supera el tamaño máximo permitido (5 MB).");
                         CargarCategoriasEnViewBag(equipmentguardar.CategoryId);
                         return View(equipmentguardar);
                     }
 
-                    // Asegurar carpeta
                     var carpetaFisica = Server.MapPath(UploadRoot);
                     Directory.CreateDirectory(carpetaFisica);
 
-                    // Nombre único
                     var fileName = $"{Guid.NewGuid():N}{ext}";
                     var rutaFisica = Path.Combine(carpetaFisica, fileName);
 
-                    // Guardar archivo
                     imagen.SaveAs(rutaFisica);
 
-                    // Ruta virtual para guardar en BD
                     rutaGuardada = Url.Content($"{UploadRoot}/{fileName}");
                     equipmentguardar.ImageUrl = rutaGuardada;
                 }
@@ -215,7 +221,7 @@ namespace SetLight.UI.Controllers
                         if (System.IO.File.Exists(rutaFisica))
                             System.IO.File.Delete(rutaFisica);
                     }
-                    catch { /* swallow */ }
+                    catch { }
                 }
 
                 ModelState.AddModelError("", "Error al guardar: " + ex.Message);
@@ -238,7 +244,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
         // GET: Equipment/Edit/5
         [HttpGet]
         public ActionResult Edit(int id)
@@ -260,13 +265,6 @@ namespace SetLight.UI.Controllers
             return View("EditEquipment", elEquipment);
         }
 
-        // Asegúrate de tener arriba del archivo:
-        // using System;
-        // using System.IO;
-        // using System.Linq;
-        // using System.Web;
-        // using System.Web.Mvc;
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(
@@ -275,14 +273,12 @@ namespace SetLight.UI.Controllers
             bool? eliminarImagen
         )
         {
-            // Validación del modelo
             if (!ModelState.IsValid)
             {
                 CargarCategorias(elEquipment.CategoryId);
                 return View("EditEquipment", elEquipment);
             }
 
-            // Obtener registro actual (para preservar campos no editables y conocer la imagen previa)
             var actual = _ObtenerEqPorIDLN.Obtener(elEquipment.EquipmentId);
             if (actual == null)
             {
@@ -291,24 +287,19 @@ namespace SetLight.UI.Controllers
                 return View("EditEquipment", elEquipment);
             }
 
-            // ✅ Preservar estado (evita que se desactive por accidente)
             elEquipment.Status = actual.Status;
 
-            // Imagen anterior
             var oldUrl = actual.ImageUrl;
             string newUrlGuardada = null;
 
             try
             {
-                // --- Manejo de imagen ---
                 if (eliminarImagen == true)
                 {
-                    // El usuario marcó eliminar
                     elEquipment.ImageUrl = null;
                 }
                 else if (nuevaImagen != null && nuevaImagen.ContentLength > 0)
                 {
-                    // Validar extensión/tamaño
                     var ext = Path.GetExtension(nuevaImagen.FileName)?.ToLowerInvariant();
                     var okExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                     if (!okExt.Contains(ext))
@@ -324,38 +315,31 @@ namespace SetLight.UI.Controllers
                         return View("EditEquipment", elEquipment);
                     }
 
-                    // Ruta de carga (usa tu carpeta; cámbiala si ya tenías otra)
                     const string UploadRoot = "~/Uploads/Equipment";
                     var carpetaFisica = Server.MapPath(UploadRoot);
                     Directory.CreateDirectory(carpetaFisica);
 
-                    // Guardar archivo
                     var fileName = $"{Guid.NewGuid():N}{ext}";
                     var rutaFisica = Path.Combine(carpetaFisica, fileName);
                     nuevaImagen.SaveAs(rutaFisica);
 
-                    // URL virtual (para BD)
                     newUrlGuardada = Url.Content($"{UploadRoot}/{fileName}");
-                    elEquipment.ImageUrl = newUrlGuardada; // asignar nueva
+                    elEquipment.ImageUrl = newUrlGuardada;
                 }
                 else
                 {
-                    // Mantener imagen anterior
                     elEquipment.ImageUrl = oldUrl;
                 }
 
-                // --- Persistir cambios ---
                 var filas = _equipmentLN.Actualizar(elEquipment);
                 if (filas <= 0)
                 {
-                    // Si algo falló, borra el archivo recién subido (si lo hubo)
                     BorrarArchivoFisicoSilencioso(newUrlGuardada);
                     ModelState.AddModelError("", "No se pudo actualizar el equipo.");
                     CargarCategorias(elEquipment.CategoryId);
                     return View("EditEquipment", elEquipment);
                 }
 
-                // Si se reemplazó o eliminó imagen, borra la antigua del disco
                 if ((eliminarImagen == true || newUrlGuardada != null) && !string.IsNullOrWhiteSpace(oldUrl))
                 {
                     BorrarArchivoFisicoSilencioso(oldUrl);
@@ -366,7 +350,6 @@ namespace SetLight.UI.Controllers
             }
             catch (Exception ex)
             {
-                // Limpieza si hubo subida
                 BorrarArchivoFisicoSilencioso(newUrlGuardada);
 
                 ModelState.AddModelError("", "Ocurrió un error al actualizar: " + ex.Message);
@@ -375,8 +358,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-        // Helpers
         private void CargarCategorias(int? seleccion = null)
         {
             using (var contexto = new Contexto())
@@ -397,14 +378,13 @@ namespace SetLight.UI.Controllers
             {
                 if (string.IsNullOrWhiteSpace(urlVirtual)) return;
 
-                // si es URL absoluta (CDN), no intentamos borrar
                 if (Uri.IsWellFormedUriString(urlVirtual, UriKind.Absolute)) return;
 
                 var rutaFisica = Server.MapPath(urlVirtual);
                 if (System.IO.File.Exists(rutaFisica))
                     System.IO.File.Delete(rutaFisica);
             }
-            catch { /* swallow */ }
+            catch { }
         }
 
         // GET: Equipment/Delete/5
@@ -420,7 +400,6 @@ namespace SetLight.UI.Controllers
             try
             {
                 // TODO: Add delete logic here
-
                 return RedirectToAction("Index");
             }
             catch
@@ -428,6 +407,7 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
+
         // GET: Equipment/Activar/5
         public ActionResult Activar(int id)
         {

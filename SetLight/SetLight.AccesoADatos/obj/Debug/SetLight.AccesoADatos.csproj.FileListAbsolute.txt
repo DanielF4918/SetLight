@@ -179,3 +179,8 @@ C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SyncSchema.resources
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_Maintenance_IdEmpleado.resources
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SincronizarModeloClientesEmpresa.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.AgregarCampoFotoEmpleado.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.ActualizarMaintenance.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SyncSchema.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_Maintenance_IdEmpleado.resources
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SincronizarModeloClientesEmpresa.resources
