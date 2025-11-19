@@ -11,7 +11,8 @@ using SetLight.AccesoADatos;
 using SetLight.AccesoADatos.ReturnDetails.CreateReturnDetails;
 using SetLight.Entidades;
 using SetLight.LogicaDeNegocio.ReturnDetails.CreateReturnDetails;
-using System.Data.Entity; // Para Include
+using System.Data.Entity;
+using System.IO; // Para Include
 
 namespace SetLight.UI.Controllers
 {
@@ -88,10 +89,77 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        //POST: ReturnDetails/CrearReturnDetails
+        // POST: ReturnDetails/CrearReturnDetails
         [HttpPost]
         public async Task<ActionResult> CrearReturnDetails(EquipmentReturnViewModel model)
         {
+            // ✅ Validaciones a nivel de modelo
+            if (model.Items != null)
+            {
+                for (int i = 0; i < model.Items.Count; i++)
+                {
+                    var item = model.Items[i];
+
+                    int buenas = item.CantidadBuenas;
+                    int danadas = item.CantidadDañadas;
+                    int faltantes = item.CantidadFaltante;
+                    int total = item.Quantity;
+
+                    // 0️⃣ No permitir negativos
+                    if (buenas < 0 || danadas < 0 || faltantes < 0)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "Las cantidades no pueden ser negativas."
+                        );
+                    }
+
+                    // 1️⃣ Solo pedir MaintenanceType si hay equipos dañados
+                    if (danadas > 0 && !item.MaintenanceType.HasValue)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].MaintenanceType",
+                            "Debe seleccionar el tipo de mantenimiento cuando hay equipos dañados."
+                        );
+                    }
+
+                    // 2️⃣ Cada campo individual no puede superar la cantidad alquilada
+                    if (buenas > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "La cantidad en buen estado no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    if (danadas > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadDañadas",
+                            "La cantidad dañada no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    if (faltantes > total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadFaltante",
+                            "La cantidad faltante no puede superar la cantidad alquilada."
+                        );
+                    }
+
+                    // 3️⃣ La suma total debe igualar la cantidad alquilada
+                    int suma = buenas + danadas + faltantes;
+                    if (suma != total)
+                    {
+                        ModelState.AddModelError(
+                            $"Items[{i}].CantidadBuenas",
+                            "La suma de buenas, dañadas y faltantes debe ser igual a la cantidad alquilada."
+                        );
+                    }
+                }
+            }
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -102,6 +170,7 @@ namespace SetLight.UI.Controllers
 
                 foreach (var item in model.Items)
                 {
+                    // ✅ 1️⃣ Equipos en buen estado
                     if (item.CantidadBuenas > 0)
                     {
                         var dtoBueno = new ReturnDetailsDto
@@ -115,10 +184,9 @@ namespace SetLight.UI.Controllers
                         };
 
                         for (int i = 0; i < item.CantidadBuenas; i++)
-                        {
                             await ln.Guardar(dtoBueno);
-                        }
 
+                        // Actualizar stock de equipos devueltos en buen estado
                         using (var contextoStock = new Contexto())
                         {
                             var equipo = contextoStock.Equipment.FirstOrDefault(e => e.EquipmentId == item.EquipmentId);
@@ -130,6 +198,7 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
+                    // ✅ 2️⃣ Equipos dañados → generan mantenimiento
                     if (item.CantidadDañadas > 0)
                     {
                         var dtoDañado = new ReturnDetailsDto
@@ -143,19 +212,26 @@ namespace SetLight.UI.Controllers
                         };
 
                         for (int i = 0; i < item.CantidadDañadas; i++)
-                        {
                             await ln.Guardar(dtoDañado);
-                        }
 
                         using (var contexto = new Contexto())
                         {
+                            // 🔎 Obtenemos el empleado (técnico) a partir del usuario logueado
+                            var emailUsuario = User.Identity.Name;   // normalmente es el correo del AspNetUser
+                            var empleado = contexto.Empleado
+                                .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+
+                            // 🔧 Creamos el mantenimiento en estado pendiente
                             var mantenimiento = new Maintenance
                             {
                                 StartDate = DateTime.Now,
-                                EndDate = DateTime.Now,
-                                MaintenanceType = item.MaintenanceType,
-                                MaintenanceStatus = 1,
-                                EquipmentId = item.EquipmentId
+                                MaintenanceType = item.MaintenanceType.Value, // ya validado
+                                MaintenanceStatus = 0, // 0 = Pendiente
+                                EquipmentId = item.EquipmentId,
+                                Comments = item.Observaciones ?? "Pendiente de revisión",
+                                Cost = null,
+                                EvidencePath = null,
+                                IdEmpleado = empleado?.IdEmpleado   // 👈 técnico responsable
                             };
 
                             contexto.Maintenance.Add(mantenimiento);
@@ -163,8 +239,27 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
+                    // ✅ 3️⃣ Equipos faltantes / no devueltos
+                    if (item.CantidadFaltante > 0)
+                    {
+                        var dtoFaltante = new ReturnDetailsDto
+                        {
+                            OrderId = model.OrderId,
+                            EquipmentId = item.EquipmentId,
+                            ReturnDate = DateTime.Now,
+                            ConditionReport = item.Observaciones ?? "Equipo no devuelto / perdido",
+                            IsReturned = false,
+                            RequiresMaintenance = false
+                        };
+
+                        for (int i = 0; i < item.CantidadFaltante; i++)
+                            await ln.Guardar(dtoFaltante);
+
+                        // No se suma al stock
+                    }
                 }
 
+                // ✅ 4️⃣ Verificar si la orden quedó completamente gestionada
                 using (var contexto = new Contexto())
                 {
                     var orderDetails = contexto.OrderDetails
@@ -193,12 +288,13 @@ namespace SetLight.UI.Controllers
                         var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
                         if (orden != null)
                         {
-                            orden.StatusOrder = 2;
+                            orden.StatusOrder = 2; // 2 = Finalizada
                             contexto.SaveChanges();
                         }
                     }
                 }
 
+                TempData["Success"] = "Devolución registrada correctamente.";
                 return RedirectToAction("Index", "RentalOrder");
             }
             catch (Exception ex)
@@ -212,8 +308,10 @@ namespace SetLight.UI.Controllers
                 ModelState.AddModelError("", "Error al guardar devoluciones: " + mensaje);
                 return View(model);
             }
-
         }
+
+
+
 
         // GET: ReturnDetails/Edit/5
         public ActionResult Edit(int id)
@@ -261,26 +359,15 @@ namespace SetLight.UI.Controllers
 
         // Listado de mantenimientos con filtros
         // GET: /ReturnDetails/Mantenimientos
-        public ActionResult Mantenimientos(
-            string equipo,      // nombre parcial del equipo
-            int? tipo,          // 1=Revisión por daño, 2=Reparación mayor, 3=Preventivo
-            int? estado,        // 1=En curso, 2=Finalizado  (por defecto: 1)
-            DateTime? desde,    // StartDate >=
-            DateTime? hasta     // StartDate <=
-        )
+        public ActionResult Mantenimientos(string equipo, int? tipo, int? estado, DateTime? desde, DateTime? hasta)
         {
             using (var contexto = new Contexto())
             {
                 var q = contexto.Maintenance
-                    .Include("Equipment")
+                    .Include(m => m.Equipment)
                     .AsQueryable();
 
-                // Por defecto, si no se envía estado, mostrar En curso
-                if (estado.HasValue)
-                    q = q.Where(m => m.MaintenanceStatus == estado.Value);
-                else
-                    q = q.Where(m => m.MaintenanceStatus == 1);
-
+                // Filtros opcionales
                 if (!string.IsNullOrWhiteSpace(equipo))
                 {
                     var term = equipo.Trim().ToLower();
@@ -290,17 +377,17 @@ namespace SetLight.UI.Controllers
                 if (tipo.HasValue)
                     q = q.Where(m => m.MaintenanceType == tipo.Value);
 
+                if (estado.HasValue)
+                    q = q.Where(m => m.MaintenanceStatus == estado.Value);
+
                 if (desde.HasValue)
                     q = q.Where(m => m.StartDate >= desde.Value);
 
                 if (hasta.HasValue)
                     q = q.Where(m => m.StartDate <= hasta.Value);
 
-                var lista = q
-                    .OrderByDescending(m => m.StartDate)
-                    .ToList();
+                var lista = q.OrderByDescending(m => m.StartDate).ToList();
 
-                // ViewBags para la vista
                 ViewBag.FiltroEquipo = equipo;
                 ViewBag.FiltroTipo = tipo;
                 ViewBag.FiltroEstado = estado;
@@ -311,8 +398,29 @@ namespace SetLight.UI.Controllers
             }
         }
 
+
+
+        // GET: ReturnDetails/Finalize/5
+        public ActionResult Finalize(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance
+                    .Include(m => m.Equipment)
+                    .FirstOrDefault(m => m.MaintenanceId == id);
+
+                if (mantenimiento == null)
+                    return HttpNotFound();
+
+                return View(mantenimiento);
+            }
+        }
+
+
+
         [HttpPost]
-        public ActionResult FinalizarMantenimiento(int id)
+        [ValidateAntiForgeryToken]
+        public ActionResult FinalizarMantenimiento(int id, string comments, decimal? cost, HttpPostedFileBase evidenceFile)
         {
             using (var contexto = new Contexto())
             {
@@ -320,8 +428,20 @@ namespace SetLight.UI.Controllers
                 if (mantenimiento == null)
                     return HttpNotFound();
 
-                mantenimiento.MaintenanceStatus = 2;
+                if (evidenceFile != null && evidenceFile.ContentLength > 0)
+                {
+                    var fileName = System.IO.Path.GetFileName(evidenceFile.FileName);
+                    var path = System.IO.Path.Combine(Server.MapPath("~/Evidencias/"), fileName);
+                    evidenceFile.SaveAs(path);
+                    mantenimiento.EvidencePath = "/Evidencias/" + fileName;
+                }
+
+                mantenimiento.Comments = comments;
+                mantenimiento.Cost = cost;
+                mantenimiento.MaintenanceStatus = 1;
                 mantenimiento.EndDate = DateTime.Now;
+
+                mantenimiento.FinalizadoPor = Session["NombreUsuario"]?.ToString() ?? User.Identity.Name;
 
                 var equipo = contexto.Equipment.Find(mantenimiento.EquipmentId);
                 if (equipo != null)
@@ -330,8 +450,14 @@ namespace SetLight.UI.Controllers
                 contexto.SaveChanges();
             }
 
+            TempData["Success"] = "Mantenimiento finalizado correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
+
+
+
+
 
         public ActionResult TestInsertarMantenimiento()
         {
@@ -341,7 +467,7 @@ namespace SetLight.UI.Controllers
                 {
                     StartDate = DateTime.Now,
                     MaintenanceType = 1,
-                    MaintenanceStatus = 1,
+                    MaintenanceStatus = 0, 
                     EquipmentId = 1
                 });
                 ctx.SaveChanges();
@@ -349,17 +475,85 @@ namespace SetLight.UI.Controllers
             return Content("¡Inserción de prueba completada!");
         }
 
+
         public ActionResult Historico()
         {
             using (var contexto = new Contexto())
             {
                 var listaHistorico = contexto.Maintenance
-                    .Include("Equipment")
+                    .Include(m => m.Equipment)
+                    .Where(m => m.MaintenanceStatus == 1 || m.MaintenanceStatus == 2) 
                     .OrderByDescending(m => m.StartDate)
                     .ToList();
 
                 return View(listaHistorico);
             }
         }
+
+
+        public ActionResult DetallesMantenimiento(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance
+                    .Include("Equipment")
+                    .FirstOrDefault(m => m.MaintenanceId == id);
+
+                if (mantenimiento == null)
+                    return HttpNotFound();
+
+                return View(mantenimiento);
+            }
+        }
+
+
+        // GET: ReturnDetails/EditarMantenimiento/5
+        public ActionResult EditarMantenimiento(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance
+                    .Include(m => m.Equipment)
+                    .FirstOrDefault(m => m.MaintenanceId == id);
+
+                if (mantenimiento == null)
+                    return HttpNotFound();
+
+                return View(mantenimiento);
+            }
+        }
+
+        // POST: ReturnDetails/EditarMantenimiento/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditarMantenimiento(int id, string comments, decimal? cost, HttpPostedFileBase evidenceFile)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance.Find(id);
+                if (mantenimiento == null)
+                    return HttpNotFound();
+
+                // Guardar evidencia si hay archivo nuevo
+                if (evidenceFile != null && evidenceFile.ContentLength > 0)
+                {
+                    var fileName = System.IO.Path.GetFileName(evidenceFile.FileName);
+                    var path = System.IO.Path.Combine(Server.MapPath("~/Evidencias/"), fileName);
+                    evidenceFile.SaveAs(path);
+                    mantenimiento.EvidencePath = "/Evidencias/" + fileName;
+                }
+
+                mantenimiento.Comments = comments;
+                mantenimiento.Cost = cost;
+
+                contexto.SaveChanges();
+            }
+
+            TempData["Success"] = "Mantenimiento actualizado correctamente.";
+            return RedirectToAction("Mantenimientos");
+        }
+
+
+
     }
 }

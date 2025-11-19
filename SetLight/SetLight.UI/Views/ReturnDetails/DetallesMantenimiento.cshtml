@@ -1,0 +1,105 @@
+﻿@model SetLight.Entidades.Maintenance
+
+<h2>Detalles del Mantenimiento</h2>
+
+<table class="table table-bordered shadow-sm">
+    <tr>
+        <th>Equipo</th>
+        <td>@(Model.Equipment != null ? Model.Equipment.EquipmentName : "—")</td>
+    </tr>
+
+    <tr>
+        <th>Inicio</th>
+        <td>@Model.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Fin</th>
+        <td>@(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "—")</td>
+    </tr>
+
+    <tr>
+        <th>Tipo</th>
+        <td>
+            @{
+                string tipo = "—";
+
+                switch (Model.MaintenanceType)
+                {
+                    case 1:
+                        tipo = "Revisión por daño";
+                        break;
+                    case 2:
+                        tipo = "Reparación mayor";
+                        break;
+                    case 3:
+                        tipo = "Mantenimiento preventivo";
+                        break;
+                    default:
+                        tipo = "—";
+                        break;
+                }
+            }
+            @tipo
+        </td>
+    </tr>
+
+    <tr>
+        <th>Comentarios</th>
+        <td>@(!string.IsNullOrWhiteSpace(Model.Comments) ? Model.Comments : "—")</td>
+    </tr>
+
+    <tr>
+        <th>Costo</th>
+        <td>@(Model.Cost.HasValue ? "$" + Model.Cost.Value.ToString("N2") : "—")</td>
+    </tr>
+
+    <tr>
+        <th>Estado</th>
+        <td>
+            @if (Model.MaintenanceStatus == 0)
+            {
+                <span class="badge bg-warning text-dark">Pendiente</span>
+            }
+            else
+            {
+                <span class="badge bg-success">Finalizado</span>
+            }
+        </td>
+    </tr>
+
+    <tr>
+        <th>Técnico responsable</th>
+        <td>@(!string.IsNullOrEmpty(Model.FinalizadoPor) ? Model.FinalizadoPor : "—")</td>
+    </tr>
+
+    <tr>
+        <th>Evidencia</th>
+        <td>
+            @if (!string.IsNullOrEmpty(Model.EvidencePath))
+            {
+                var extension = System.IO.Path.GetExtension(Model.EvidencePath)?.ToLower();
+
+                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
+                {
+                    <img src="@Url.Content(Model.EvidencePath)"
+                         alt="Evidencia"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-width: 400px; border: 1px solid #ccc; margin-top: 5px;" />
+                }
+                else
+                {
+                    <a href="@Url.Content(Model.EvidencePath)" target="_blank">Ver archivo</a>
+                }
+            }
+            else
+            {
+                <span>—</span>
+            }
+        </td>
+    </tr>
+</table>
+
+<div class="mt-3">
+    @Html.ActionLink("Volver al listado", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary" })
+</div>

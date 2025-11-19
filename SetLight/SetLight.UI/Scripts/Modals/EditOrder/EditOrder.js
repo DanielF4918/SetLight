@@ -44,9 +44,9 @@
                         <td>${name}</td>
                         <td>${brand}</td>
                         <td>${model}</td>
-                        <td>₡${val.toLocaleString('es-CR')}</td>
+                        <td>$${val.toLocaleString('es-CR')}</td>
                         <td>${qty}</td>
-                        <td>₡${subItem.toLocaleString('es-CR')}</td>
+                        <td>$${subItem.toLocaleString('es-CR')}</td>
                     </tr>
                 `;
 

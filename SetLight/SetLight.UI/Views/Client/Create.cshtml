@@ -33,6 +33,33 @@
                         @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
                     </div>
 
+                    <!-- Campos opcionales de empresa -->
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.EmpresaNombre, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.EmpresaNombre, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "form-control border-dark",
+                                placeholder = "Ej: Producciones Tica S.A."
+                            }
+                        })
+                        @Html.ValidationMessageFor(model => model.EmpresaNombre, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.EmpresaTelefono, new { @class = "form-label text-black" })
+                        @Html.EditorFor(model => model.EmpresaTelefono, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "form-control border-dark",
+                                placeholder = "Ej: 2222-3333"
+                            }
+                        })
+                        @Html.ValidationMessageFor(model => model.EmpresaTelefono, "", new { @class = "text-danger" })
+                    </div>
+
                     <div class="mb-4">
                         @Html.LabelFor(model => model.Email, new { @class = "form-label text-black" })
                         @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control border-dark" } })

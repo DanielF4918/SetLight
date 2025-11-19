@@ -2,6 +2,27 @@
 
 @{
     ViewBag.Title = "Listado de Empleados";
+
+    // Placeholder por si no tienen imagen
+    var PLACEHOLDER = Url.Content("~/Content/img/placeholder-user.png");
+
+    Func<string, string> Src = (raw) =>
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
+
+        var url = raw.Trim();
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("//") ||
+            url.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        url = url.Replace("\\", "/");
+        if (url.StartsWith("~/")) return Url.Content(url);
+        if (url.StartsWith("/")) return url;
+
+        return PLACEHOLDER;
+    };
 }
 
 <div class="container mt-4 mb-5">
@@ -10,7 +31,7 @@
         @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
     </div>
 
-    <!-- Filtros (front-end, sin tocar controller) -->
+    <!-- Filtros -->
     <div class="card p-3 mb-3">
         <div class="row g-2 align-items-end">
             <div class="col-md-6">
@@ -39,22 +60,29 @@
             foreach (var e in Model)
             {
                 var nombreCompleto = (e.Nombre ?? "") + " " + (e.Apellido ?? "");
-                var cargo = string.IsNullOrWhiteSpace(e.NombreRol) ? e.RolId : e.NombreRol;
+                var cargo = string.IsNullOrWhiteSpace(e.RolNombre) ? e.RolId : e.RolNombre;
 
                 <div class="sl-card emp-card"
                      data-nombre="@nombreCompleto.ToLower()"
                      data-estado="@e.Estado.ToString().ToLower()">
-                    <div class="sl-body">
-                        <div class="sl-title">@nombreCompleto</div>
-                        <div class="sl-sub">Cargo: <strong>@cargo</strong></div>
-                        <div class="sl-badges">
+                    <div class="sl-body text-center p-3">
+
+                        <!-- 🧩 Foto de perfil -->
+                        <img src="@Src(e.FotoPerfil)"
+                             alt="Foto de @nombreCompleto"
+                             class="img-thumbnail rounded-circle shadow-sm mb-2"
+                             style="width: 90px; height: 90px; object-fit: cover;" />
+
+                        <div class="sl-title fw-bold">@nombreCompleto</div>
+                        <div class="sl-sub text-muted small">Cargo: <strong>@cargo</strong></div>
+                        <div class="sl-badges mt-1">
                             <span class="badge-soft @(e.Estado ? "badge-green" : "badge-gray")">
                                 @(e.Estado ? "Activo" : "Inactivo")
                             </span>
                         </div>
                     </div>
 
-                    <div class="sl-footer">
+                    <div class="sl-footer d-flex justify-content-between align-items-center px-3 py-2">
                         <!-- Switch sin JS -->
                         <div>
                             @if (e.Estado)
@@ -73,7 +101,7 @@
                             }
                         </div>
 
-                        <!-- Editar / Detalles (ojito) -->
+                        <!-- Editar / Detalles -->
                         <div class="d-flex gap-2">
                             <a class="btn-icon warning" title="Editar"
                                href="@Url.Action("Edit","Empleado", new { id = e.IdEmpleado })">

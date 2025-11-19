@@ -88,6 +88,7 @@
     <Compile Include="ModelosParaUI\EmpeladoDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
+    <Compile Include="ModelosParaUI\MaintenanceDto.cs" />
     <Compile Include="ModelosParaUI\OrderDetailDto.cs" />
     <Compile Include="ModelosParaUI\RentalOrderDto.cs" />
     <Compile Include="ModelosParaUI\ReturnDetailsDto.cs" />
@@ -100,6 +101,8 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="AccesoADatos\Maintenance\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

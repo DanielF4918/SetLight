@@ -44,13 +44,13 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group" role="group">
 
-
+                                <!-- Ver equipos -->
                                 <button class="btn btn-dark btn-sm rounded-circle" title="Ver equipos"
                                         onclick="mostrarEquiposModal(@orden.OrderId)">
                                     <i class="bi bi-eye"></i>
                                 </button>
 
-
+                                <!-- Editar orden -->
                                 @if (orden.StatusOrder == 1)
                                 {
                                     <a href="@Url.Action("Edit", "RentalOrder", new { id = orden.OrderId })"
@@ -65,7 +65,7 @@
                                     </button>
                                 }
 
-
+                                <!-- Registrar / Ver devolución -->
                                 @if (orden.StatusOrder == 1)
                                 {
                                     <a href="@Url.Action("CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId })"
@@ -87,7 +87,30 @@
                                     </button>
                                 }
 
+                                <!-- 🔴 Cancelar orden -->
+                                @if (orden.StatusOrder == 1)
+                                {
+                                    using (Html.BeginForm("Cancelar", "RentalOrder",
+                                                          new { id = orden.OrderId },
+                                                          FormMethod.Post,
+                                                          new { @class = "d-inline", onsubmit = "return confirm('¿Seguro que desea cancelar esta orden?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm rounded-circle"
+                                                title="Cancelar orden">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                        <i class="bi bi-x-circle text-muted"></i>
+                                    </button>
+                                }
 
+                                <!-- Descargar comprobante -->
                                 @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
                                 {
                                     <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })"
@@ -109,7 +132,6 @@
         }
     </div>
 
-
     <div class="mt-4">
         @Html.PagedListPager(Model, page => Url.Action("Index", new
         {
@@ -124,28 +146,25 @@
     </div>
 
     <style>
-
         .card {
             border: 1px solid #dee2e6 !important;
             border-radius: 10px;
         }
 
-
         .btn-group {
             display: flex;
-            justify-content: center; 
+            justify-content: center;
             gap: 10px;
         }
 
             .btn-group .btn {
-                border-radius: 50%; 
+                border-radius: 50%;
                 width: 36px;
                 height: 36px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-
 
         .hover-card {
             transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -160,7 +179,6 @@
             font-size: 0.8rem;
             padding: 6px 10px;
         }
-
 
         .pagination {
             display: flex !important;
@@ -189,7 +207,7 @@
             }
     </style>
 
-
+    @* Modales de equipos *@
     @foreach (var orden in Model)
     {
         <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
@@ -219,8 +237,8 @@
                                         <td>@detalle.Brand</td>
                                         <td>@detalle.Model</td>
                                         <td>@detalle.Quantity</td>
-                                        <td>₡@detalle.RentalValue</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                        <td>$@detalle.RentalValue</td>
+                                        <td>$@(detalle.RentalValue * detalle.Quantity)</td>
                                     </tr>
                                 }
                             </tbody>

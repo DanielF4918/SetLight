@@ -32,6 +32,7 @@
                 <th>Cantidad alquilada</th>
                 <th>Cantidad en buen estado</th>
                 <th>Cantidad dañada</th>
+                <th>Cantidad faltante</th>
                 <th>Observaciones</th>
                 <th>Tipo de mantenimiento</th>
             </tr>
@@ -47,17 +48,44 @@
                     </td>
                     <td>
                         @Html.DisplayFor(m => m.Items[i].Quantity)
-                        @Html.HiddenFor(m => m.Items[i].Quantity)
+                        @Html.HiddenFor(m => m.Items[i].Quantity, new { @class = "qty-total" })
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadBuenas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
-                        @Html.ValidationMessageFor(m => m.Items[i].CantidadBuenas)
+                        @Html.TextBoxFor(
+                            m => m.Items[i].CantidadBuenas,
+                            new
+                            {
+                                @class = "form-control qty-buenas",
+                                type = "number",
+                                min = "0",
+                                max = Model.Items[i].Quantity
+                            })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadBuenas, "", new { @class = "text-danger" })
                     </td>
                     <td>
-                        @Html.TextBoxFor(m => m.Items[i].CantidadDañadas, new { @class = "form-control", type = "number", min = 0, max = Model.Items[i].Quantity, value = "0" })
-                        @Html.ValidationMessageFor(m => m.Items[i].CantidadDañadas)
+                        @Html.TextBoxFor(
+                            m => m.Items[i].CantidadDañadas,
+                            new
+                            {
+                                @class = "form-control qty-danadas",
+                                type = "number",
+                                min = "0",
+                                max = Model.Items[i].Quantity
+                            })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadDañadas, "", new { @class = "text-danger" })
                     </td>
-
+                    <td>
+                        @Html.TextBoxFor(
+                            m => m.Items[i].CantidadFaltante,
+                            new
+                            {
+                                @class = "form-control qty-faltantes",
+                                type = "number",
+                                min = "0",
+                                max = Model.Items[i].Quantity
+                            })
+                        @Html.ValidationMessageFor(m => m.Items[i].CantidadFaltante, "", new { @class = "text-danger" })
+                    </td>
                     <td>
                         @Html.TextBoxFor(m => m.Items[i].Observaciones, new { @class = "form-control" })
                     </td>
@@ -72,7 +100,7 @@
                             "-- Seleccione --",
                             new { @class = "form-control" }
                         )
-                        @Html.ValidationMessageFor(m => m.Items[i].MaintenanceType)
+                        @Html.ValidationMessageFor(m => m.Items[i].MaintenanceType, "", new { @class = "text-danger" })
                     </td>
                 </tr>
             }
@@ -80,7 +108,81 @@
     </table>
 
     <div class="form-group">
-        <input type="submit" value="Registrar devolución" class="btn btn-primary" />
+        <input type="submit" value="Registrar devolución" class="btn btn-danger" />
         @Html.ActionLink("Volver al listado", "Index", "RentalOrder", null, new { @class = "btn btn-secondary" })
     </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll("table tbody tr");
+
+            rows.forEach(row => {
+                const totalInput = row.querySelector(".qty-total");
+                const buenasInput = row.querySelector(".qty-buenas");
+                const danadasInput = row.querySelector(".qty-danadas");
+                const faltantesInput = row.querySelector(".qty-faltantes");
+
+                if (!totalInput || !buenasInput || !danadasInput || !faltantesInput) {
+                    return;
+                }
+
+                function onChange(e) {
+                    const total = parseInt(totalInput.value || "0");
+
+                    let buenas = parseInt(buenasInput.value || "0");
+                    let danadas = parseInt(danadasInput.value || "0");
+                    let faltantes = parseInt(faltantesInput.value || "0");
+
+                    // Evitar negativos
+                    if (buenas < 0) buenas = 0;
+                    if (danadas < 0) danadas = 0;
+                    if (faltantes < 0) faltantes = 0;
+
+                    // Si todas las unidades están en buen estado → bloquear el resto
+                    if (buenas >= total) {
+                        buenas = total;
+                        danadas = 0;
+                        faltantes = 0;
+
+                        danadasInput.value = 0;
+                        faltantesInput.value = 0;
+                        danadasInput.disabled = true;
+                        faltantesInput.disabled = true;
+                    } else {
+                        // Habilitar campos si no está todo en buen estado
+                        danadasInput.disabled = false;
+                        faltantesInput.disabled = false;
+
+                        // Evitar que la suma se pase del total
+                        let suma = buenas + danadas + faltantes;
+                        if (suma > total) {
+                            // Reducir el campo que se está editando
+                            const target = e.target;
+                            let actual = parseInt(target.value || "0");
+                            const exceso = suma - total;
+
+                            actual = actual - exceso;
+                            if (actual < 0) actual = 0;
+                            target.value = actual;
+
+                            // Recalcular valores
+                            buenas = parseInt(buenasInput.value || "0");
+                            danadas = parseInt(danadasInput.value || "0");
+                            faltantes = parseInt(faltantesInput.value || "0");
+                        }
+                    }
+
+                    buenasInput.value = buenas;
+                    danadasInput.value = danadas;
+                    faltantesInput.value = faltantes;
+                }
+
+                [buenasInput, danadasInput, faltantesInput].forEach(input => {
+                    input.addEventListener("input", onChange);
+                });
+            });
+        });
+    </script>
 }

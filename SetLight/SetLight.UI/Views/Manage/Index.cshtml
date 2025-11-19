@@ -1,24 +1,39 @@
 ﻿@model SetLight.Abstracciones.ModelosParaUI.EmpleadoDto
 @{
     ViewBag.Title = "Administrar";
+
+    var PLACEHOLDER = Url.Content("~/Content/img/placeholder-user.png");
+    var foto = string.IsNullOrWhiteSpace(Model.FotoPerfil) ? PLACEHOLDER : Url.Content(Model.FotoPerfil);
 }
 
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
+<main aria-labelledby="title" class="container mt-4 mb-5">
+    <h2 id="title" class="mb-3">@ViewBag.Title</h2>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @Html.Raw(TempData["StatusMessage"])
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    }
+
 
     <p class="text-success">@ViewBag.StatusMessage</p>
 
-    <div class="mb-4">
-        <h4>Perfil del colaborador</h4>
+    <div class="text-center mb-4">
+        <img src="@foto"
+             alt="Foto de @Model.Nombre"
+             class="img-thumbnail rounded-circle shadow-sm"
+             style="width: 140px; height: 140px; object-fit: cover;" />
+        <h4 class="mt-3">@Model.Nombre @Model.Apellido</h4>
+        <p class="text-muted mb-0">@Model.CorreoElectronico</p>
+    </div>
+
+    <div class="card shadow-sm p-4 bg-light">
+        <h5 class="mb-3">Información personal</h5>
         <hr />
 
         <dl class="row">
-            <dt class="col-sm-4">Nombre:</dt>
-            <dd class="col-sm-8">@Model.Nombre @Model.Apellido</dd>
-
-            <dt class="col-sm-4">Correo:</dt>
-            <dd class="col-sm-8">@Model.CorreoElectronico</dd>
-
             <dt class="col-sm-4">Teléfono:</dt>
             <dd class="col-sm-8">@Model.TelefonoCelular</dd>
 
@@ -38,15 +53,91 @@
             <dd class="col-sm-8">@Model.InfoMedica</dd>
         </dl>
 
-        <p class="text-muted">
-            Si alguno de estos datos es incorrecto, comuníquese con su supervisor o Recursos Humanos.
+        <p class="text-muted mt-3">
+            Si alguno de estos datos es incorrecto, comuníquese con su supervisor o con el área de Recursos Humanos.
         </p>
     </div>
 
-    <div>
-        <h4>Cambiar la configuración de la cuenta</h4>
+    <div class="mt-4">
+        <h5>Cambiar la configuración de la cuenta</h5>
         <hr />
-        <dl class="dl-horizontal">
-        </dl>
+        <div class="mt-3">
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarContrasena">
+                Cambiar contraseña
+            </button>
+        </div>
+
+
     </div>
 </main>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarContrasena" tabindex="-1" aria-labelledby="modalCambiarContrasenaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalCambiarContrasenaLabel">Cambiar Contraseña</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="msgCambioContrasena"></div>
+
+                @using (Html.BeginForm("ChangePassword", "Manage", FormMethod.Post, new { id = "formCambiarContrasena" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        @Html.Label("Contraseña actual", htmlAttributes: new { @class = "form-label" })
+                        <input type="password" name="OldPassword" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.Label("Nueva contraseña", htmlAttributes: new { @class = "form-label" })
+                        <input type="password" name="NewPassword" class="form-control" minlength="6" required />
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.Label("Confirmar nueva contraseña", htmlAttributes: new { @class = "form-label" })
+                        <input type="password" name="ConfirmPassword" class="form-control" minlength="6" required />
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    document.getElementById("formCambiarContrasena").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = this;
+        const msgBox = document.getElementById("msgCambioContrasena");
+
+        msgBox.innerHTML = "";
+
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            msgBox.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+            form.reset();
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalCambiarContrasena"));
+                modal.hide();
+                location.reload(); 
+            }, 2000);
+        } else {
+            msgBox.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+        }
+    });
+    </script>
+}
+

@@ -9,6 +9,7 @@ namespace SetLight.Entidades
     public class Maintenance
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaintenanceId { get; set; }
 
         [Required]
@@ -17,15 +18,34 @@ namespace SetLight.Entidades
         public DateTime? EndDate { get; set; }
 
         [Required]
-        public int MaintenanceType { get; set; }
+        public int MaintenanceType { get; set; } // 1 = Revisión por daño, 2 = Reparación mayor, 3 = Preventivo
 
         [Required]
-        public int MaintenanceStatus { get; set; }
+        [Range(0, 2)]
+        public int MaintenanceStatus { get; set; } = 0; // 0 = Pendiente, 1 = Finalizado, 2 = Cancelado (opcional)
 
         [Required]
+        [ForeignKey(nameof(Equipment))]
         public int EquipmentId { get; set; }
 
-        [ForeignKey("EquipmentId")]
+        [StringLength(500)]
+        public string Comments { get; set; }
+
+        [Column(TypeName = "decimal")] 
+        public decimal? Cost { get; set; }
+
+        [StringLength(255)]
+        public string EvidencePath { get; set; }
+
+        [StringLength(256)]
+        public string FinalizadoPor { get; set; }
+
         public virtual EquipmentDA Equipment { get; set; }
+
+
+        public int? IdEmpleado { get; set; }
+
+
+
     }
 }

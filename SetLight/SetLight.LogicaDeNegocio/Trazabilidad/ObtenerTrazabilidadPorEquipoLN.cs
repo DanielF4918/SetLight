@@ -4,7 +4,6 @@ using System.Linq;
 using SetLight.Abstracciones.AccesoADatos.Trazabilidad;
 using SetLight.Abstracciones.LogicaDeNegocio.Trazabilidad;
 using SetLight.Abstracciones.ModelosParaUI;
-using SetLight.AccesoADatos;
 using SetLight.AccesoADatos.Trazabilidad;
 
 namespace SetLight.LogicaDeNegocio.Trazabilidad.ObtenerTrazabilidadPorEquipo
@@ -22,25 +21,9 @@ namespace SetLight.LogicaDeNegocio.Trazabilidad.ObtenerTrazabilidadPorEquipo
         {
             var data = _trazabilidadAD.ObtenerPorEquipo(equipoId);
 
-            var resultado = data.Select(x => new TrazabilidadDto
-            {
-                EquipmentId = x.EquipmentId,
-                EquipmentNombre = x.EquipmentNombre,
-                TipoEvento = x.TipoEvento,
-
-                // Para préstamos
-                ClienteNombre = x.ClienteNombre,
-                FechaInicio = x.FechaInicio,
-                FechaFin = x.FechaFin,
-                EncargadoPrestamo = x.EncargadoPrestamo,
-
-                // Para mantenimientos
-                FechaMantenimiento = x.FechaMantenimiento,
-                TipoMantenimiento = x.TipoMantenimiento,
-                Comentarios = x.Comentarios
-            })
-            .OrderBy(x => x.FechaInicio ?? x.FechaMantenimiento)
-            .ToList();
+            var resultado = data
+                .OrderBy(x => x.FechaInicio ?? x.FechaMantenimiento)
+                .ToList();
 
             return resultado;
         }

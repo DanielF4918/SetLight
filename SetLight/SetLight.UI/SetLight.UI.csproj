@@ -283,6 +283,10 @@
     <Content Include="Views\Empleado\CrearEmpleado.cshtml" />
     <Content Include="Views\Empleado\Edit.cshtml" />
     <Content Include="Views\Empleado\Details.cshtml" />
+    <Content Include="Views\Shared\_UserMiniProfile.cshtml" />
+    <Content Include="Views\ReturnDetails\Finalize.cshtml" />
+    <Content Include="Views\ReturnDetails\DetallesMantenimiento.cshtml" />
+    <Content Include="Views\ReturnDetails\EditarMantenimiento.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
