@@ -7,14 +7,76 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</br>
+<div>
+<h2 class="mb-4 text-dark fw-bold" style="float: left">Órdenes de Alquiler Registradas</h2>
+<div class="text-end mb-3" style="float: right">
+    @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
+</div>
+</div>
+</br>
+</br>
 
 <div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
-    <h2 class="mb-4 text-dark fw-bold">Órdenes de Alquiler Registradas</h2>
+    
+    <form method="get" class="row g-2 mb-3">
 
-    <div class="text-end mb-3">
-        @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
+        <div class="col-md-2">
+            <label>N° Orden</label>
+            <input type="number" name="orderId" class="form-control"
+                   value="@ViewBag.FiltroOrderId" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Estado</label>
+            <select name="estado" class="form-control">
+                <option value="">-- Todos --</option>
+                <option value="1" @(ViewBag.FiltroEstado == 1 ? "selected" : "")>Activa</option>
+                <option value="2" @(ViewBag.FiltroEstado == 2 ? "selected" : "")>Completada</option>
+                <option value="3" @(ViewBag.FiltroEstado == 3 ? "selected" : "")>Cancelada</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label>Cliente</label>
+            <input type="text" name="cliente" class="form-control"
+                   value="@ViewBag.FiltroCliente" placeholder="Nombre del cliente" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Empleado</label>
+            <select name="empleadoId" class="form-control">
+                <option value="">-- Todos --</option>
+                @foreach (var emp in ViewBag.Empleados)
+                {
+                    <option value="@emp.Value" @(ViewBag.FiltroEmpleadoId == int.Parse(emp.Value) ? "selected" : "")>
+                        @emp.Text
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label>Desde</label>
+            <input type="date" name="desde" class="form-control"
+                   value="@ViewBag.FiltroDesde" />
+        </div>
+
+        <div class="col-md-2">
+            <label>Hasta</label>
+            <input type="date" name="hasta" class="form-control"
+                   value="@ViewBag.FiltroHasta" />
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-dark flex-fill">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
+        </div>
+
+    </form>
+
     </div>
-
     <div class="row g-3">
         @foreach (var orden in Model)
         {
@@ -44,13 +106,13 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group" role="group">
 
-
+                                <!-- Ver equipos -->
                                 <button class="btn btn-dark btn-sm rounded-circle" title="Ver equipos"
                                         onclick="mostrarEquiposModal(@orden.OrderId)">
                                     <i class="bi bi-eye"></i>
                                 </button>
 
-
+                                <!-- Editar orden -->
                                 @if (orden.StatusOrder == 1)
                                 {
                                     <a href="@Url.Action("Edit", "RentalOrder", new { id = orden.OrderId })"
@@ -65,7 +127,7 @@
                                     </button>
                                 }
 
-
+                                <!-- Registrar / Ver devolución -->
                                 @if (orden.StatusOrder == 1)
                                 {
                                     <a href="@Url.Action("CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId })"
@@ -87,7 +149,30 @@
                                     </button>
                                 }
 
+                                <!-- 🔴 Cancelar orden -->
+                                @if (orden.StatusOrder == 1)
+                                {
+                                    using (Html.BeginForm("Cancelar", "RentalOrder",
+                                                          new { id = orden.OrderId },
+                                                          FormMethod.Post,
+                                                          new { @class = "d-inline", onsubmit = "return confirm('¿Seguro que desea cancelar esta orden?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm rounded-circle"
+                                                title="Cancelar orden">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                        <i class="bi bi-x-circle text-muted"></i>
+                                    </button>
+                                }
 
+                                <!-- Descargar comprobante -->
                                 @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
                                 {
                                     <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })"
@@ -109,7 +194,6 @@
         }
     </div>
 
-
     <div class="mt-4">
         @Html.PagedListPager(Model, page => Url.Action("Index", new
         {
@@ -124,28 +208,25 @@
     </div>
 
     <style>
-
         .card {
             border: 1px solid #dee2e6 !important;
             border-radius: 10px;
         }
 
-
         .btn-group {
             display: flex;
-            justify-content: center; 
+            justify-content: center;
             gap: 10px;
         }
 
             .btn-group .btn {
-                border-radius: 50%; 
+                border-radius: 50%;
                 width: 36px;
                 height: 36px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-
 
         .hover-card {
             transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -160,7 +241,6 @@
             font-size: 0.8rem;
             padding: 6px 10px;
         }
-
 
         .pagination {
             display: flex !important;
@@ -189,7 +269,7 @@
             }
     </style>
 
-
+    @* Modales de equipos *@
     @foreach (var orden in Model)
     {
         <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
@@ -219,8 +299,8 @@
                                         <td>@detalle.Brand</td>
                                         <td>@detalle.Model</td>
                                         <td>@detalle.Quantity</td>
-                                        <td>₡@detalle.RentalValue</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
+                                        <td>$@detalle.RentalValue</td>
+                                        <td>$@(detalle.RentalValue * detalle.Quantity)</td>
                                     </tr>
                                 }
                             </tbody>
@@ -242,4 +322,4 @@
             }
         </script>
     }
-</div>
+
