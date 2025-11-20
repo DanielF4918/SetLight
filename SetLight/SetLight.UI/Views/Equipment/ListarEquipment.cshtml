@@ -346,28 +346,38 @@
                         <div class="equip-price">@e.RentalValue.ToString("C2", us)</div>
 
                         <div class="equip-actions">
-                            <a href="@toggle" class="toggle" title="@(activo ? "Inactivar" : "Activar")" onclick="return confirm('¿Seguro?');">
+                            <a href="@toggle" class="toggle" title="@(activo ? "Inactivar" : "Activar")">
                                 <input type="checkbox" @(activo ? "checked" : "") />
                                 <span class="track"></span>
                             </a>
 
-                            <div style="display:flex;gap:10px;">
-                                <a class="icon-btn" title="Editar"
-                                   href="@Url.Action("Edit","Equipment",new { id = e.EquipmentId })">
+                            <div class="btn-group ms-2" role="group">
+                                <!-- Editar equipo -->
+                                <a href="@Url.Action("Edit","Equipment", new { id = e.EquipmentId })"
+                                   class="btn btn-warning btn-sm rounded-circle"
+                                   title="Editar equipo">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                <a class="icon-btn" title="Ver detalles"
-                                   href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#@detId" aria-expanded="false">
-                                    <i class="bi bi-search"></i>
-                                </a>
+                                <!-- Ver detalles del equipo -->
+                                <button type="button"
+                                        class="btn btn-dark btn-sm rounded-circle"
+                                        title="Ver detalles"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@detId"
+                                        aria-expanded="false">
+                                    <i class="bi bi-eye"></i>
+                                </button>
 
-                                <a class="icon-btn" title="Trazabilidad"
-                                   href="@Url.Action("VerTrazabilidad","Trazabilidad",new { equipoId = e.EquipmentId })">
+                                <!-- Ver trazabilidad -->
+                                <a href="@Url.Action("VerTrazabilidad","Trazabilidad", new { equipoId = e.EquipmentId })"
+                                   class="btn btn-secondary btn-sm rounded-circle"
+                                   title="Ver trazabilidad">
                                     <i class="bi bi-graph-up"></i>
                                 </a>
                             </div>
                         </div>
+
 
                         <div id="@detId" class="collapse equip-details" style="margin-top:6px;">
                             @if (!string.IsNullOrWhiteSpace(e.Description))
