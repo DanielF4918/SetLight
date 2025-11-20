@@ -19,9 +19,9 @@
 /* =========================
    NAVBAR FIJA (mismo tamaño)
    ========================= */
-.sl-navbar{
-  background:#0d0d0d !important;     /* negro del logo */
-  border-bottom:2px solid var(--brand);
+.sl-navbar {
+    background: #030303 !important; /* nuevo color del header */
+    border-bottom: 2px solid var(--brand);
 }
 .sl-navbar .nav-link{ color:#f5f6f7 !important; }
 .sl-navbar .nav-link:hover,
@@ -427,4 +427,51 @@ input:checked + .slider {
 .sl-switch--on .knob {
     transform: translateX(20px);
 }
+/* Espacio entre los botoncitos redondos de acciones */
+.btn-group {
+    gap: 6px; /* espacio entre cada círculo */
+}
+
+    .btn-group .btn.rounded-circle {
+        margin: 0; /* por si quedó algo anterior */
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+/* Tarjeta genérica SetLight con hover (igual a equipos/órdenes) */
+.sl-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+    .sl-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    }
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 
