@@ -101,14 +101,17 @@
                             }
                         </div>
 
-                        <!-- Editar / Detalles -->
-                        <div class="d-flex gap-2">
-                            <a class="btn-icon warning" title="Editar"
-                               href="@Url.Action("Edit","Empleado", new { id = e.IdEmpleado })">
+                        <!-- Editar / Detalles (estilo igual al de Órdenes) -->
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Edit","Empleado", new { id = e.IdEmpleado })"
+                               class="btn btn-warning btn-sm rounded-circle"
+                               title="Editar empleado">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <a class="btn-icon info" title="Detalles"
-                               href="@Url.Action("Details","Empleado", new { id = e.IdEmpleado })">
+
+                            <a href="@Url.Action("Details","Empleado", new { id = e.IdEmpleado })"
+                               class="btn btn-dark btn-sm rounded-circle"
+                               title="Ver detalles del empleado">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </div>

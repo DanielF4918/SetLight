@@ -109,23 +109,28 @@
                             }
                         </div>
 
-                        <!-- Editar / Detalles (ojito) / Historial -->
-                        <div class="d-flex gap-2">
-                            <a class="btn-icon warning" title="Editar"
-                               href="@Url.Action("Edit","Client", new { id = c.ClientId })">
+                        <!-- Acciones del cliente (mismo estilo que Órdenes) -->
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Edit","Client", new { id = c.ClientId })"
+                               class="btn btn-warning btn-sm rounded-circle"
+                               title="Editar cliente">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
 
-                            <button type="button" class="btn-icon info" title="Detalles"
+                            <button type="button"
+                                    class="btn btn-dark btn-sm rounded-circle"
+                                    title="Ver detalles"
                                     data-bs-toggle="modal" data-bs-target="#cltModal_@c.ClientId">
                                 <i class="bi bi-eye"></i>
                             </button>
 
-                            <a class="btn-icon" title="Historial"
-                               href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })">
+                            <a href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })"
+                               class="btn btn-secondary btn-sm rounded-circle"
+                               title="Ver historial de órdenes">
                                 <i class="bi bi-clock-history"></i>
                             </a>
                         </div>
+
                     </div>
                 </div>
 
