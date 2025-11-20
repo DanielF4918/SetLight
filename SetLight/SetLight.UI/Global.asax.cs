@@ -3,6 +3,7 @@ using System.Data.Entity;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using SetLight.AccesoADatos;
 
 namespace SetLight.UI
 {
@@ -15,12 +16,8 @@ namespace SetLight.UI
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            Database.SetInitializer(
-                new MigrateDatabaseToLatestVersion<
-                    SetLight.AccesoADatos.Contexto,
-                    global::SetLight.AccesoADatos.Migrations.Configuration
-                >()
-            );
+            Database.SetInitializer<Contexto>(null);
+
         }
     }
 }
