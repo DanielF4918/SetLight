@@ -22,7 +22,7 @@
 </head>
 <body>
     <!-- Si ya pusiste las clases sticky en el nav, déjalas; si no, tu nav normal -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
                 <img src="@Url.Content("~/Content/Logo.jpg")" alt="Logo SetLight" width="150" height="100" class="me-2" />
@@ -81,4 +81,9 @@
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("Scripts", required: false)
 </body>
+
+body {
+    padding-top: 90px;
+}
+
 </html>
