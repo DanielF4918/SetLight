@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using PagedList;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.CreateClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.EditClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ListClient;
@@ -34,8 +35,11 @@ namespace SetLight.UI.Controllers
         }
 
         // GET: Client/ListarClient
-        public ActionResult ListarClient(string nombre, string telefono, string correo, string status)
+        public ActionResult ListarClient(string nombre, string telefono, string correo, string empresa, string status, int? page)
         {
+            int pageSize = 12;
+            int pageNumber = page ?? 1;
+
             var lista = _listarClientLN.Obtener();
 
             if (!string.IsNullOrWhiteSpace(nombre))
@@ -62,22 +66,36 @@ namespace SetLight.UI.Controllers
                     c.Email != null && c.Email.ToLower().Contains(correoLower)
                 ).ToList();
             }
+            if (!string.IsNullOrWhiteSpace(empresa))
+            {
+                string empresaLower = empresa.ToLower();
+                lista = lista.Where(c =>
+                    c.EmpresaNombre != null &&
+                    c.EmpresaNombre.ToLower().Contains(empresaLower)
+                ).ToList();
+            }
 
             if (!string.IsNullOrWhiteSpace(status) && int.TryParse(status, out int estadoInt))
             {
                 lista = lista.Where(c => c.Status == estadoInt).ToList();
             }
 
+
             ViewBag.NombreBuscado = nombre;
             ViewBag.TelefonoBuscado = telefono;
             ViewBag.CorreoBuscado = correo;
+            ViewBag.EmpresaBuscada = empresa;
             ViewBag.Estados = new List<SelectListItem>
             {
                 new SelectListItem { Text = "Activo",   Value = "1", Selected = (status == "1") },
                 new SelectListItem { Text = "Inactivo", Value = "0", Selected = (status == "0") }
             };
+            var pagedList = lista
+        .OrderBy(c => c.FirstName)
+        .ToPagedList(pageNumber, pageSize);
 
-            return View(lista);
+
+            return View(pagedList);
         }
 
         // GET: Client/Details/5
@@ -204,6 +222,7 @@ namespace SetLight.UI.Controllers
                         || c.FirstName.Contains(filtro)
                         || c.LastName.Contains(filtro)
                         || (c.EmpresaNombre != null && c.EmpresaNombre.Contains(filtro))
+
                     )
                     .Select(c => new ClientDto
                     {

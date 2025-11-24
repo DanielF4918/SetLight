@@ -1,4 +1,7 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.ClientDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.ClientDto>
+@using PagedList.Mvc
+@using PagedList
+
 
 @{
     ViewBag.Title = "Clientes";
@@ -30,6 +33,12 @@
                     <input type="text" name="correo" value="@ViewBag.CorreoBuscado"
                            class="form-control border-dark" placeholder="Ej: correo@ejemplo.com" />
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label text-black">Empresa</label>
+                    <input type="text" name="empresa" value="@ViewBag.EmpresaBuscada"
+                           class="form-control border-dark" placeholder="Ej: Amazon, Coca Cola" />
+                </div>
+
                 <div class="col-md-2">
                     <label class="form-label text-black">Estado</label>
                     @Html.DropDownList("status",
@@ -74,6 +83,10 @@
                 <div class="sl-card">
                     <div class="sl-body">
                         <div class="sl-title">@nombre</div>
+
+                        <div class="sl-sub">
+                            Correo: <strong>@c.Email</strong>
+                        </div>
 
                         <div class="sl-sub">
                             Empresa: <strong>@empresaNombre</strong>
@@ -169,4 +182,53 @@
             <div class="text-muted">No hay clientes para los filtros seleccionados.</div>
         }
     </div>
+    <div class="mt-4">
+        @Html.PagedListPager(
+            Model,
+            page => Url.Action("ListarClient", new
+            {
+                page,
+                nombre = ViewBag.NombreBuscado,
+                telefono = ViewBag.TelefonoBuscado,
+                correo = ViewBag.CorreoBuscado,
+                empresa = ViewBag.EmpresaBuscada,
+                status = ViewBag.EstadoSeleccionado
+            }),
+            PagedListRenderOptions.ClassicPlusFirstAndLast
+        )
+    </div>
+
+
+
+
 </div>
+<style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+
+</style>
+    
+

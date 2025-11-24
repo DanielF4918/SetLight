@@ -1,4 +1,6 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+@using PagedList.Mvc
+@using PagedList
 @using System.Globalization
 @using System.Web
 
@@ -43,6 +45,32 @@
 }
 
 <style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+
     .inv-header {
         display: flex;
         justify-content: space-between;
@@ -168,6 +196,7 @@
             color: #222;
         }
 
+
     .toggle {
         position: relative;
         display: inline-flex;
@@ -251,6 +280,7 @@
         color: #111827;
         border: 1px solid #9ca3af;
     }
+
 
         .btn-outline-secondary:hover {
             background: #f3f4f6;
@@ -398,4 +428,19 @@
             <div class="text-muted">No hay equipos para mostrar.</div>
         }
     </div>
+        <div class="mt-4">
+            @Html.PagedListPager(
+        Model,
+        page => Url.Action("ListarEquipment", new
+        {
+            page,
+            Nombre = Request["Nombre"],
+            CategoriaId = Request["CategoriaId"],
+            Estado = Request["Estado"]
+        }),
+        PagedListRenderOptions.ClassicPlusFirstAndLast
+    )
+
+        </div>
+
 </div>
