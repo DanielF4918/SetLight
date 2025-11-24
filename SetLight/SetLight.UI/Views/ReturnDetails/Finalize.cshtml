@@ -1,33 +1,71 @@
 ﻿@model SetLight.Entidades.Maintenance
 
-<h2>Finalizar mantenimiento</h2>
-
-@using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.AntiForgeryToken()
-
-    @Html.Hidden("id", Model.MaintenanceId)
-    @Html.HiddenFor(m => m.MaintenanceId)
-
-    <div class="form-group">
-        <label>Equipo:</label>
-        <p>@Model.Equipment?.EquipmentName</p>
-    </div>
-
-    <div class="form-group">
-        <label>Comentarios:</label>
-        @Html.TextArea("comments", null, new { @class = "form-control", rows = 3 })
-    </div>
-
-    <div class="form-group">
-        <label>Costo:</label>
-        @Html.TextBox("cost", null, new { @class = "form-control", type = "number", step = "0.01" })
-    </div>
-
-    <div class="form-group">
-        <label>Evidencia (opcional):</label>
-        <input type="file" name="evidenceFile" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-success">Guardar y Finalizar</button>
+@{
+    ViewBag.Title = "Finalizar mantenimiento";
 }
+
+<div class="container mt-5 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
+    <h2 class="text-center mb-4 text-dark">Finalizar mantenimiento</h2>
+
+    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails",
+                           FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        @* Id del mantenimiento *@
+        @Html.Hidden("id", Model.MaintenanceId)
+        @Html.HiddenFor(m => m.MaintenanceId)
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Equipo:</label>
+            <p class="form-control-plaintext fw-semibold">
+                @(Model.Equipment != null
+                    ? Model.Equipment.EquipmentName
+                    : "(Sin nombre de equipo)")
+            </p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Comentarios:</label>
+            @Html.TextArea(
+                "comments",
+                Model.Comments,@* muestra comentarios existentes si los hubiera *@
+new
+{
+@class = "form-control",
+rows = 3,
+placeholder = "Notas finales del mantenimiento, trabajos realizados, etc."
+})
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Costo:</label>
+            @Html.TextBox(
+                "cost",
+                Model.Cost.HasValue ? Model.Cost.Value.ToString("0.##") : "",
+                new
+                {
+                    @class = "form-control",
+                    type = "number",
+                    step = "0.01",
+                    min = "0"
+                })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Evidencia (opcional):</label>
+            <input type="file" name="evidenceFile" class="form-control" />
+            <small class="text-muted">
+                Puedes adjuntar una foto, PDF u otro archivo con la evidencia del trabajo realizado.
+            </small>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">
+                Guardar y Finalizar
+            </button>
+            @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null,
+                new { @class = "btn btn-secondary ms-2" })
+        </div>
+    }
+</div>

@@ -228,6 +228,7 @@
     <Content Include="Scripts\Modals\EditOrder\EditOrder.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
     <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
+    <Content Include="Scripts\Modals\Maintenance\CreateMaintenance.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -287,6 +288,8 @@
     <Content Include="Views\ReturnDetails\Finalize.cshtml" />
     <Content Include="Views\ReturnDetails\DetallesMantenimiento.cshtml" />
     <Content Include="Views\ReturnDetails\EditarMantenimiento.cshtml" />
+    <Content Include="Views\ReturnDetails\CreateMaintenance.cshtml" />
+    <Content Include="Views\ReturnDetails\_ModalSeleccionarEquipo.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
