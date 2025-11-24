@@ -314,7 +314,7 @@ namespace SetLight.UI.Controllers
             if (orden == null)
                 return HttpNotFound();
 
-            // Equipos seleccionados en la orden
+            // Detalles seleccionados en la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
@@ -330,26 +330,35 @@ namespace SetLight.UI.Controllers
                                 Stock = equipo.Stock
                             }).ToList();
 
-            var idsSeleccionados = detalles.Select(d => d.EquipmentId).ToList();
+            // Diccionario para saber cuántas unidades tiene cada equipo en la orden
+            var cantidadesPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.Quantity);
 
-            // Equipos disponibles: si hay seleccionados, excluirlos; si no, traer todos
-            var disponiblesQuery = _contexto.Equipment.AsQueryable();
+            // Lista de IDs ya seleccionados
+            var idsSeleccionados = cantidadesPorEquipo.Keys.ToList();
 
-            if (idsSeleccionados.Any())
-            {
-                disponiblesQuery = disponiblesQuery.Where(e => !idsSeleccionados.Contains(e.EquipmentId));
-            }
+            // 1) Traemos de la BD los equipos que nos interesan (esto sí es LINQ to Entities)
+            var equiposBase = _contexto.Equipment
+                .Where(e => e.Status == 1 || idsSeleccionados.Contains(e.EquipmentId))
+                .ToList();   // 👈 aquí ya pasamos a memoria
 
-            var disponibles = disponiblesQuery.Select(e => new OrderDetailDto
-            {
-                EquipmentId = e.EquipmentId,
-                EquipmentName = e.EquipmentName,
-                Brand = e.Brand,
-                Model = e.Model,
-                RentalValue = e.RentalValue,
-                Stock = e.Stock,
-                Quantity = 0
-            }).ToList();
+            // 2) Ahora sí usamos el Dictionary en memoria para armar el DTO del modal
+            var equiposParaModal = equiposBase
+                .Select(e =>
+                {
+                    cantidadesPorEquipo.TryGetValue(e.EquipmentId, out int qty);
+                    return new OrderDetailDto
+                    {
+                        EquipmentId = e.EquipmentId,
+                        EquipmentName = e.EquipmentName,
+                        Brand = e.Brand,
+                        Model = e.Model,
+                        RentalValue = e.RentalValue,
+                        Stock = e.Stock,
+                        Quantity = qty // 0 si no estaba en la orden, o la cantidad actual si sí estaba
+                    };
+                })
+                .ToList();
+
 
             var viewModel = new CrearRentalOrderViewModel
             {
@@ -359,8 +368,9 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 StatusOrder = orden.StatusOrder,
                 DescuentoManual = orden.DescuentoManual,
-                EquiposSeleccionados = detalles,
-                EquiposDisponibles = disponibles,
+
+                EquiposSeleccionados = detalles,      // para la tabla de abajo
+                EquiposDisponibles = equiposParaModal, // para el modal
 
                 Clientes = _contexto.Clients
                     .Select(c => new ClientDto
@@ -373,6 +383,7 @@ namespace SetLight.UI.Controllers
 
             return View("Edit", viewModel);
         }
+
 
         //POST: RentalOrder/Edit/5
         [HttpPost]
@@ -543,7 +554,7 @@ namespace SetLight.UI.Controllers
             return RedirectToAction("Index");
         }
 
-        //GET: VerComprobante
+        // GET: VerComprobante
         public ActionResult VerComprobante(int id)
         {
             var orden = _contexto.RentalOrders.Find(id);
@@ -551,9 +562,13 @@ namespace SetLight.UI.Controllers
                 return HttpNotFound("Orden no encontrada");
 
             var cliente = _contexto.Clients.FirstOrDefault(c => c.ClientId == orden.ClientId);
+            if (cliente == null)
+                return HttpNotFound("Cliente no encontrado");
+
+            // Detalles de la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             join equipo in _contexto.Equipment
-                            on detalle.EquipmentId equals equipo.EquipmentId
+                                on detalle.EquipmentId equals equipo.EquipmentId
                             where detalle.OrderId == orden.OrderId
                             select new OrderDetailDto
                             {
@@ -564,18 +579,44 @@ namespace SetLight.UI.Controllers
                                 Quantity = detalle.Quantity
                             }).ToList();
 
+            // ====== Cálculos de alquiler (mismo criterio que en el JS) ======
+            var dias = (orden.EndDate - orden.StartDate).Days + 1;
+            if (dias < 1) dias = 1;
+
+            decimal subtotal = 0m;
+            foreach (var d in detalles)
+            {
+                subtotal += d.RentalValue * d.Quantity * dias;
+            }
+
+            var iva = Math.Round(subtotal * 0.13m, 2);
+            var totalBruto = subtotal + iva;
+
+            var descuentoPct = orden.DescuentoManual ?? 0m;
+            var montoDescuento = Math.Round(totalBruto * (descuentoPct / 100m), 2);
+            var total = totalBruto - montoDescuento;
+
+            // DTO completo para el PDF
             var dto = new RentalOrderDto
             {
                 OrderId = orden.OrderId,
                 OrderDate = orden.OrderDate,
                 StartDate = orden.StartDate,
                 EndDate = orden.EndDate,
-                ClientName = cliente.FirstName + " " + cliente.LastName,
-                Details = detalles
+                ClientName = $"{cliente.FirstName} {cliente.LastName}",
+                Details = detalles,
+
+                // 👇 campos de descuento y totales
+                DescuentoManual = orden.DescuentoManual,
+                CantidadDias = dias,
+                Subtotal = subtotal,
+                Iva = iva,
+                Total = total
             };
 
             byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
             return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
         }
+
     }
 }

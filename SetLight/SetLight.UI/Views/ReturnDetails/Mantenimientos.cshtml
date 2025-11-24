@@ -4,82 +4,123 @@
     ViewBag.Title = "Mantenimientos";
 }
 
-<h2 class="mb-3">Listado de Mantenimientos</h2>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-black">Mantenimientos</h2>
+        @Html.ActionLink(
+            "+ Registrar mantenimiento manual",
+            "CreateMaintenance",
+            "ReturnDetails",
+            null,
+            new { @class = "btn btn-danger text-white fw-semibold" }
+        )
+    </div>
 
+    <div class="mb-3">
+        <form method="get" class="d-flex align-items-center gap-2">
+            <input type="text"
+                   name="equipo"
+                   placeholder="Buscar equipo..."
+                   value="@ViewBag.FiltroEquipo"
+                   class="form-control"
+                   style="max-width: 250px;" />
 
+            <select name="estado" class="form-select" style="max-width: 180px;">
+                <option value="">-- Estado --</option>
+                <option value="0" @(ViewBag.FiltroEstado == 0 ? "selected" : "")>Pendiente</option>
+                <option value="1" @(ViewBag.FiltroEstado == 1 ? "selected" : "")>Finalizado</option>
+            </select>
 
-<div class="mb-3">
-    <form method="get">
-        <input type="text" name="equipo" placeholder="Buscar equipo..." value="@ViewBag.FiltroEquipo" />
-        <select name="estado">
-            <option value="">-- Estado --</option>
-            <option value="0" @(ViewBag.FiltroEstado == 0 ? "selected" : "")>Pendiente</option>
-            <option value="1" @(ViewBag.FiltroEstado == 1 ? "selected" : "")>Finalizado</option>
-        </select>
-        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
-    </form>
-</div>
+            <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+        </form>
+    </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
 
-
-<table class="styled-table table table-striped">
-    <thead>
-        <tr>
-            <th>Equipo</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in Model)
-        {
+    <table class="styled-table table table-striped">
+        <thead>
             <tr>
-                <td>@(m.Equipment?.EquipmentName ?? "(Sin nombre)")</td>
-                <td>@m.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>
-                    @(m.EndDate.HasValue ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "-")
-                </td>
-                <td>
-                    @(
-                        m.MaintenanceType == 1 ? "Revisión por daño" :
-                        m.MaintenanceType == 2 ? "Reparación mayor" :
-                        m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
-                        "—"
-                    )
-                </td>
-                <td>
-                    @if (m.MaintenanceStatus == 0)
-                    {
-                        <span class="badge bg-warning text-dark">Pendiente</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-success">Finalizado</span>
-                    }
-                </td>
-                <td>
-                    @if (m.MaintenanceStatus == 0)
-                    {
-                        @Html.ActionLink("Finalizar", "Finalize", "ReturnDetails", new { id = m.MaintenanceId }, new { @class = "btn btn-success btn-sm" })
-                    }
-                    else
-                    {
-                        @Html.ActionLink("Ver detalles", "DetallesMantenimiento", "ReturnDetails", new { id = m.MaintenanceId }, new { @class = "btn btn-info btn-sm me-2" })
-                        @Html.ActionLink("Editar", "EditarMantenimiento", "ReturnDetails", new { id = m.MaintenanceId }, new { @class = "btn btn-warning btn-sm" })
-                    }
-                </td>
-
+                <th>Equipo</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Acción</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td>@(m.Equipment != null ? m.Equipment.EquipmentName : "(Sin nombre)")</td>
+
+                    <td>@m.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+
+                    <td>
+                        @(m.EndDate.HasValue
+                            ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                            : "-")
+                    </td>
+
+                    <td>
+                        @(
+                            m.MaintenanceType == 1 ? "Revisión por daño" :
+                            m.MaintenanceType == 2 ? "Reparación mayor" :
+                            m.MaintenanceType == 3 ? "Mantenimiento preventivo" :
+                            "—"
+                         )
+                    </td>
+
+                    <td>
+                        @if (m.MaintenanceStatus == 0)
+                        {
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        }
+                        else if (m.MaintenanceStatus == 1)
+                        {
+                            <span class="badge bg-success">Finalizado</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Desconocido</span>
+                        }
+                    </td>
+
+                    <td>
+                        @* Ver detalles siempre *@
+                        @Html.ActionLink(
+                            "Ver detalles",
+                            "DetallesMantenimiento",
+                            "ReturnDetails",
+                            new { id = m.MaintenanceId },
+                            new { @class = "btn btn-info btn-sm me-2" })
+
+                        @* Solo pendientes se pueden editar y finalizar *@
+                        @if (m.MaintenanceStatus == 0)
+                        {
+                            @Html.ActionLink(
+                                "Editar",
+                                "EditarMantenimiento",
+                                "ReturnDetails",
+                                new { id = m.MaintenanceId },
+                                new { @class = "btn btn-warning btn-sm me-2" })
+
+                            @Html.ActionLink(
+                                "Finalizar",
+                                "Finalize",
+                                "ReturnDetails",
+                                new { id = m.MaintenanceId },
+                                new { @class = "btn btn-success btn-sm" })
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 <style>
     .styled-table {
@@ -102,10 +143,5 @@
 
     .badge {
         font-size: 0.9rem;
-    }
-
-    form input, form select {
-        margin-right: 10px;
-        padding: 4px 8px;
     }
 </style>

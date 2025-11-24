@@ -1,52 +1,55 @@
-﻿@model List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>
+﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>
 @using System.Globalization
-@{
-    var us = CultureInfo.GetCultureInfo("en-US"); // USD
-}
-<table class="table table-bordered table-striped" id="tablaEquipos">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Valor Renta</th>
-            <th>Stock</th>
-            <th>Cantidad</th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.Count; i++)
-        {
-            var cantidadSeleccionada = Model[i].Quantity;
-            var stockDisponible = Model[i].Stock;
-            var cantidadMaxima = stockDisponible + cantidadSeleccionada;
+
+<div class="mb-3">
+    <input type="text"
+           id="filtroEquipos"
+           class="form-control"
+           placeholder="Buscar por nombre, marca o modelo..." />
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle" id="tablaEquiposSeleccionModal">
+        <thead class="table-dark text-white">
             <tr>
-                <td>@Model[i].EquipmentName</td>
-                <td>@Model[i].Brand</td>
-                <td>@Model[i].Model</td>
-                <td>@Model[i].RentalValue.ToString("C0", us)</td>
-                <td id="stock-display-@Model[i].EquipmentId"><strong>@Model[i].Stock</strong></td>
-                <td>
-                    @Html.TextBox(
-                        $"EquiposSeleccionados[{i}].Quantity", cantidadSeleccionada,
-                        new
-                        {
-                            @class = "form-control cantidad-equipo",
-                            type = "number",
-                            min = "0",
-                            max = cantidadMaxima,
-                            data_id = Model[i].EquipmentId,
-                            data_name = Model[i].EquipmentName,
-                            data_brand = Model[i].Brand,
-                            data_model = Model[i].Model,
-                            data_value = Model[i].RentalValue,
-                            data_stock = stockDisponible,
-                            data_selected = cantidadSeleccionada
-                        }
-                    )
-                </td>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Valor Renta</th>
+                <th>Stock</th>
+                <th>Cantidad</th>
             </tr>
-        }
-    </tbody>
-</table>
-<button type="button" class="btn btn-success mt-3" id="btnAgregarEquipos">Seleccionar equipos</button>
+        </thead>
+        <tbody>
+            @foreach (var eq in Model)
+            {
+                <tr>
+                    <td class="col-nombre">@eq.EquipmentName</td>
+                    <td class="col-marca">@eq.Brand</td>
+                    <td class="col-modelo">@eq.Model</td>
+                    <td>$@eq.RentalValue.ToString("N2")</td>
+                    <td id="stock-display-@eq.EquipmentId">
+                        <strong>@eq.Stock</strong>
+                    </td>
+                    <td>
+                        <input type="number"
+                               class="form-control cantidad-equipo"
+                               min="0"
+                               value="@(eq.Quantity)"
+                               data-id="@eq.EquipmentId"
+                               data-name="@eq.EquipmentName"
+                               data-brand="@eq.Brand"
+                               data-model="@eq.Model"
+                               data-value="@eq.RentalValue.ToString(CultureInfo.InvariantCulture)"
+                               data-stock="@eq.Stock"
+                               data-selected="@(eq.Quantity)" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<button id="btnAgregarEquipos" type="button" class="btn btn-success mt-3">
+    Seleccionar equipos
+</button>

@@ -1,11 +1,11 @@
-﻿@model SetLight.Entidades.Maintenance
+﻿@model SetLight.Entidades.Dto.MaintenanceDto
 
 <h2>Detalles del Mantenimiento</h2>
 
 <table class="table table-bordered shadow-sm">
     <tr>
         <th>Equipo</th>
-        <td>@(Model.Equipment != null ? Model.Equipment.EquipmentName : "—")</td>
+        <td>@(!string.IsNullOrEmpty(Model.EquipmentName) ? Model.EquipmentName : "—")</td>
     </tr>
 
     <tr>
@@ -35,9 +35,6 @@
                     case 3:
                         tipo = "Mantenimiento preventivo";
                         break;
-                    default:
-                        tipo = "—";
-                        break;
                 }
             }
             @tipo
@@ -61,16 +58,33 @@
             {
                 <span class="badge bg-warning text-dark">Pendiente</span>
             }
-            else
+            else if (Model.MaintenanceStatus == 1)
             {
                 <span class="badge bg-success">Finalizado</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Cancelado</span>
             }
         </td>
     </tr>
 
     <tr>
         <th>Técnico responsable</th>
-        <td>@(!string.IsNullOrEmpty(Model.FinalizadoPor) ? Model.FinalizadoPor : "—")</td>
+        <td>
+            @if (!string.IsNullOrEmpty(Model.TechnicianName))
+            {
+                @Model.TechnicianName
+            }
+            else if (!string.IsNullOrEmpty(Model.FinalizadoPor))
+            {
+                @Model.FinalizadoPor
+            }
+            else
+            {
+                @Html.Raw("—")
+            }
+        </td>
     </tr>
 
     <tr>
@@ -101,5 +115,11 @@
 </table>
 
 <div class="mt-3">
-    @Html.ActionLink("Volver al listado", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary" })
+    @Html.ActionLink(
+        "Volver al listado",
+        "Mantenimientos",
+        "ReturnDetails",
+        null,
+        new { @class = "btn btn-secondary" }
+    )
 </div>

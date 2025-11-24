@@ -94,6 +94,7 @@
     <Compile Include="ModelosParaUI\ReturnDetailsDto.cs" />
     <Compile Include="ModelosParaUI\TrazabilidadDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\CrearMaintenanceViewModel.cs" />
     <Compile Include="ViewModels\CrearRentalOrderViewModel .cs" />
     <Compile Include="ViewModels\EquipmentReturnViewModel.cs" />
     <Compile Include="ViewModels\PerfilUsuarioViewModel.cs" />
