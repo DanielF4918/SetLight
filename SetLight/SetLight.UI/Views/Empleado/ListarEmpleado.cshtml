@@ -39,6 +39,11 @@
                 <input id="fNombre" class="form-control" placeholder="Ej: Daniel Fuentes" />
             </div>
             <div class="col-md-3">
+                <label class="form-label">Cargo</label>
+                <input id="fCargo" class="form-control" placeholder="Ej: Administrador, Técnico..." />
+            </div>
+
+            <div class="col-md-3">
                 <label class="form-label">Estado</label>
                 <select id="fEstado" class="form-select">
                     <option value="">Todos</option>
@@ -64,6 +69,7 @@
 
                 <div class="sl-card emp-card"
                      data-nombre="@nombreCompleto.ToLower()"
+                     data-cargo="@cargo.ToLower()"
                      data-estado="@e.Estado.ToString().ToLower()">
                     <div class="sl-body text-center p-3">
 
@@ -130,20 +136,35 @@
     <script>
         (() => {
             const $nombre = document.getElementById('fNombre');
+            const $cargo = document.getElementById('fCargo');
             const $estado = document.getElementById('fEstado');
+
             const cards = Array.from(document.querySelectorAll('#gridEmpleados .emp-card'));
+
             function filtrar() {
-                const q = ($nombre.value || '').trim().toLowerCase();
-                const s = ($estado.value || '').toLowerCase();
-                cards.forEach(c => {
-                    const okN = !q || (c.dataset.nombre || '').includes(q);
-                    const okS = !s || (c.dataset.estado || '') === s;
-                    c.style.display = (okN && okS) ? '' : 'none';
+                const qNombre = ($nombre.value || '').trim().toLowerCase();
+                const qCargo = ($cargo.value || '').trim().toLowerCase();
+                const qEstado = ($estado.value || '').trim().toLowerCase();
+
+                cards.forEach(card => {
+                    const okN = !qNombre || (card.dataset.nombre || '').includes(qNombre);
+                    const okC = !qCargo || (card.dataset.cargo || '').includes(qCargo);
+                    const okS = !qEstado || (card.dataset.estado || '') === qEstado;
+
+                    card.style.display = (okN && okC && okS) ? '' : 'none';
                 });
             }
+
             document.getElementById('btnFiltrar').addEventListener('click', filtrar);
-            document.getElementById('btnLimpiar').addEventListener('click', () => { $nombre.value = ''; $estado.value = ''; filtrar(); });
-            $nombre.addEventListener('keyup', e => { if (e.key === 'Enter') { filtrar(); } });
+
+            document.getElementById('btnLimpiar').addEventListener('click', () => {
+                $nombre.value = '';
+                $cargo.value = '';
+                $estado.value = '';
+                filtrar();
+            });
+
+            $nombre.addEventListener('keyup', e => { if (e.key === 'Enter') filtrar(); });
         })();
     </script>
 }
