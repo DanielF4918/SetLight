@@ -58,9 +58,9 @@ namespace SetLight.UI.Controllers
                     })
                     .ToDictionary(x => x.EquipmentId, x => x.Cant);
 
-                // Mantenimientos activos por equipo
+                // Mantenimientos por equipo - SOLO pendientes (status 0)
                 var mantenimientoPorEquipo = contexto.Maintenance
-                    .Where(m => m.MaintenanceStatus != 2)
+                    .Where(m => m.MaintenanceStatus == 0) // 0 = Pendiente
                     .GroupBy(m => m.EquipmentId)
                     .Select(g => new
                     {
@@ -140,7 +140,6 @@ namespace SetLight.UI.Controllers
             int pageSize = 12; // puedes ajustar
 
             return View(lista.ToPagedList(pageNumber, pageSize));
-
         }
 
         // GET: Equipment/Details/5
