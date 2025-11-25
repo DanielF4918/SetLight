@@ -12,7 +12,9 @@ using SetLight.AccesoADatos.ReturnDetails.CreateReturnDetails;
 using SetLight.Entidades;
 using SetLight.LogicaDeNegocio.ReturnDetails.CreateReturnDetails;
 using System.Data.Entity;
-using System.IO; // Para Include
+using System.IO;
+using SetLight.Entidades.Dto;
+using SetLight.AccesoADatos.Modelos;
 
 namespace SetLight.UI.Controllers
 {
@@ -20,12 +22,40 @@ namespace SetLight.UI.Controllers
     public class ReturnDetailsController : Controller
     {
         private ICreateReturnDetailsAD _createReturnDetailsAD;
+        private readonly Contexto _contexto = new Contexto();
 
         public ReturnDetailsController()
         {
             _createReturnDetailsAD = new CreateReturnDetailsAD();
         }
 
+         private void CargarCombosMantenimiento(int? equipmentIdSeleccionado = null)
+    {
+        using (var contexto = new Contexto())
+        {
+            // 🟢 Combo de equipos
+            ViewBag.Equipos = contexto.Equipment
+                .Where(e => e.Status == 1) // sólo activos, si quieres
+                .Select(e => new SelectListItem
+                {
+                    Value    = e.EquipmentId.ToString(),
+                    Text     = e.EquipmentName,
+                    Selected = (equipmentIdSeleccionado.HasValue &&
+                                equipmentIdSeleccionado.Value == e.EquipmentId)
+                })
+                .ToList();
+
+            // 🟢 Combo de tipos de mantenimiento
+            // Si tienes tabla en BD, reemplaza esto por tu DbSet de tipos.
+            ViewBag.TiposMantenimiento = new[]
+            {
+                new SelectListItem { Value = "1", Text = "Correctivo" },
+                new SelectListItem { Value = "2", Text = "Preventivo" },
+                new SelectListItem { Value = "3", Text = "Otro" }
+            };
+        }
+    }
+        
         public ActionResult DetallesDevolucion(int orderId)
         {
             using (var contexto = new Contexto())
@@ -491,20 +521,47 @@ namespace SetLight.UI.Controllers
         }
 
 
+        [HttpGet]
         public ActionResult DetallesMantenimiento(int id)
         {
             using (var contexto = new Contexto())
             {
-                var mantenimiento = contexto.Maintenance
-                    .Include("Equipment")
-                    .FirstOrDefault(m => m.MaintenanceId == id);
+                var mantenimiento = (
+                    from m in contexto.Maintenance
+                    join eq in contexto.Equipment
+                        on m.EquipmentId equals eq.EquipmentId
+                    join emp in contexto.Empleado
+                        on m.IdEmpleado equals emp.IdEmpleado into empJoin
+                    from emp in empJoin.DefaultIfEmpty()
+                    where m.MaintenanceId == id
+                    select new MaintenanceDto
+                    {
+                        MaintenanceId = m.MaintenanceId,
+                        StartDate = m.StartDate,
+                        EndDate = m.EndDate,
+                        MaintenanceType = m.MaintenanceType,
+                        MaintenanceStatus = m.MaintenanceStatus,
+                        EquipmentId = m.EquipmentId,
+                        EquipmentName = eq.EquipmentName,
+                        Comments = m.Comments,
+                        Cost = m.Cost,
+                        EvidencePath = m.EvidencePath,
+                        IdEmpleado = m.IdEmpleado,
+                        TechnicianName = emp != null
+                                                ? emp.Nombre + " " + emp.Apellido
+                                                : null,
+                        FinalizadoPor = m.FinalizadoPor
+                    }
+                ).FirstOrDefault();
 
                 if (mantenimiento == null)
                     return HttpNotFound();
 
+                // No forces nombre de vista: usará Views/ReturnDetails/DetallesMantenimiento.cshtml
                 return View(mantenimiento);
             }
         }
+
 
 
         // GET: ReturnDetails/EditarMantenimiento/5
@@ -552,6 +609,93 @@ namespace SetLight.UI.Controllers
             TempData["Success"] = "Mantenimiento actualizado correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
+        // GET: ReturnDetails/CreateMaintenance
+        [HttpGet]
+        public ActionResult CreateMaintenance()
+        {
+            using (var contexto = new Contexto())
+            {
+                var equipos = contexto.Equipment
+                    .Where(e => e.Status == 1 && e.Stock > 0)
+                    .Select(e => new EquipmentDto
+                    {
+                        EquipmentId = e.EquipmentId,
+                        EquipmentName = e.EquipmentName,
+                        Brand = e.Brand,
+                        Model = e.Model
+                    })
+                    .ToList();
+
+                var model = new CrearMaintenanceViewModel
+                {
+                    Equipos = equipos
+                };
+
+                return View(model);
+            }
+        }
+
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateMaintenance(MaintenanceDto model, HttpPostedFileBase evidenceFile)
+        {
+            if (!ModelState.IsValid)
+            {
+                CargarCombosMantenimiento(model.EquipmentId);
+                return View("CreateMaintenance", model);
+            }
+
+            if (model.StartDate == default(DateTime))
+                model.StartDate = DateTime.Today;
+
+            using (var contexto = new Contexto())
+            {
+                // Técnico logueado
+                var emailUsuario = User.Identity.Name;
+                var empleado = contexto.Empleado
+                    .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+
+                var mantenimiento = new Maintenance
+                {
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    MaintenanceType = model.MaintenanceType,
+                    // 👇 FORZAMOS siempre pendiente al crear
+                    MaintenanceStatus = 0,           // 0 = Pendiente
+                    EquipmentId = model.EquipmentId,
+                    Comments = model.Comments,
+                    Cost = model.Cost,
+                    IdEmpleado = empleado?.IdEmpleado
+                };
+
+                // Evidencia (opcional)
+                if (evidenceFile != null && evidenceFile.ContentLength > 0)
+                {
+                    var evidenciasRoot = Server.MapPath("~/Evidencias/");
+                    Directory.CreateDirectory(evidenciasRoot);
+
+                    var originalName = System.IO.Path.GetFileName(evidenceFile.FileName);
+                    var extension = System.IO.Path.GetExtension(originalName);
+                    var fileName = $"{Guid.NewGuid():N}{extension}";
+                    var fullPath = Path.Combine(evidenciasRoot, fileName);
+
+                    evidenceFile.SaveAs(fullPath);
+                    mantenimiento.EvidencePath = "/Evidencias/" + fileName;
+                }
+
+                contexto.Maintenance.Add(mantenimiento);
+                contexto.SaveChanges();
+            }
+
+            TempData["Success"] = "Mantenimiento creado correctamente.";
+            return RedirectToAction("Mantenimientos");
+        }
+
 
 
 

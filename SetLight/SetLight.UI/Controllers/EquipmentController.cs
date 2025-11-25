@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI;
+using PagedList;
 using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
@@ -38,7 +40,7 @@ namespace SetLight.UI.Controllers
         }
 
         // GET: Equipment
-        public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado)
+        public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado, int? page)
         {
             var lista = _listarEquipmentLN.Obtener();
 
@@ -134,7 +136,11 @@ namespace SetLight.UI.Controllers
             ViewBag.NombreBuscado = Nombre;
             ViewBag.PlaceholderImagen = Url.Content("~/content/img/placeholder-equipment.png");
 
-            return View(lista);
+            int pageNumber = page ?? 1;
+            int pageSize = 12; // puedes ajustar
+
+            return View(lista.ToPagedList(pageNumber, pageSize));
+
         }
 
         // GET: Equipment/Details/5

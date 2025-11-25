@@ -1,0 +1,152 @@
+﻿@model SetLight.Abstracciones.ViewModels.CrearMaintenanceViewModel
+
+@{
+    ViewBag.Title = "Crear mantenimiento";
+}
+
+<div class="container mt-5 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
+    <h2 class="text-center mb-4 text-dark">Crear mantenimiento</h2>
+
+    @using (Html.BeginForm("CreateMaintenance", "ReturnDetails", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        @* Id oculto del equipo *@
+        @Html.HiddenFor(m => m.EquipmentId, new { id = "EquipmentId" })
+
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Equipo</label>
+
+            <div class="input-group">
+                <input type="text"
+                       id="EquipoNombreVisible"
+                       class="form-control border-dark"
+                       placeholder="Seleccione un equipo..."
+                       value="@Model.EquipmentName"
+                       readonly />
+
+                <button type="button"
+                        id="btnAbrirModalEquipos"
+                        class="btn btn-dark">
+                    Buscar equipo
+                </button>
+            </div>
+            <small class="text-muted">Use el botón para buscar y seleccionar un equipo.</small>
+            @Html.ValidationMessageFor(m => m.EquipmentId, "", new { @class = "text-danger" })
+        </div>
+
+        @* 🔧 NUEVO: Tipo de mantenimiento *@
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Tipo de mantenimiento</label>
+            @Html.DropDownListFor(
+                m => m.MaintenanceType,
+                new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Revisión por daño",       Value = "1" },
+                    new SelectListItem { Text = "Reparación mayor",        Value = "2" },
+                    new SelectListItem { Text = "Mantenimiento preventivo", Value = "3" }
+                },
+                "-- Seleccione --",
+                new { @class = "form-control border-dark", id = "MaintenanceType" }
+            )
+            @Html.ValidationMessageFor(m => m.MaintenanceType, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Comentarios / descripción del daño</label>
+            @Html.TextAreaFor(m => m.Comments,
+                new
+                {
+                    @class = "form-control border-dark",
+                    rows = "4",
+                    placeholder = "Detalle el motivo del mantenimiento, daños observados, etc."
+                })
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Evidencia (foto, PDF, etc.)</label>
+            <input type="file"
+                   name="evidenceFile"
+                   id="evidenceFile"
+                   class="form-control border-dark" />
+            <small class="text-muted">Opcional, puede adjuntar una imagen o archivo como evidencia.</small>
+        </div>
+
+        <div class="form-group mt-4 text-center">
+            <button type="submit" class="btn btn-success px-4 fw-semibold">
+                Guardar mantenimiento
+            </button>
+            @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary ms-3" })
+        </div>
+    }
+</div>
+
+@* Modal de selección de equipo *@
+<div class="modal fade" id="modalEquipos" tabindex="-1" aria-labelledby="modalEquiposLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalEquiposLabel">Seleccionar equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <input type="text"
+                           id="filtroEquiposMantenimiento"
+                           class="form-control"
+                           placeholder="Buscar por nombre, marca o modelo..." />
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle" id="tablaEquiposMantenimiento">
+                        <thead class="table-dark text-white">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Equipos != null && Model.Equipos.Any())
+                            {
+                                foreach (var eq in Model.Equipos)
+                                {
+                                    <tr class="fila-equipo">
+                                        <td class="col-nombre">@eq.EquipmentName</td>
+                                        <td class="col-marca">@eq.Brand</td>
+                                        <td class="col-modelo">@eq.Model</td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm seleccionar-equipo"
+                                                    data-id="@eq.EquipmentId"
+                                                    data-nombre="@eq.EquipmentName">
+                                                Seleccionar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-muted">
+                                        No hay equipos disponibles para mantenimiento.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/Modals/Maintenance/CreateMaintenance.js"></script>
+}
