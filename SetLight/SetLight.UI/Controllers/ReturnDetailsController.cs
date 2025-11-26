@@ -29,33 +29,32 @@ namespace SetLight.UI.Controllers
             _createReturnDetailsAD = new CreateReturnDetailsAD();
         }
 
-         private void CargarCombosMantenimiento(int? equipmentIdSeleccionado = null)
-    {
-        using (var contexto = new Contexto())
+        private void CargarCombosMantenimiento(int? equipmentIdSeleccionado = null)
         {
-            // 🟢 Combo de equipos
-            ViewBag.Equipos = contexto.Equipment
-                .Where(e => e.Status == 1) // sólo activos, si quieres
-                .Select(e => new SelectListItem
-                {
-                    Value    = e.EquipmentId.ToString(),
-                    Text     = e.EquipmentName,
-                    Selected = (equipmentIdSeleccionado.HasValue &&
-                                equipmentIdSeleccionado.Value == e.EquipmentId)
-                })
-                .ToList();
-
-            // 🟢 Combo de tipos de mantenimiento
-            // Si tienes tabla en BD, reemplaza esto por tu DbSet de tipos.
-            ViewBag.TiposMantenimiento = new[]
+            using (var contexto = new Contexto())
             {
-                new SelectListItem { Value = "1", Text = "Correctivo" },
-                new SelectListItem { Value = "2", Text = "Preventivo" },
-                new SelectListItem { Value = "3", Text = "Otro" }
-            };
+                // 🟢 Combo de equipos
+                ViewBag.Equipos = contexto.Equipment
+                    .Where(e => e.Status == 1) // sólo activos, si quieres
+                    .Select(e => new SelectListItem
+                    {
+                        Value = e.EquipmentId.ToString(),
+                        Text = e.EquipmentName,
+                        Selected = (equipmentIdSeleccionado.HasValue &&
+                                    equipmentIdSeleccionado.Value == e.EquipmentId)
+                    })
+                    .ToList();
+
+                // 🟢 Combo de tipos de mantenimiento
+                ViewBag.TiposMantenimiento = new[]
+                {
+                    new SelectListItem { Value = "1", Text = "Correctivo" },
+                    new SelectListItem { Value = "2", Text = "Preventivo" },
+                    new SelectListItem { Value = "3", Text = "Otro" }
+                };
+            }
         }
-    }
-        
+
         public ActionResult DetallesDevolucion(int orderId)
         {
             using (var contexto = new Contexto())
@@ -340,9 +339,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-
-
         // GET: ReturnDetails/Edit/5
         public ActionResult Edit(int id)
         {
@@ -356,7 +352,6 @@ namespace SetLight.UI.Controllers
             try
             {
                 // TODO: Add update logic here
-
                 return RedirectToAction("Index");
             }
             catch
@@ -378,7 +373,6 @@ namespace SetLight.UI.Controllers
             try
             {
                 // TODO: Add delete logic here
-
                 return RedirectToAction("Index");
             }
             catch
@@ -428,8 +422,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-
         // GET: ReturnDetails/Finalize/5
         public ActionResult Finalize(int id)
         {
@@ -445,8 +437,6 @@ namespace SetLight.UI.Controllers
                 return View(mantenimiento);
             }
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -484,11 +474,6 @@ namespace SetLight.UI.Controllers
             return RedirectToAction("Mantenimientos");
         }
 
-
-
-
-
-
         public ActionResult TestInsertarMantenimiento()
         {
             using (var ctx = new Contexto())
@@ -497,7 +482,7 @@ namespace SetLight.UI.Controllers
                 {
                     StartDate = DateTime.Now,
                     MaintenanceType = 1,
-                    MaintenanceStatus = 0, 
+                    MaintenanceStatus = 0,
                     EquipmentId = 1
                 });
                 ctx.SaveChanges();
@@ -505,21 +490,19 @@ namespace SetLight.UI.Controllers
             return Content("¡Inserción de prueba completada!");
         }
 
-
         public ActionResult Historico()
         {
             using (var contexto = new Contexto())
             {
                 var listaHistorico = contexto.Maintenance
                     .Include(m => m.Equipment)
-                    .Where(m => m.MaintenanceStatus == 1 || m.MaintenanceStatus == 2) 
+                    .Where(m => m.MaintenanceStatus == 1 || m.MaintenanceStatus == 2)
                     .OrderByDescending(m => m.StartDate)
                     .ToList();
 
                 return View(listaHistorico);
             }
         }
-
 
         [HttpGet]
         public ActionResult DetallesMantenimiento(int id)
@@ -548,8 +531,8 @@ namespace SetLight.UI.Controllers
                         EvidencePath = m.EvidencePath,
                         IdEmpleado = m.IdEmpleado,
                         TechnicianName = emp != null
-                                                ? emp.Nombre + " " + emp.Apellido
-                                                : null,
+                            ? emp.Nombre + " " + emp.Apellido
+                            : null,
                         FinalizadoPor = m.FinalizadoPor
                     }
                 ).FirstOrDefault();
@@ -557,12 +540,9 @@ namespace SetLight.UI.Controllers
                 if (mantenimiento == null)
                     return HttpNotFound();
 
-                // No forces nombre de vista: usará Views/ReturnDetails/DetallesMantenimiento.cshtml
                 return View(mantenimiento);
             }
         }
-
-
 
         // GET: ReturnDetails/EditarMantenimiento/5
         public ActionResult EditarMantenimiento(int id)
@@ -636,10 +616,7 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-
-
-
+        // POST: ReturnDetails/CreateMaintenance
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateMaintenance(MaintenanceDto model, HttpPostedFileBase evidenceFile)
@@ -673,6 +650,13 @@ namespace SetLight.UI.Controllers
                     IdEmpleado = empleado?.IdEmpleado
                 };
 
+                // 🔻 NUEVO: sacar una unidad del stock porque el equipo entra a mantenimiento manual
+                var equipo = contexto.Equipment.FirstOrDefault(e => e.EquipmentId == model.EquipmentId);
+                if (equipo != null && equipo.Stock > 0)
+                {
+                    equipo.Stock -= 1;
+                }
+
                 // Evidencia (opcional)
                 if (evidenceFile != null && evidenceFile.ContentLength > 0)
                 {
@@ -695,9 +679,5 @@ namespace SetLight.UI.Controllers
             TempData["Success"] = "Mantenimiento creado correctamente.";
             return RedirectToAction("Mantenimientos");
         }
-
-
-
-
     }
 }
