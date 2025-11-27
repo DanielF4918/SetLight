@@ -15,6 +15,7 @@ using System.Data.Entity;
 using System.IO;
 using SetLight.Entidades.Dto;
 using SetLight.AccesoADatos.Modelos;
+using PagedList;
 
 namespace SetLight.UI.Controllers
 {
@@ -381,9 +382,16 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // Listado de mantenimientos con filtros
+        // Listado de mantenimientos con filtros + paginación
         // GET: /ReturnDetails/Mantenimientos
-        public ActionResult Mantenimientos(string equipo, int? tipo, int? estado, DateTime? desde, DateTime? hasta)
+        public ActionResult Mantenimientos(
+            string equipo,
+            int? tipo,
+            int? estado,
+            DateTime? desde,
+            DateTime? hasta,
+            int? page
+        )
         {
             using (var contexto = new Contexto())
             {
@@ -410,17 +418,27 @@ namespace SetLight.UI.Controllers
                 if (hasta.HasValue)
                     q = q.Where(m => m.StartDate <= hasta.Value);
 
-                var lista = q.OrderByDescending(m => m.StartDate).ToList();
+                // Orden: más recientes primero, luego ID desc
+                q = q.OrderByDescending(m => m.StartDate)
+                     .ThenByDescending(m => m.MaintenanceId);
 
+                // Paginación
+                int pageSize = 12;              // cantidad de cards por página (ajustable)
+                int pageNumber = page ?? 1;
+
+                var listaPaginada = q.ToPagedList(pageNumber, pageSize);
+
+                // Mantener valores de filtros para la vista y la paginación
                 ViewBag.FiltroEquipo = equipo;
                 ViewBag.FiltroTipo = tipo;
                 ViewBag.FiltroEstado = estado;
                 ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
                 ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
 
-                return View(lista);
+                return View(listaPaginada);
             }
         }
+
 
         // GET: ReturnDetails/Finalize/5
         public ActionResult Finalize(int id)

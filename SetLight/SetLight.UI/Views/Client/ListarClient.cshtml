@@ -71,7 +71,7 @@
                     nombre = "(Sin nombre)";
                 }
 
-                // Teléfono a mostrar: primero personal, si no hay, el de empresa
+                // Teléfono a mostrar
                 var telefonoMostrar = !string.IsNullOrWhiteSpace(c.Phone)
                     ? c.Phone
                     : (string.IsNullOrWhiteSpace(c.EmpresaTelefono) ? "—" : c.EmpresaTelefono);
@@ -104,7 +104,6 @@
                     </div>
 
                     <div class="sl-footer">
-                        <!-- Switch sin JS -->
                         <div>
                             @if (isActivo)
                             {
@@ -122,7 +121,7 @@
                             }
                         </div>
 
-                        <!-- Acciones del cliente (mismo estilo que Órdenes) -->
+                        <!-- Acciones del cliente -->
                         <div class="btn-group" role="group">
                             <a href="@Url.Action("Edit","Client", new { id = c.ClientId })"
                                class="btn btn-warning btn-sm rounded-circle"
