@@ -20,7 +20,7 @@
                 <th>Cantidad</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="equiposBody">
             @foreach (var eq in Model)
             {
                 <tr>
@@ -49,7 +49,170 @@
         </tbody>
     </table>
 </div>
+<div class="d-flex justify-content-center mt-2">
+    <nav>
+        <ul class="pagination pagination-sm gap-1" id="equiposPagination"></ul>
+    </nav>
+</div>
+
 
 <button id="btnAgregarEquipos" type="button" class="btn btn-success mt-3">
     Seleccionar equipos
 </button>
+<style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+            font-weight: bold !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+</style>
+
+<script>
+
+    let filasOriginales = [];
+
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        filasOriginales = Array.from(document.querySelectorAll("#equiposBody tr"));
+        paginarEquipos(6);
+    });
+
+    document.getElementById("filtroEquipos").addEventListener("keyup", function () {
+
+        const filtro = this.value.toLowerCase().trim();
+        const tbody = document.getElementById("equiposBody");
+
+        
+        if (filtro === "") {
+            tbody.innerHTML = "";
+            filasOriginales.forEach(f => tbody.appendChild(f));
+            paginarEquipos(6);
+            return;
+        }
+
+        
+        const filtradas = filasOriginales.filter(row => {
+
+            const nombre = row.querySelector(".col-nombre")?.textContent.toLowerCase() || "";
+            const marca = row.querySelector(".col-marca")?.textContent.toLowerCase() || "";
+            const modelo = row.querySelector(".col-modelo")?.textContent.toLowerCase() || "";
+
+            return (
+                nombre.includes(filtro) ||
+                marca.includes(filtro) ||
+                modelo.includes(filtro)
+            );
+        });
+
+        
+        tbody.innerHTML = "";
+        filtradas.forEach(f => tbody.appendChild(f));
+
+        
+        paginarEquipos(6);
+    });
+
+
+
+
+    function paginarEquipos(rowsPerPage) {
+
+        const table = document.querySelector("#equiposBody");
+        if (!table) return;
+
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        if (totalPages === 0) return;
+
+        const pagination = document.querySelector("#equiposPagination");
+
+        function mostrarPagina(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, i) => {
+                row.style.display = (i >= start && i < end) ? "" : "none";
+            });
+
+            dibujarPaginacion(page);
+        }
+
+        function boton(text, disabled, onClick, isActive = false) {
+            const li = document.createElement("li");
+            li.style.margin = "0 6px";
+
+            const span = document.createElement("span");
+            span.textContent = text;
+            span.style.padding = "6px 12px";
+            span.style.borderRadius = "6px";
+            span.style.cursor = "pointer";
+            span.style.display = "inline-block";
+            span.style.border = "1px solid #ccc";
+            span.style.userSelect = "none";
+            span.style.backgroundColor = "#ffffff";
+
+            if (isActive) {
+                span.style.fontWeight = "900";
+                span.style.backgroundColor = "#e9ecef";
+                span.style.border = "2px solid #000";
+            }
+
+            if (!disabled && !isActive) {
+                span.addEventListener("mouseenter", () => span.style.backgroundColor = "#f0f0f0");
+                span.addEventListener("mouseleave", () => span.style.backgroundColor = "#ffffff");
+                span.addEventListener("click", e => {
+                    e.preventDefault();
+                    onClick();
+                });
+            } else if (disabled) {
+                span.style.opacity = "0.4";
+                span.style.cursor = "not-allowed";
+            }
+
+            li.appendChild(span);
+            return li;
+        }
+
+        function dibujarPaginacion(currentPage) {
+            pagination.innerHTML = "";
+
+            pagination.appendChild(boton("««", currentPage === 1, () => mostrarPagina(1)));
+            pagination.appendChild(boton("«", currentPage === 1, () => mostrarPagina(currentPage - 1)));
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.appendChild(
+                    boton(i, false, () => mostrarPagina(i), i === currentPage)
+                );
+            }
+
+            pagination.appendChild(boton("»", currentPage === totalPages, () => mostrarPagina(currentPage + 1)));
+            pagination.appendChild(boton("»»", currentPage === totalPages, () => mostrarPagina(totalPages)));
+        }
+
+        mostrarPagina(1);
+    }
+
+</script>
