@@ -274,7 +274,9 @@ BEGIN
         ADD EmpresaTelefono NVARCHAR(25) NULL;
 END
 GO
-
+ -- Cambio en el Null de Mantenimiento del EndDate --
+ALTER TABLE [dbo].[Maintenance]
+ALTER COLUMN [EndDate] DATETIME NULL;
 
 
 

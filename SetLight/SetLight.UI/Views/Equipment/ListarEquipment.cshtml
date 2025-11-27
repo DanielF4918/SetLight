@@ -281,7 +281,6 @@
         border: 1px solid #9ca3af;
     }
 
-
         .btn-outline-secondary:hover {
             background: #f3f4f6;
         }
@@ -363,7 +362,6 @@
 
                             <span class="chip">Disp: @e.Disponibles</span>
 
-                            @* NUEVO: chip de alquilados *@
                             @if (e.Alquilados > 0)
                             {<span class="chip">Alq: @e.Alquilados</span>}
 
@@ -408,7 +406,6 @@
                             </div>
                         </div>
 
-
                         <div id="@detId" class="collapse equip-details" style="margin-top:6px;">
                             @if (!string.IsNullOrWhiteSpace(e.Description))
                             {
@@ -428,19 +425,18 @@
             <div class="text-muted">No hay equipos para mostrar.</div>
         }
     </div>
-        <div class="mt-4">
-            @Html.PagedListPager(
-        Model,
-        page => Url.Action("ListarEquipment", new
-        {
-            page,
-            Nombre = Request["Nombre"],
-            CategoriaId = Request["CategoriaId"],
-            Estado = Request["Estado"]
-        }),
-        PagedListRenderOptions.ClassicPlusFirstAndLast
-    )
 
-        </div>
-
+    <div class="mt-4">
+        @Html.PagedListPager(
+            Model,
+            page => Url.Action("ListarEquipment", new
+            {
+                page,
+                Nombre = Request["Nombre"],
+                CategoriaId = Request["CategoriaId"],
+                Estado = Request["Estado"]
+            }),
+            PagedListRenderOptions.ClassicPlusFirstAndLast
+        )
+    </div>
 </div>
