@@ -18,11 +18,11 @@ namespace SetLight.Entidades.Dto
 
         public string EquipmentName { get; set; }
 
-        // 🔹 NUEVO: técnico responsable
         public int? IdEmpleado { get; set; }
         public string TechnicianName { get; set; }
 
-        // (Opcional, solo si quieres usar también FinalizadoPor en la vista)
         public string FinalizadoPor { get; set; }
+
+        public int Cantidad { get; set; } = 1;
     }
 }
