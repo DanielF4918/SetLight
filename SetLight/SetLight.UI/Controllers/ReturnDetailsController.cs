@@ -466,24 +466,35 @@ namespace SetLight.UI.Controllers
                 if (mantenimiento == null)
                     return HttpNotFound();
 
+                // Guardar evidencia si hay archivo nuevo
                 if (evidenceFile != null && evidenceFile.ContentLength > 0)
                 {
-                    var fileName = System.IO.Path.GetFileName(evidenceFile.FileName);
-                    var path = System.IO.Path.Combine(Server.MapPath("~/Evidencias/"), fileName);
-                    evidenceFile.SaveAs(path);
+                    var evidenciasRoot = Server.MapPath("~/Evidencias/");
+                    Directory.CreateDirectory(evidenciasRoot);
+
+                    var originalName = System.IO.Path.GetFileName(evidenceFile.FileName);
+                    var extension = System.IO.Path.GetExtension(originalName);
+                    var fileName = $"{Guid.NewGuid():N}{extension}";
+                    var fullPath = Path.Combine(evidenciasRoot, fileName);
+
+                    evidenceFile.SaveAs(fullPath);
                     mantenimiento.EvidencePath = "/Evidencias/" + fileName;
                 }
 
                 mantenimiento.Comments = comments;
                 mantenimiento.Cost = cost;
-                mantenimiento.MaintenanceStatus = 1;
+                mantenimiento.MaintenanceStatus = 1;         // 1 = Finalizado
                 mantenimiento.EndDate = DateTime.Now;
 
-                mantenimiento.FinalizadoPor = Session["NombreUsuario"]?.ToString() ?? User.Identity.Name;
+                mantenimiento.FinalizadoPor = Session["NombreUsuario"]?.ToString()
+                                              ?? User.Identity.Name;
 
+                // 🔹 Actualizar Stock: una unidad vuelve a estar disponible
                 var equipo = contexto.Equipment.Find(mantenimiento.EquipmentId);
                 if (equipo != null)
+                {
                     equipo.Stock += 1;
+                }
 
                 contexto.SaveChanges();
             }
@@ -491,6 +502,8 @@ namespace SetLight.UI.Controllers
             TempData["Success"] = "Mantenimiento finalizado correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
+
 
         public ActionResult TestInsertarMantenimiento()
         {
@@ -610,18 +623,21 @@ namespace SetLight.UI.Controllers
 
         // GET: ReturnDetails/CreateMaintenance
         [HttpGet]
+
         public ActionResult CreateMaintenance()
         {
             using (var contexto = new Contexto())
             {
                 var equipos = contexto.Equipment
-                    .Where(e => e.Status == 1 && e.Stock > 0)
+                    .Where(e => e.Status == 1 && e.Stock > 0)   // 👈 AQUÍ el cambio
+
                     .Select(e => new EquipmentDto
                     {
                         EquipmentId = e.EquipmentId,
                         EquipmentName = e.EquipmentName,
                         Brand = e.Brand,
-                        Model = e.Model
+                        Model = e.Model,
+                        Stock = e.Stock
                     })
                     .ToList();
 
@@ -634,11 +650,18 @@ namespace SetLight.UI.Controllers
             }
         }
 
+
         // POST: ReturnDetails/CreateMaintenance
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateMaintenance(MaintenanceDto model, HttpPostedFileBase evidenceFile)
         {
+            // 🔹 Validación de cantidad
+            if (model.Cantidad <= 0)
+            {
+                ModelState.AddModelError("Cantidad", "La cantidad debe ser al menos 1.");
+            }
+
             if (!ModelState.IsValid)
             {
                 CargarCombosMantenimiento(model.EquipmentId);
@@ -655,27 +678,27 @@ namespace SetLight.UI.Controllers
                 var empleado = contexto.Empleado
                     .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
 
-                var mantenimiento = new Maintenance
-                {
-                    StartDate = model.StartDate,
-                    EndDate = model.EndDate,
-                    MaintenanceType = model.MaintenanceType,
-                    // 👇 FORZAMOS siempre pendiente al crear
-                    MaintenanceStatus = 0,           // 0 = Pendiente
-                    EquipmentId = model.EquipmentId,
-                    Comments = model.Comments,
-                    Cost = model.Cost,
-                    IdEmpleado = empleado?.IdEmpleado
-                };
+                var equipo = contexto.Equipment
+                    .FirstOrDefault(e => e.EquipmentId == model.EquipmentId);
 
-                // 🔻 NUEVO: sacar una unidad del stock porque el equipo entra a mantenimiento manual
-                var equipo = contexto.Equipment.FirstOrDefault(e => e.EquipmentId == model.EquipmentId);
-                if (equipo != null && equipo.Stock > 0)
+                if (equipo == null)
                 {
-                    equipo.Stock -= 1;
+                    ModelState.AddModelError("EquipmentId", "El equipo seleccionado no existe.");
+                    CargarCombosMantenimiento(model.EquipmentId);
+                    return View("CreateMaintenance", model);
                 }
 
-                // Evidencia (opcional)
+                // 🔹 Validar que haya suficientes unidades disponibles (usando Stock)
+                if (equipo.Stock < model.Cantidad)
+                {
+                    ModelState.AddModelError("Cantidad",
+                        $"Solo hay {equipo.Stock} unidades disponibles para este equipo.");
+                    CargarCombosMantenimiento(model.EquipmentId);
+                    return View("CreateMaintenance", model);
+                }
+
+                // 🔹 Manejo de evidencia (solo se guarda el archivo una vez)
+                string evidencePath = null;
                 if (evidenceFile != null && evidenceFile.ContentLength > 0)
                 {
                     var evidenciasRoot = Server.MapPath("~/Evidencias/");
@@ -687,15 +710,38 @@ namespace SetLight.UI.Controllers
                     var fullPath = Path.Combine(evidenciasRoot, fileName);
 
                     evidenceFile.SaveAs(fullPath);
-                    mantenimiento.EvidencePath = "/Evidencias/" + fileName;
+                    evidencePath = "/Evidencias/" + fileName;
                 }
 
-                contexto.Maintenance.Add(mantenimiento);
+                // 🔹 Crear N mantenimientos (uno por unidad)
+                for (int i = 0; i < model.Cantidad; i++)
+                {
+                    var mantenimiento = new Maintenance
+                    {
+                        StartDate = model.StartDate,
+                        EndDate = model.EndDate,
+                        MaintenanceType = model.MaintenanceType,
+                        MaintenanceStatus = 0,           // 0 = Pendiente
+                        EquipmentId = model.EquipmentId,
+                        Comments = model.Comments,
+                        Cost = model.Cost,
+                        IdEmpleado = empleado?.IdEmpleado,
+                        EvidencePath = evidencePath
+                    };
+
+                    contexto.Maintenance.Add(mantenimiento);
+                }
+
+                // 🔹 Actualizar Stock (lo tratamos como "disponibles")
+                equipo.Stock -= model.Cantidad;
+
                 contexto.SaveChanges();
             }
 
-            TempData["Success"] = "Mantenimiento creado correctamente.";
+            TempData["Success"] = "Mantenimientos creados correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
+
     }
 }
