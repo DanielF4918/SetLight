@@ -7,10 +7,9 @@ using SetLight.Abstracciones.LogicaDeNegocio.Empleado;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.LogicaDeNegocio.Empleado.CrearEmpleado;
 using SetLight.LogicaDeNegocio.Empleado.ListarEmpleado;
-using SetLight.UI.Models; 
+using SetLight.UI.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
 using SetLight.LogicaDeNegocio.Empleado.ObtenerEmpleadoPorID;
-using System.Runtime.Remoting.Contexts;
 using SetLight.AccesoADatos;
 using SetLight.Abstracciones.AccesoADatos.Empleado;
 using SetLight.AccesoADatos.Empleado.EditarEmpleado;
@@ -19,18 +18,18 @@ using System.Data.SqlClient;
 using System.Web;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
+using PagedList; // ⬅️ Para IPagedList / ToPagedList
 
 namespace SetLight.UI.Controllers
 {
     [Authorize(Roles = "Administrador")]
     public class EmpleadoController : Controller
     {
-        private  IListarEmpleadoLN _listarEmpleadoLN;
-        private  ICrearEmpleadoLN _crearEmpleadoLN;
-        private  ApplicationDbContext _contexto;
+        private IListarEmpleadoLN _listarEmpleadoLN;
+        private ICrearEmpleadoLN _crearEmpleadoLN;
+        private ApplicationDbContext _contexto;
         private IObtenerEmpleadoPorIDLN _obtenerEmpleadoPorIDLN;
         private IEditarEmpleadoAD _editarEmpleadoAD;
-
 
         public EmpleadoController()
         {
@@ -40,7 +39,6 @@ namespace SetLight.UI.Controllers
             _obtenerEmpleadoPorIDLN = new ObtenerEmpleadoPorIDLN();
             _editarEmpleadoAD = new EditarEmpleadoAD();
         }
-
 
         private string ObtenerUserIdPorCorreo(string correo)
         {
@@ -63,16 +61,19 @@ namespace SetLight.UI.Controllers
         }
 
         public ApplicationUserManager UserManager =>
-    HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
 
         public ApplicationSignInManager SignInManager =>
             HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
 
         // GET: Empleado
-        public ActionResult ListarEmpleado()
+        // Igual patrón que Clientes: filtros por GET + paginación
+        public ActionResult ListarEmpleado(string nombre, string cargo, string estado, int? page)
         {
-            List<EmpleadoDto> listaEmpleados = _listarEmpleadoLN.Obtener();
+            // 1) Traer lista desde la lógica de negocio
+            List<EmpleadoDto> listaEmpleados = _listarEmpleadoLN.Obtener() ?? new List<EmpleadoDto>();
 
+            // 2) Completar nombres de rol y normalizar foto
             using (var identityContext = new ApplicationDbContext())
             {
                 var roles = identityContext.Roles.ToDictionary(r => r.Id, r => r.Name);
@@ -84,15 +85,64 @@ namespace SetLight.UI.Controllers
                         : "Sin rol";
 
                     if (string.IsNullOrWhiteSpace(emp.FotoPerfil))
-                        emp.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+                        emp.FotoPerfil = "~/Content/img/placeholder-user.png";
                     else if (!emp.FotoPerfil.StartsWith("~"))
                         emp.FotoPerfil = "~" + emp.FotoPerfil;
                 }
             }
 
-            return View(listaEmpleados);
-        }
+            // 3) Aplicar filtros (servidor), igual que Clientes
+            if (!string.IsNullOrWhiteSpace(nombre))
+            {
+                var n = nombre.Trim().ToLower();
+                listaEmpleados = listaEmpleados
+                    .Where(e =>
+                        ((e.Nombre ?? "") + " " + (e.Apellido ?? ""))
+                            .ToLower()
+                            .Contains(n))
+                    .ToList();
+            }
 
+            if (!string.IsNullOrWhiteSpace(cargo))
+            {
+                var c = cargo.Trim().ToLower();
+                listaEmpleados = listaEmpleados
+                    .Where(e =>
+                        ((e.RolNombre ?? e.RolId) ?? "")
+                            .ToLower()
+                            .Contains(c))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(estado))
+            {
+                if (bool.TryParse(estado, out bool estBool))
+                {
+                    listaEmpleados = listaEmpleados
+                        .Where(e => e.Estado == estBool)
+                        .ToList();
+                }
+            }
+
+            // Guardar filtros en ViewBag para mantenerlos
+            ViewBag.FiltroNombre = nombre;
+            ViewBag.FiltroCargo = cargo;
+            ViewBag.FiltroEstado = estado;
+
+            // 4) Orden para que la paginación sea estable
+            listaEmpleados = listaEmpleados
+                .OrderBy(e => e.Nombre)
+                .ThenBy(e => e.Apellido)
+                .ToList();
+
+            // 5) Configurar paginación (igual lógica que en Clientes)
+            int pageSize = 12;         // número de cards por página (ajusta si quieres)
+            int pageNumber = page ?? 1;
+
+            var modeloPaginado = listaEmpleados.ToPagedList(pageNumber, pageSize);
+
+            return View(modeloPaginado);
+        }
 
         // GET: Empleado/Create
         public ActionResult CrearEmpleado()
@@ -114,7 +164,7 @@ namespace SetLight.UI.Controllers
 
             try
             {
-                // 🆕 Guardar foto si se sube
+                // Guardar foto si se sube
                 if (foto != null && foto.ContentLength > 0)
                 {
                     var path = Server.MapPath("~/Content/img/empleados/");
@@ -125,7 +175,6 @@ namespace SetLight.UI.Controllers
                     var fullPath = System.IO.Path.Combine(path, fileName);
                     foto.SaveAs(fullPath);
 
-                    // Guardamos la ruta relativa
                     empleadoDto.FotoPerfil = $"/Content/img/empleados/{fileName}";
                 }
 
@@ -156,7 +205,6 @@ namespace SetLight.UI.Controllers
             return View(empleadoDto);
         }
 
-
         private static bool EsViolacionUnicidad(Exception ex)
         {
             while (ex != null)
@@ -179,8 +227,6 @@ namespace SetLight.UI.Controllers
                 Selected = r.Id == rolSeleccionado
             }).ToList();
         }
-
-
 
         // GET: Empleado/Details/5
         [HttpGet]
@@ -241,8 +287,6 @@ namespace SetLight.UI.Controllers
             return View("Details", model);
         }
 
-
-
         // GET: Empleado/Edit/5
         [HttpGet]
         public ActionResult Edit(int id)
@@ -257,7 +301,6 @@ namespace SetLight.UI.Controllers
                     {
                         IdEmpleado = e.IdEmpleado,
                         IdEmpleadoGuid = e.IdEmpleadoGuid,
-
                         Nombre = e.Nombre,
                         Apellido = e.Apellido,
                         TelefonoCelular = e.TelefonoCelular,
@@ -288,13 +331,12 @@ namespace SetLight.UI.Controllers
 
             ViewBag.Estados = new[]
             {
-        new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-        new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-    };
+                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+            };
 
             return View("Edit", model);
         }
-
 
         // POST: Empleado/Edit/5
         [HttpPost]
@@ -333,7 +375,9 @@ namespace SetLight.UI.Controllers
             if (actual == null)
                 ModelState.AddModelError("", "El empleado no existe.");
 
-            var correoCambio = actual != null && !string.Equals(actual.CorreoElectronico?.Trim(), model.CorreoElectronico?.Trim(), StringComparison.OrdinalIgnoreCase);
+            var correoCambio = actual != null &&
+                !string.Equals(actual.CorreoElectronico?.Trim(), model.CorreoElectronico?.Trim(), StringComparison.OrdinalIgnoreCase);
+
             if (actual != null && correoCambio)
             {
                 var correoNuevo = model.CorreoElectronico?.Trim();
@@ -363,16 +407,16 @@ namespace SetLight.UI.Controllers
 
                 ViewBag.Estados = new[]
                 {
-            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-        };
+                    new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                    new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+                };
 
                 return View("Edit", model);
             }
 
             try
             {
-                // ✅ Manejo de la foto
+                // Manejo de la foto
                 if (nuevaFoto != null && nuevaFoto.ContentLength > 0)
                 {
                     var path = Server.MapPath("~/Content/img/empleados/");
@@ -493,19 +537,12 @@ namespace SetLight.UI.Controllers
 
             ViewBag.Estados = new[]
             {
-        new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-        new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-    };
+                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+            };
 
             return View("Edit", model);
         }
-
-
-
-
-
-
-
 
         // GET: Empleado/Delete/5
         public ActionResult Delete(int id)
@@ -527,7 +564,6 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
-
 
         // GET: Empleado/Activar/5
         public ActionResult Activar(int id)
@@ -560,10 +596,5 @@ namespace SetLight.UI.Controllers
 
             return RedirectToAction("ListarEmpleado");
         }
-
-
-
     }
-
-
 }

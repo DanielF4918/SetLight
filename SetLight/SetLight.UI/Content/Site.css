@@ -472,6 +472,260 @@ input:checked + .slider {
         grid-template-columns: 1fr;
     }
 }
+.maint-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
 
+@media (max-width: 992px) {
+    .maint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
 
+@media (max-width: 768px) {
+    .maint-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
 
+.maint-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    border: 1px solid #e9e9e9;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.maint-photo {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+}
+
+.maint-info {
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.maint-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+}
+
+.maint-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    background: #f1f1f1;
+    color: #333;
+}
+
+.mant-status-pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.mant-status-finalizado {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.mant-status-cancelado {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.mant-status-desconocido {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.maint-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.maint-cost {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* ========== Mantenimientos ========== */
+
+.maint-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .maint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .maint-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.maint-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform .15s ease, box-shadow .15s ease;
+    animation: maint-pop .25s ease-out;
+}
+
+    .maint-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    }
+
+@keyframes maint-pop {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.maint-photo {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    background: #f3f4f6;
+    display: block;
+}
+
+.maint-info {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.maint-name {
+    font-size: .95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    min-height: 2.4em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.maint-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: .8rem;
+}
+
+.chip {
+    background: #f6f7f9;
+    border: 1px solid #e9ebf0;
+    padding: .22rem .45rem;
+    border-radius: 999px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Estados */
+.mant-status-pendiente {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #c05621;
+}
+
+.mant-status-finalizado {
+    background: #ecfdf3;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.mant-status-cancelado {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.mant-status-desconocido {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.maint-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.maint-cost {
+    font-weight: 800;
+    font-size: .95rem;
+}
+
+.pagination {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+    .pagination li a,
+    .pagination li span {
+        padding: 0 !important;
+        margin: 0 6px;
+        background: none !important;
+        border: none !important;
+        color: #555 !important;
+        font-weight: 500;
+        text-decoration: none !important;
+        font-size: 16px;
+    }
+
+    .pagination li.active span {
+        color: #000 !important;
+        font-weight: 700;
+    }
+
+    .pagination li a:hover {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }

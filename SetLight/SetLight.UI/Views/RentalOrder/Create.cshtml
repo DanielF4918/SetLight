@@ -109,10 +109,14 @@
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title" id="modalLabelEquipos">Seleccionar equipos</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="modalBodyEquipos">
                 @Html.Partial("_SeleccionarEquipos", Model.EquiposDisponibles)
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -124,9 +128,13 @@
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title" id="clienteModalLabel">Seleccionar Cliente</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="contenedorClientes">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -135,4 +143,17 @@
 @section Scripts {
     <script src="~/Scripts/Modals/CreateOrder/CreateOrder.js"></script>
     <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+            const modalEquipos = document.getElementById("modalSeleccionarEquipos");
+
+            modalEquipos.addEventListener("shown.bs.modal", function () {
+                paginarEquipos(5); 
+            });
+
+        });
+    </script>
+
 }

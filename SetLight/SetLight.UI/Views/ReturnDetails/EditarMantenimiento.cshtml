@@ -1,56 +1,172 @@
 ﻿@model SetLight.Entidades.Maintenance
 
 @{
-    ViewBag.Title = "Editar Mantenimiento";
+    ViewBag.Title = "Editar mantenimiento";
+
+    // ✅ Nombre de equipo seguro
+    var nombreEquipo = (Model.Equipment != null &&
+                        !string.IsNullOrWhiteSpace(Model.Equipment.EquipmentName))
+        ? Model.Equipment.EquipmentName
+        : "(Equipo sin nombre)";
+
+    string tipo = "—";
+    switch (Model.MaintenanceType)
+    {
+        case 1: tipo = "Revisión por daño"; break;
+        case 2: tipo = "Reparación mayor"; break;
+        case 3: tipo = "Mantenimiento preventivo"; break;
+    }
+
+    string estadoTexto = "Desconocido";
+    string estadoClase = "badge bg-secondary";
+
+    switch (Model.MaintenanceStatus)
+    {
+        case 0:
+            estadoTexto = "Pendiente";
+            estadoClase = "badge bg-warning text-dark";
+            break;
+        case 1:
+            estadoTexto = "Finalizado";
+            estadoClase = "badge bg-success";
+            break;
+        case 2:
+            estadoTexto = "Cancelado";
+            estadoClase = "badge bg-secondary";
+            break;
+    }
 }
 
-<h2>Editar mantenimiento finalizado</h2>
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-black mb-0">Editar mantenimiento</h2>
 
-@using (Html.BeginForm("EditarMantenimiento", "ReturnDetails", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.MaintenanceId)
-
-    <div class="form-group">
-        <label>Equipo:</label>
-        <p class="form-control-static">@Model.Equipment?.EquipmentName</p>
+        @Html.ActionLink(
+            "Volver a mantenimientos",
+            "Mantenimientos",
+            "ReturnDetails",
+            null,
+            new { @class = "btn btn-outline-secondary" }
+        )
     </div>
 
-    <div class="form-group">
-        <label>Comentarios:</label>
-        @Html.TextArea("comments", Model.Comments, new { @class = "form-control", rows = 3 })
-    </div>
+    <!-- Card -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+            <!-- Encabezado del mantenimiento -->
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h4 class="mb-1">
+                        @nombreEquipo   @* ← aquí ya sale solo el nombre *@
+                    </h4>
+                    <div class="text-muted small">
+                        <span class="me-3">
+                            <i class="bi bi-tools me-1"></i>@tipo
+                        </span>
+                        <span>
+                            <i class="bi bi-calendar-event me-1"></i>
+                            Inicio: @Model.StartDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                        @if (Model.EndDate.HasValue)
+                        {
+                            <span class="ms-3">
+                                <i class="bi bi-flag me-1"></i>
+                                Fin: @Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        }
+                    </div>
+                </div>
+                <span class="@estadoClase">@estadoTexto</span>
+            </div>
 
-    <div class="form-group">
-        <label>Costo ($):</label>
-        @Html.TextBox("cost", Model.Cost?.ToString("N2"), new { @class = "form-control", type = "number", step = "0.01" })
-    </div>
+            <hr />
 
-    <div class="form-group">
-        <label>Evidencia actual:</label><br />
-        @if (!string.IsNullOrEmpty(Model.EvidencePath))
-        {
-            var extension = System.IO.Path.GetExtension(Model.EvidencePath).ToLower();
-            if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
+            @using (Html.BeginForm("EditarMantenimiento", "ReturnDetails", FormMethod.Post, new { enctype = "multipart/form-data" }))
             {
-                <img src="@Url.Content(Model.EvidencePath)" alt="Evidencia" class="img-thumbnail" style="max-width: 300px;" />
-            }
-            else
-            {
-                <a href="@Url.Content(Model.EvidencePath)" target="_blank">Ver archivo actual</a>
-            }
-        }
-        else
-        {
-            <span>— Sin evidencia —</span>
-        }
-    </div>
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.MaintenanceId)
 
-    <div class="form-group">
-        <label>Reemplazar evidencia:</label>
-        <input type="file" name="evidenceFile" class="form-control" />
-    </div>
+                <div class="row g-3">
+                    <!-- Comentarios -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Comentarios</label>
+                        @Html.TextArea(
+                            "comments",
+                            Model.Comments,
+                            new { @class = "form-control", rows = 4, placeholder = "Describe el trabajo realizado o notas adicionales..." }
+                        )
+                    </div>
 
-    <button type="submit" class="btn btn-primary">Guardar cambios</button>
-    @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary" })
-}
+                    <!-- Costo -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Costo ($)</label>
+                        @Html.TextBox(
+                            "cost",
+                            Model.Cost?.ToString("N2"),
+                            new { @class = "form-control", type = "number", step = "0.01", min = "0" }
+                        )
+                        <small class="text-muted">Si no aplica, puedes dejarlo en blanco.</small>
+                    </div>
+
+                    <!-- Evidencia actual -->
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Evidencia actual</label>
+
+                        <div class="border rounded p-2 bg-light">
+                            @if (!string.IsNullOrEmpty(Model.EvidencePath))
+                            {
+                                var extension = System.IO.Path.GetExtension(Model.EvidencePath).ToLower();
+                                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
+                                {
+                                    <img src="@Url.Content(Model.EvidencePath)"
+                                         alt="Evidencia"
+                                         class="img-fluid rounded shadow-sm"
+                                         style="max-height: 250px;" />
+                                }
+                                else
+                                {
+                                    <a href="@Url.Content(Model.EvidencePath)"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Ver archivo actual
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">— Sin evidencia registrada —</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Nueva evidencia -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Reemplazar evidencia</label>
+                        <input type="file" name="evidenceFile" class="form-control" />
+                        <small class="text-muted">
+                            Opcional. Si subes un archivo, se reemplazará la evidencia anterior.
+                        </small>
+                    </div>
+                </div>
+
+                <hr class="mt-4" />
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-end gap-2">
+                    @Html.ActionLink(
+                        "Cancelar",
+                        "Mantenimientos",
+                        "ReturnDetails",
+                        null,
+                        new { @class = "btn btn-outline-secondary" }
+                    )
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i>Guardar cambios
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
