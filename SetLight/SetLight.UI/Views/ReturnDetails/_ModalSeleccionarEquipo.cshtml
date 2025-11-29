@@ -1,5 +1,4 @@
-﻿
-@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
 
 <div class="mb-3">
     <input type="text"
@@ -16,11 +15,12 @@
                 <th>Nombre</th>
                 <th>Marca</th>
                 <th>Modelo</th>
+                <th>Stock</th>
                 <th>Acción</th>
             </tr>
         </thead>
         <tbody>
-            @if (Model != null)
+            @if (Model != null && Model.Any())
             {
                 foreach (var eq in Model)
                 {
@@ -28,6 +28,7 @@
                         <td class="col-nombre">@eq.EquipmentName</td>
                         <td class="col-marca">@eq.Brand</td>
                         <td class="col-modelo">@eq.Model</td>
+                        <td class="col-stock">@eq.Stock</td>
                         <td>
                             <button type="button"
                                     class="btn btn-sm btn-primary btn-seleccionar-equipo"
@@ -38,6 +39,14 @@
                         </td>
                     </tr>
                 }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-muted">
+                        No hay equipos disponibles.
+                    </td>
+                </tr>
             }
         </tbody>
     </table>

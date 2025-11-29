@@ -19,7 +19,7 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="clientesBody">
                 @foreach (var cliente in Model)
                 {
                     var nombreCompleto = $"{cliente.FirstName} {cliente.LastName}".Trim();
@@ -46,4 +46,99 @@
             </tbody>
         </table>
     </div>
+    <div class="d-flex justify-content-center mt-2">
+        <nav>
+            <ul class="pagination pagination-sm gap-1" id="clientesPagination"></ul>
+        </nav>
+    </div>
+    </hr>
+
+    <style>
+
+        .pagination .page-link {
+            border: none !important;
+            background: none !important;
+            padding: 4px 8px !important;
+            color: #000 !important;
+            box-shadow: none !important;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: none !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+
+        .pagination .page-link:hover {
+            background: none !important;
+            color: #000 !important;
+            text-decoration: underline;
+        }
+
+        .pagination {
+            gap: 6px;
+        }
+
+        .card {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+            .btn-group .btn {
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+        .hover-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+            .hover-card:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+
+        .pagination {
+            display: flex !important;
+            justify-content: center !important;
+            padding-left: 0;
+            list-style: none;
+        }
+
+            .pagination li a,
+            .pagination li span {
+                color: black !important;
+                margin: 0 5px;
+                border-radius: 4px;
+                padding: 5px 10px;
+                display: inline-block;
+            }
+
+            .pagination li.active span {
+                background-color: #e9ecef !important;
+                color: black !important;
+            }
+
+            .pagination li a:hover {
+                background-color: #f0f0f0;
+                color: black !important;
+            }
+    </style>
+
 </div>
