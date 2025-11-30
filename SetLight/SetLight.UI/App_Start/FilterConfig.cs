@@ -1,5 +1,6 @@
 ﻿using System.Web;
 using System.Web.Mvc;
+using SetLight.UI.Filters;
 
 namespace SetLight.UI
 {
@@ -8,6 +9,7 @@ namespace SetLight.UI
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new VerificarEmpleadoActivoAttribute());
         }
     }
 }

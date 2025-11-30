@@ -5,6 +5,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
+using System.Net;
+using System.Net.Mail;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -18,8 +20,27 @@ namespace SetLight.UI
     {
         public Task SendAsync(IdentityMessage message)
         {
-            // Conecte el servicio de correo electrónico aquí para enviar un correo electrónico.
-            return Task.FromResult(0);
+            var mail = new MailMessage();
+            mail.To.Add(new MailAddress(message.Destination));
+            mail.Subject = message.Subject;
+            mail.Body = message.Body;
+            mail.IsBodyHtml = true;
+
+            // 👉 EL MISMO CORREO QUE VAS A USAR EN GMAIL
+            mail.From = new MailAddress("setlight16.01@gmail.com", "SetLight Soporte");
+
+            var smtp = new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(
+                    "setlight16.01@gmail.com",        // mismo de arriba
+                    "dhnoiofrsgxbrvru"   // NO es tu password normal
+                )
+            };
+
+            return smtp.SendMailAsync(mail);
         }
     }
 
@@ -40,9 +61,10 @@ namespace SetLight.UI
         {
         }
 
-        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
+        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
+
             // Configure la lógica de validación de nombres de usuario
             manager.UserValidator = new UserValidator<ApplicationUser>(manager)
             {
@@ -65,8 +87,7 @@ namespace SetLight.UI
             manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(5);
             manager.MaxFailedAccessAttemptsBeforeLockout = 5;
 
-            // Registre los proveedores de autenticación de dos factores. Esta aplicación usa el teléfono y el correo electrónico para recibir un código de verificación del usuario
-            // Puede escribir su propio proveedor y conectarlo aquí.
+            // 2FA
             manager.RegisterTwoFactorProvider("Código telefónico", new PhoneNumberTokenProvider<ApplicationUser>
             {
                 MessageFormat = "Su código de seguridad es {0}"
@@ -76,14 +97,19 @@ namespace SetLight.UI
                 Subject = "Código de seguridad",
                 BodyFormat = "Su código de seguridad es {0}"
             });
+
             manager.EmailService = new EmailService();
             manager.SmsService = new SmsService();
+
+            // 🔹 IMPORTANTE PARA RECUPERAR CONTRASEÑA (tokens)
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = 
-                    new DataProtectorTokenProvider<ApplicationUser>(dataProtectionProvider.Create("ASP.NET Identity"));
+                manager.UserTokenProvider =
+                    new DataProtectorTokenProvider<ApplicationUser>(
+                        dataProtectionProvider.Create("ASP.NET Identity"));
             }
+
             return manager;
         }
     }

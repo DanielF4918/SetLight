@@ -67,6 +67,7 @@ namespace SetLight.UI.Controllers
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
+            ViewBag.CuentaDesactivada = TempData["CuentaDesactivada"];
             return View();
         }
 
@@ -256,26 +257,44 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = await UserManager.FindByNameAsync(model.Email);
-                if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
-                {
-                    // No revelar que el usuario no existe o que no está confirmado
-                    return View("ForgotPasswordConfirmation");
-                }
-
-                // Para obtener más información sobre cómo habilitar la confirmación de cuentas y el restablecimiento de contraseña, visite https://go.microsoft.com/fwlink/?LinkID=320771
-                // Enviar un correo electrónico con este vínculo
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-                // await UserManager.SendEmailAsync(user.Id, "Restablecer contraseña", "Para restablecer la contraseña, haga clic <a href=\"" + callbackUrl + "\">aquí</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                return View(model);
             }
 
-            // Si llegamos a este punto, es que se ha producido un error y volvemos a mostrar el formulario
-            return View(model);
+            // Buscamos por correo (Email), no por UserName
+            var user = await UserManager.FindByEmailAsync(model.Email);
+
+            // Por seguridad, no revelamos si existe o no
+            if (user == null)
+            {
+                return View("ForgotPasswordConfirmation");
+            }
+
+            // Generar token de reseteo
+            var code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+
+            // Construir URL de callback
+            var callbackUrl = Url.Action(
+                "ResetPassword",
+                "Account",
+                new { userId = user.Id, code = code },
+                protocol: Request.Url.Scheme);
+
+            // Enviar correo
+            await UserManager.SendEmailAsync(
+                user.Id,
+                "Recuperación de contraseña - SetLight",
+                $"Hola,<br/><br/>" +
+                $"Has solicitado restablecer tu contraseña en SetLight.<br/>" +
+                $"Para continuar, haz clic en el siguiente enlace:<br/><br/>" +
+                $"<a href=\"{callbackUrl}\">RESTABLECER CONTRASEÑA</a><br/><br/>" +
+                $"Si no fuiste tú quien solicitó este cambio, puedes ignorar este mensaje.");
+
+            // Siempre mostramos la misma vista, exista o no el usuario
+            return View("ForgotPasswordConfirmation");
         }
+
 
         //
         // GET: /Account/ForgotPasswordConfirmation
@@ -290,8 +309,19 @@ namespace SetLight.UI.Controllers
         [AllowAnonymous]
         public ActionResult ResetPassword(string code)
         {
-            return code == null ? View("Error") : View();
+            if (code == null)
+            {
+                return View("Error");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Code = code
+            };
+
+            return View(model);
         }
+
 
         //
         // POST: /Account/ResetPassword
@@ -304,20 +334,28 @@ namespace SetLight.UI.Controllers
             {
                 return View(model);
             }
-            var user = await UserManager.FindByNameAsync(model.Email);
+
+            // Buscamos por correo
+            var user = await UserManager.FindByEmailAsync(model.Email);
+
             if (user == null)
             {
-                // No revelar que el usuario no existe
+                // No revelamos si el usuario existe o no
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
+
             var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
+
             if (result.Succeeded)
             {
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
+
+            // Si hubo errores, los mostramos
             AddErrors(result);
-            return View();
+            return View(model);
         }
+
 
         //
         // GET: /Account/ResetPasswordConfirmation

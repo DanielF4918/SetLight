@@ -343,9 +343,11 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(EmpleadoDto model, HttpPostedFileBase nuevaFoto)
         {
+            // Validación manual de rol
             if (string.IsNullOrWhiteSpace(model.RolId))
                 ModelState.AddModelError(nameof(model.RolId), "Debe seleccionar un rol.");
 
+            // Traemos el estado actual del empleado desde BD
             EmpleadoDto actual;
             using (var ctx = new Contexto())
             {
@@ -375,9 +377,11 @@ namespace SetLight.UI.Controllers
             if (actual == null)
                 ModelState.AddModelError("", "El empleado no existe.");
 
+            // Detectar si cambia el correo
             var correoCambio = actual != null &&
                 !string.Equals(actual.CorreoElectronico?.Trim(), model.CorreoElectronico?.Trim(), StringComparison.OrdinalIgnoreCase);
 
+            // Validaciones de correo duplicado
             if (actual != null && correoCambio)
             {
                 var correoNuevo = model.CorreoElectronico?.Trim();
@@ -396,8 +400,45 @@ namespace SetLight.UI.Controllers
                     ModelState.AddModelError(nameof(model.CorreoElectronico), "Ese correo ya está registrado en la cuenta de acceso.");
             }
 
+            // 🔐 VALIDAR CONTRASEÑA DEL ADMIN ACTUAL
+            if (string.IsNullOrWhiteSpace(model.AdminPassword))
+            {
+                ModelState.AddModelError("AdminPassword", "Debe ingresar su contraseña para confirmar los cambios.");
+            }
+            else
+            {
+                var adminUserId = User.Identity.GetUserId();
+                var adminUser = await UserManager.FindByIdAsync(adminUserId);
+
+                if (adminUser == null)
+                {
+                    ModelState.AddModelError("", "No se pudo validar el usuario actual.");
+                }
+                else
+                {
+                    var passwordOk = await UserManager.CheckPasswordAsync(adminUser, model.AdminPassword);
+                    if (!passwordOk)
+                    {
+                        ModelState.AddModelError("AdminPassword", "La contraseña ingresada es incorrecta. No se realizaron cambios.");
+                    }
+                }
+            }
+
+            // Si hay errores, recargar combos y devolver la vista
             if (!ModelState.IsValid)
             {
+                // 🖼️ Recuperar foto para que no se pierda al recargar
+                if (actual != null)
+                    model.FotoPerfil = actual.FotoPerfil;
+
+                if (string.IsNullOrWhiteSpace(model.FotoPerfil))
+                    model.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+                else if (!model.FotoPerfil.StartsWith("~"))
+                    model.FotoPerfil = "~" + model.FotoPerfil;
+
+                // Por seguridad, no volver a enviar la contraseña al cliente
+                model.AdminPassword = null;
+
                 ViewBag.Roles = _contexto.Roles.Select(r => new SelectListItem
                 {
                     Value = r.Id,
@@ -407,9 +448,9 @@ namespace SetLight.UI.Controllers
 
                 ViewBag.Estados = new[]
                 {
-                    new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-                    new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-                };
+            new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+            new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+        };
 
                 return View("Edit", model);
             }
@@ -442,6 +483,7 @@ namespace SetLight.UI.Controllers
                     return RedirectToAction("ListarEmpleado");
                 }
 
+                // Si cambió el correo, actualizar también en Identity
                 if (correoCambio)
                 {
                     var user = await UserManager.FindByEmailAsync(actual.CorreoElectronico);
@@ -469,6 +511,7 @@ namespace SetLight.UI.Controllers
                     }
                 }
 
+                // Actualizar rol en Identity
                 var userIdIdentity = _contexto.Users
                     .Where(u => u.Email == model.CorreoElectronico)
                     .Select(u => u.Id)
@@ -502,6 +545,7 @@ namespace SetLight.UI.Controllers
                     }
                 }
 
+                // Si no quedaron errores, OK
                 if (!ModelState.Values.SelectMany(v => v.Errors).Any())
                 {
                     TempData["Ok"] = "Empleado actualizado correctamente.";
@@ -528,6 +572,20 @@ namespace SetLight.UI.Controllers
                 ModelState.AddModelError("", "Error inesperado: " + ex.Message);
             }
 
+            // 🔁 Si llegamos aquí es porque hubo algún error en el try/catch
+
+            // Asegurar foto antes de devolver la vista
+            if (string.IsNullOrWhiteSpace(model.FotoPerfil) && actual != null)
+                model.FotoPerfil = actual.FotoPerfil;
+
+            if (string.IsNullOrWhiteSpace(model.FotoPerfil))
+                model.FotoPerfil = "~/Content/img/placeholder-equipment.png";
+            else if (!model.FotoPerfil.StartsWith("~"))
+                model.FotoPerfil = "~" + model.FotoPerfil;
+
+            // Limpiar contraseña
+            model.AdminPassword = null;
+
             ViewBag.Roles = _contexto.Roles.Select(r => new SelectListItem
             {
                 Value = r.Id,
@@ -537,12 +595,14 @@ namespace SetLight.UI.Controllers
 
             ViewBag.Estados = new[]
             {
-                new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
-                new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
-            };
+        new SelectListItem { Value = bool.TrueString,  Text = "Activo",   Selected = model.Estado },
+        new SelectListItem { Value = bool.FalseString, Text = "Inactivo", Selected = !model.Estado }
+    };
 
             return View("Edit", model);
         }
+
+
 
         // GET: Empleado/Delete/5
         public ActionResult Delete(int id)

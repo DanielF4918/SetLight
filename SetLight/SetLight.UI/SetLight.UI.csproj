@@ -173,6 +173,7 @@
     <Compile Include="Controllers\RentalOrderController.cs" />
     <Compile Include="Controllers\ReturnDetailsController.cs" />
     <Compile Include="Controllers\TrazabilidadController.cs" />
+    <Compile Include="Filters\VerificarEmpleadoActivoAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -226,6 +227,7 @@
     <Content Include="Scripts\Modals\CreateOrder\AgregarCliente.js" />
     <Content Include="Scripts\Modals\CreateOrder\CreateOrder.js" />
     <Content Include="Scripts\Modals\EditOrder\EditOrder.js" />
+    <Content Include="Scripts\Modals\Empleado\EditEmpleado.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
     <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
     <Content Include="Scripts\Modals\Maintenance\CreateMaintenance.js" />

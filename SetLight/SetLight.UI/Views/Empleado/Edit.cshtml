@@ -6,12 +6,15 @@
 
 <h2 class="mb-4">Editar empleado</h2>
 
-@using (Html.BeginForm("Edit", "Empleado", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("Edit", "Empleado", FormMethod.Post, new { enctype = "multipart/form-data", id = "formEditarEmpleado" }))
 {
     @Html.AntiForgeryToken()
 
     @Html.HiddenFor(m => m.IdEmpleado)
     @Html.HiddenFor(m => m.IdEmpleadoGuid)
+
+    <!-- 🆕 Hidden para la contraseña del admin (se llenará desde el modal vía JS) -->
+    @Html.HiddenFor(m => m.AdminPassword, new { id = "AdminPassword" })
 
     <!-- 🆕 Campo de Foto de Perfil -->
     <div class="mb-4 text-center">
@@ -125,12 +128,55 @@
     </div>
 
     <div class="mt-4">
-        <button type="submit" class="btn btn-success">Guardar</button>
+        <!-- 🆕 Este botón ya no envía el form directo, solo abre el modal -->
+        <button type="button" id="btnGuardarEmpleado" class="btn btn-success">Guardar</button>
         @Html.ActionLink("Volver", "ListarEmpleado", null, new { @class = "btn btn-secondary ms-2" })
     </div>
 }
 
+<!-- 🆕 Modal para confirmar contraseña de administrador -->
+<div class="modal fade" id="modalConfirmarPassword" tabindex="-1" aria-labelledby="modalConfirmarPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalConfirmarPasswordLabel">Confirmar cambios</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Para aplicar los cambios en la información del empleado,
+                    ingrese su contraseña de administrador.
+                </p>
+
+                <div class="mb-3">
+                    <label for="txtAdminPasswordModal" class="form-label">Contraseña</label>
+                    <input type="password" id="txtAdminPasswordModal" class="form-control" />
+                    <small class="text-muted">
+                        Esta es la contraseña de su propia cuenta, no la del empleado.
+                    </small>
+                </div>
+
+                @using System.Linq
+                <div id="errorModalPassword" class="text-danger @(ViewData.ModelState["AdminPassword"]?.Errors.Any() == true ? "" : "d-none")">
+                    @if (ViewData.ModelState["AdminPassword"]?.Errors.Any() == true)
+                    {
+                        @ViewData.ModelState["AdminPassword"].Errors.First().ErrorMessage
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnConfirmarPassword" class="btn btn-dark">
+                    Confirmar y guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
     <script>
         function previewFoto(input) {
             if (input.files && input.files[0]) {
@@ -141,5 +187,10 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        var adminPasswordServerError = '@(ViewData.ModelState["AdminPassword"]?.Errors.FirstOrDefault()?.ErrorMessage ?? "")';
     </script>
+
+    <script src="~/Scripts/Modals/Empleado/EditEmpleado.js"></script>
 }
+
