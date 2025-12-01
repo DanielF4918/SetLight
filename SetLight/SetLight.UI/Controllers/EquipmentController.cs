@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.UI;
 using PagedList;
-using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
@@ -39,7 +37,7 @@ namespace SetLight.UI.Controllers
             _equipmentLN = new EditarEquipmentLN();
         }
 
-        // GET: Equipment
+        // GET: Equipment/ListarEquipment
         public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado, int? page)
         {
             var lista = _listarEquipmentLN.Obtener();
@@ -83,17 +81,34 @@ namespace SetLight.UI.Controllers
                     e.Disponibles = e.Stock < 0 ? 0 : e.Stock;
                 }
 
-                // ViewBags para combos
-                ViewBag.Categorias = contexto.EqCategory
-                    .Select(c => new SelectListItem
+                // ----- Combo de categorías (Tipo) -----
+                var categoriasBD = contexto.EqCategory
+                    .OrderBy(c => c.CategoryName)
+                    .ToList();
+
+                var categorias = new List<SelectListItem>
+                {
+                    new SelectListItem
+                    {
+                        Value = "0",
+                        Text = "Todos",
+                        Selected = !CategoriaId.HasValue || CategoriaId == 0
+                    }
+                };
+
+                categorias.AddRange(
+                    categoriasBD.Select(c => new SelectListItem
                     {
                         Value = c.CategoryId.ToString(),
                         Text = c.CategoryName,
-                        Selected = (CategoriaId.HasValue && CategoriaId == c.CategoryId)
-                    }).ToList();
+                        Selected = CategoriaId.HasValue && CategoriaId.Value == c.CategoryId
+                    })
+                );
+
+                ViewBag.Categorias = categorias;
             }
 
-            // Filtros
+            // -------- Filtros --------
             if (!string.IsNullOrWhiteSpace(Nombre))
             {
                 var n = Nombre.Trim().ToLower();
@@ -124,32 +139,33 @@ namespace SetLight.UI.Controllers
                 }
             }
 
+            // Combo de estados
             ViewBag.Estados = new List<SelectListItem>
             {
-                new SelectListItem { Value = "0", Text = "Todos",             Selected = Estado == null || Estado == 0 },
-                new SelectListItem { Value = "1", Text = "Activo",            Selected = Estado == 1 },
-                new SelectListItem { Value = "2", Text = "Alquilado",         Selected = Estado == 2 },
-                new SelectListItem { Value = "3", Text = "Inactivo",          Selected = Estado == 3 },
-                new SelectListItem { Value = "4", Text = "En mantenimiento",  Selected = Estado == 4 }
+                new SelectListItem { Value = "0", Text = "Todos",            Selected = !Estado.HasValue || Estado == 0 },
+                new SelectListItem { Value = "1", Text = "Activo",           Selected = Estado == 1 },
+                new SelectListItem { Value = "2", Text = "Alquilado",        Selected = Estado == 2 },
+                new SelectListItem { Value = "3", Text = "Inactivo",         Selected = Estado == 3 },
+                new SelectListItem { Value = "4", Text = "En mantenimiento", Selected = Estado == 4 }
             };
 
             ViewBag.NombreBuscado = Nombre;
             ViewBag.PlaceholderImagen = Url.Content("~/content/img/placeholder-equipment.png");
 
             int pageNumber = page ?? 1;
-            int pageSize = 12; // puedes ajustar
+            int pageSize = 12;
 
             return View(lista.ToPagedList(pageNumber, pageSize));
         }
 
-        // GET: Equipment/Details/5
+        // --- el resto de tu controller queda igual ---
+
         public ActionResult Details(int id)
         {
             List<EquipmentDto> LaListaEquipment = _listarEquipmentLN.Obtener();
             return View(LaListaEquipment);
         }
 
-        // GET: Equipment/Create
         public ActionResult CrearEquipment()
         {
             using (var contexto = new Contexto())
@@ -167,7 +183,6 @@ namespace SetLight.UI.Controllers
             return View();
         }
 
-        // POST: Equipment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearEquipment(EquipmentDto equipmentguardar, HttpPostedFileBase imagen)
@@ -249,7 +264,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // GET: Equipment/Edit/5
         [HttpGet]
         public ActionResult Edit(int id)
         {
@@ -392,13 +406,11 @@ namespace SetLight.UI.Controllers
             catch { }
         }
 
-        // GET: Equipment/Delete/5
         public ActionResult Delete(int id)
         {
             return View();
         }
 
-        // POST: Equipment/Delete/5
         [HttpPost]
         public ActionResult Delete(int id, FormCollection collection)
         {
@@ -413,7 +425,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // GET: Equipment/Activar/5
         public ActionResult Activar(int id)
         {
             var equipo = _ObtenerEqPorIDLN.Obtener(id);
@@ -422,7 +433,6 @@ namespace SetLight.UI.Controllers
             return RedirectToAction("ListarEquipment");
         }
 
-        // GET: Equipment/Inactivar/5
         public ActionResult Inactivar(int id)
         {
             var equipo = _ObtenerEqPorIDLN.Obtener(id);
