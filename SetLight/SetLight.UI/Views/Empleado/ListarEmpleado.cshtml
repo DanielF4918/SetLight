@@ -33,36 +33,49 @@
         @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
     </div>
 
-    <!-- Filtros (JS, como antes) -->
+    <!-- Filtros -->
     <div class="card p-3 mb-3">
-        <div class="row g-2 align-items-end">
+        <form method="get" class="row g-2 align-items-end">
             <div class="col-md-6">
                 <label class="form-label">Nombre</label>
-                <input id="fNombre" class="form-control" placeholder="Ej: Daniel Fuentes" />
+                <input id="fNombre" name="nombre"
+                       value="@Request["nombre"]"
+                       class="form-control"
+                       placeholder="Ej: Daniel Fuentes" />
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">Cargo</label>
-                <input id="fCargo" class="form-control" placeholder="Ej: Administrador, Técnico..." />
+                <input id="fCargo" name="cargo"
+                       value="@Request["cargo"]"
+                       class="form-control"
+                       placeholder="Ej: Administrador, Técnico..." />
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Estado</label>
-                <select id="fEstado" class="form-select">
+                <select id="fEstado" name="estado" class="form-select">
                     <option value="">Todos</option>
-                    <option value="true">Activo</option>
-                    <option value="false">Inactivo</option>
+                    <option value="true" @(Request["estado"] == "true" ? "selected" : "")>Activo</option>
+                    <option value="false" @(Request["estado"] == "false" ? "selected" : "")>Inactivo</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex gap-2 mt-2 mt-md-0">
-                <button id="btnFiltrar" class="btn btn-dark flex-fill">
-                    <i class="bi bi-funnel"></i> Filtrar
+
+            <!-- Botones alineados a la derecha, como Mantenimientos -->
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button id="btnFiltrar" type="submit" class="btn btn-dark">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
                 </button>
-                <button id="btnLimpiar" class="btn btn-outline-secondary flex-fill">
+
+                <a id="btnLimpiar"
+                   href="@Url.Action("ListarEmpleado","Empleado")"
+                   class="btn btn-outline-secondary">
                     Limpiar
-                </button>
+                </a>
             </div>
-        </div>
+        </form>
     </div>
+
 
     <!-- Cards -->
     <div id="gridEmpleados" class="card-grid">

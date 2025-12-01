@@ -239,18 +239,6 @@
                 transform: translateX(20px);
             }
 
-    .inv-filters {
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        margin: 10px 0 18px;
-    }
-
-        .inv-filters .form-control {
-            min-width: 220px;
-        }
-
     .btn-primary {
         display: inline-block;
         background: #198754;
@@ -296,36 +284,46 @@
     {
         <div class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
+                <!-- Nombre -->
                 <div class="col-md-4">
                     <label class="form-label">Nombre</label>
-                    <input type="text" name="Nombre" value="@ViewBag.NombreBuscado"
-                           class="form-control" placeholder="Canon, Sony, SN..." />
+                    <input type="text" name="Nombre"
+                           value="@ViewBag.NombreBuscado"
+                           class="form-control"
+                           placeholder="Canon, Sony, SN..." />
                 </div>
 
-                <div class="col-md-3">
+                <!-- Tipo / Categoría -->
+                <div class="col-md-4">
                     <label class="form-label">Tipo</label>
                     @Html.DropDownList(
                         "CategoriaId",
                         (IEnumerable<SelectListItem>)ViewBag.Categorias,
-                        "Todos",
-                        new { @class = "form-select" })
+                        null,
+                        new { @class = "form-select" }
+                    )
                 </div>
 
-                <div class="col-md-3">
+                <!-- Estado -->
+                <div class="col-md-4">
                     <label class="form-label">Estado</label>
                     @Html.DropDownList(
                         "Estado",
                         (IEnumerable<SelectListItem>)ViewBag.Estados,
-                        "Todos",
-                        new { @class = "form-select" })
+                        null,
+                        new { @class = "form-select" }
+                    )
                 </div>
 
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-dark flex-fill">
-                        <i class="bi bi-funnel"></i> Filtrar
+                <!-- Botones -->
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
                     </button>
                     <a href="@Url.Action("ListarEquipment","Equipment")"
-                       class="btn btn-outline-secondary flex-fill">Limpiar</a>
+                       class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
                 </div>
             </div>
         </div>
