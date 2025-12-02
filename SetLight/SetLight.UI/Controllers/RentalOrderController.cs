@@ -16,6 +16,8 @@ using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
 using SetLight.AccesoADatos.RentalOrder;
 using SetLight.LogicaDeNegocio.Services;
 using PagedList;
+using X.PagedList;
+
 
 namespace SetLight.UI.Controllers
 {
@@ -39,10 +41,9 @@ namespace SetLight.UI.Controllers
             _obtenerROPorIdAD = new ObtenerROPorIdAD();
         }
 
-        public ActionResult History(int clientId)
+        public ActionResult History(int clientId, int? page, DateTime? desde, DateTime? hasta)
         {
             ClientDto cliente = _obtenerClPorID.Obtener(clientId);
-
             if (cliente == null)
                 return HttpNotFound("Cliente no encontrado");
 
@@ -60,7 +61,7 @@ namespace SetLight.UI.Controllers
                                  RutaComprobante = orden.RutaComprobante,
                                  Details = (from detalle in _contexto.OrderDetails
                                             join equipo in _contexto.Equipment
-                                            on detalle.EquipmentId equals equipo.EquipmentId
+                                                on detalle.EquipmentId equals equipo.EquipmentId
                                             where detalle.OrderId == orden.OrderId
                                             select new OrderDetailDto
                                             {
@@ -70,10 +71,25 @@ namespace SetLight.UI.Controllers
                                                 RentalValue = equipo.RentalValue,
                                                 Quantity = detalle.Quantity
                                             }).ToList()
-                             }).ToList();
+                             });
+
+
+            if (desde.HasValue) historial = historial.Where(o => o.OrderDate >= desde.Value);
+            if (hasta.HasValue) historial = historial.Where(o => o.OrderDate <= hasta.Value);
+
+
+            int pageSize = 7;
+            int pageNumber = page ?? 1;
+            var historialPaginado = historial
+                .OrderByDescending(x => x.OrderId)
+                .ToPagedList(pageNumber, pageSize);
 
             ViewBag.ClientName = cliente.FirstName + " " + cliente.LastName;
-            return View(historial);
+            ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
+            ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
+            ViewBag.ClientId = clientId;
+
+            return View(historialPaginado);
         }
 
         // Listado de órdenes con filtros
