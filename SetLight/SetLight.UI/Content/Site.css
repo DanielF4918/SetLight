@@ -729,3 +729,16 @@ input:checked + .slider {
         color: #000 !important;
         text-decoration: underline !important;
     }
+
+/* Opcional, por si quieres una clase reutilizable */
+.sl-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+
+@media (max-width: 768px) {
+    .sl-filter-actions .btn {
+        flex: 1;
+    }
+}
