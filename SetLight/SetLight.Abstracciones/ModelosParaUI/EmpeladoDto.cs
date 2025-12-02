@@ -77,7 +77,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string FotoPerfil { get; set; }
 
         // 🔐 Campo solo para confirmar cambios críticos
-        [Required(ErrorMessage = "Debe ingresar su contraseña para confirmar los cambios.")]
+ 
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña de administrador")]
         public string AdminPassword { get; set; }
