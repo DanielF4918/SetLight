@@ -27,6 +27,24 @@ namespace SetLight.UI.Controllers
             _contexto = new Contexto();
         }
 
+
+        private bool ExisteNombreCategoria(string nombre, int? excluirId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                return false;
+
+            var normalizado = nombre.Trim().ToLower();
+
+            var query = _contexto.EqCategory.AsQueryable();
+
+            if (excluirId.HasValue)
+            {
+                query = query.Where(c => c.CategoryId != excluirId.Value);
+            }
+
+            return query.Any(c => c.CategoryName.Trim().ToLower() == normalizado);
+        }
+
         // GET: EqCategory
         public ActionResult Index()
         {
@@ -47,10 +65,18 @@ namespace SetLight.UI.Controllers
 
         // POST: EqCategory/CrearEqCategory (usado por AJAX)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearEqCategory(EqCategoryDto eqCategoryAguardar)
         {
             if (!ModelState.IsValid)
             {
+                return PartialView("CrearEqCategory", eqCategoryAguardar);
+            }
+
+            // 🔹 Validar nombre único (crear)
+            if (ExisteNombreCategoria(eqCategoryAguardar.CategoryName))
+            {
+                ModelState.AddModelError("CategoryName", "Ya existe una categoría con ese nombre.");
                 return PartialView("CrearEqCategory", eqCategoryAguardar);
             }
 
@@ -66,17 +92,31 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // GET: EqCategory/Edit/5
-        public ActionResult Edit(int id)
+
+
+        // Lista de categorías en un PartialView (tabla)
+        public ActionResult ListarCategoriasPartial()
         {
-            // Obtenemos la categoría directamente desde el contexto
+            var categorias = _contexto.EqCategory
+                .Select(c => new EqCategoryDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName
+                })
+                .OrderBy(c => c.CategoryName)
+                .ToList();
+
+            return PartialView("_ListaCategorias", categorias);
+        }
+
+        // Formulario de edición en un PartialView
+        public ActionResult EditarCategoriaPartial(int id)
+        {
             var categoriaEnBd = _contexto.EqCategory
                 .FirstOrDefault(c => c.CategoryId == id);
 
             if (categoriaEnBd == null)
-            {
                 return HttpNotFound();
-            }
 
             var modelo = new EqCategoryDto
             {
@@ -84,33 +124,38 @@ namespace SetLight.UI.Controllers
                 CategoryName = categoriaEnBd.CategoryName
             };
 
-            return View(modelo);
+            return PartialView("_EditarCategoria", modelo);
         }
 
-        // POST: EqCategory/Edit/5
+        // POST AJAX para guardar cambios
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(EqCategoryDto model)
+        public ActionResult EditarCategoriaAjax(EqCategoryDto model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return Json(new { success = false, mensaje = "Datos inválidos." });
             }
 
-            // Usamos la capa de lógica de negocio que ya creaste
+            // 🔹 Validar nombre único (editar)
+            if (ExisteNombreCategoria(model.CategoryName, model.CategoryId))
+            {
+                return Json(new
+                {
+                    success = false,
+                    mensaje = "Ya existe una categoría con ese nombre."
+                });
+            }
+
             int resultado = _editarEqCategoryLN.Actualizar(model);
 
             if (resultado == 0)
             {
-                // No se encontró o no se guardó
-                ModelState.AddModelError("", "No fue posible actualizar la categoría.");
-                return View(model);
+                return Json(new { success = false, mensaje = "No fue posible actualizar la categoría." });
             }
 
-            TempData["Mensaje"] = "Categoría actualizada correctamente.";
-            return RedirectToAction("Index");
+            return Json(new { success = true });
         }
-
         // GET: EqCategory/Delete/5
         public ActionResult Delete(int id)
         {

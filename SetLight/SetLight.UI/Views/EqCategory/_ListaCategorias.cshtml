@@ -1,0 +1,37 @@
+﻿
+@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EqCategoryDto>
+
+<table class="table table-striped table-hover mb-0">
+    <thead>
+        <tr>
+            <th>Nombre de la categoría</th>
+            <th style="width: 120px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.CategoryName</td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-sm btn-primary btn-editar-cat"
+                                data-id="@c.CategoryId">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="text-center text-muted">
+                    No hay categorías registradas.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
