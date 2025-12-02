@@ -6,7 +6,9 @@ using System.Web;
 using System.Web.Mvc;
 using SetLight.Abstracciones.LogicaDeNegocio.EqCategory.CrearEqCategory;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.AccesoADatos;
 using SetLight.LogicaDeNegocio.EqCategory.CrearEqCategory;
+using SetLight.LogicaDeNegocio.EqCategory.EditarEqcategory;
 
 namespace SetLight.UI.Controllers
 {
@@ -15,9 +17,14 @@ namespace SetLight.UI.Controllers
     {
         private ICrearEqCategoryLN _crearEqCategoryLN;
 
+        private readonly EditarEqCategoryLN _editarEqCategoryLN;
+        private readonly Contexto _contexto;
+
         public EqCategoryController()
         {
             _crearEqCategoryLN = new CrearEqCategoryLN();
+            _editarEqCategoryLN = new EditarEqCategoryLN();
+            _contexto = new Contexto();
         }
 
         // GET: EqCategory
@@ -62,22 +69,46 @@ namespace SetLight.UI.Controllers
         // GET: EqCategory/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            // Obtenemos la categoría directamente desde el contexto
+            var categoriaEnBd = _contexto.EqCategory
+                .FirstOrDefault(c => c.CategoryId == id);
+
+            if (categoriaEnBd == null)
+            {
+                return HttpNotFound();
+            }
+
+            var modelo = new EqCategoryDto
+            {
+                CategoryId = categoriaEnBd.CategoryId,
+                CategoryName = categoriaEnBd.CategoryName
+            };
+
+            return View(modelo);
         }
 
         // POST: EqCategory/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(EqCategoryDto model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // TODO: Add update logic here
-                return RedirectToAction("Index");
+                return View(model);
             }
-            catch
+
+            // Usamos la capa de lógica de negocio que ya creaste
+            int resultado = _editarEqCategoryLN.Actualizar(model);
+
+            if (resultado == 0)
             {
-                return View();
+                // No se encontró o no se guardó
+                ModelState.AddModelError("", "No fue posible actualizar la categoría.");
+                return View(model);
             }
+
+            TempData["Mensaje"] = "Categoría actualizada correctamente.";
+            return RedirectToAction("Index");
         }
 
         // GET: EqCategory/Delete/5
