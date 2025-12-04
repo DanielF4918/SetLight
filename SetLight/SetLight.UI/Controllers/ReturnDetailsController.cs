@@ -654,7 +654,7 @@ namespace SetLight.UI.Controllers
         // POST: ReturnDetails/CreateMaintenance
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateMaintenance(MaintenanceDto model, HttpPostedFileBase evidenceFile)
+        public ActionResult CreateMaintenance(CrearMaintenanceViewModel model, HttpPostedFileBase evidenceFile)
         {
             // 🔹 Validación de cantidad
             if (model.Cantidad <= 0)
@@ -665,7 +665,7 @@ namespace SetLight.UI.Controllers
             if (!ModelState.IsValid)
             {
                 CargarCombosMantenimiento(model.EquipmentId);
-                return View("CreateMaintenance", model);
+                return View("CreateMaintenance", model);   // 👈 devolvemos el ViewModel correcto
             }
 
             if (model.StartDate == default(DateTime))
@@ -691,8 +691,13 @@ namespace SetLight.UI.Controllers
                 // 🔹 Validar que haya suficientes unidades disponibles (usando Stock)
                 if (equipo.Stock < model.Cantidad)
                 {
-                    ModelState.AddModelError("Cantidad",
-                        $"Solo hay {equipo.Stock} unidades disponibles para este equipo.");
+                    // Mensaje claro, parecido al de las órdenes
+                    var msg = $"No hay suficientes unidades disponibles para el equipo: {equipo.EquipmentName}. " +
+                              $"Disponibles: {equipo.Stock}, seleccionadas: {model.Cantidad}.";
+
+                    ModelState.AddModelError(string.Empty, msg);   // aparece en ValidationSummary
+                    ModelState.AddModelError("Cantidad", msg);     // aparece junto al campo Cantidad
+
                     CargarCombosMantenimiento(model.EquipmentId);
                     return View("CreateMaintenance", model);
                 }
@@ -704,8 +709,8 @@ namespace SetLight.UI.Controllers
                     var evidenciasRoot = Server.MapPath("~/Evidencias/");
                     Directory.CreateDirectory(evidenciasRoot);
 
-                    var originalName = System.IO.Path.GetFileName(evidenceFile.FileName);
-                    var extension = System.IO.Path.GetExtension(originalName);
+                    var originalName = Path.GetFileName(evidenceFile.FileName);
+                    var extension = Path.GetExtension(originalName);
                     var fileName = $"{Guid.NewGuid():N}{extension}";
                     var fullPath = Path.Combine(evidenciasRoot, fileName);
 
@@ -732,7 +737,7 @@ namespace SetLight.UI.Controllers
                     contexto.Maintenance.Add(mantenimiento);
                 }
 
-                // 🔹 Actualizar Stock (lo tratamos como "disponibles")
+                // 🔹 Actualizar Stock (disponibles)
                 equipo.Stock -= model.Cantidad;
 
                 contexto.SaveChanges();
@@ -741,6 +746,7 @@ namespace SetLight.UI.Controllers
             TempData["Success"] = "Mantenimientos creados correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
 
 
     }

@@ -21,7 +21,7 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                 StatusOrder = orden.StatusOrder,
                 EmpleadoId = orden.EmpleadoId,
                 DescuentoManual = orden.DescuentoManual,
-                RutaComprobante = orden.RutaComprobante 
+                RutaComprobante = orden.RutaComprobante
             };
 
             db.RentalOrders.Add(entidad);
@@ -29,6 +29,25 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
 
             foreach (var detalle in orden.Details)
             {
+                var equipo = db.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
+
+                if (equipo == null)
+                {
+                    throw new InvalidOperationException("El equipo seleccionado no existe.");
+                }
+
+                Console.WriteLine($"Equipo: {equipo.EquipmentName} | Stock actual: {equipo.Stock} | Cantidad alquilada: {detalle.Quantity}");
+
+                if (equipo.Stock < detalle.Quantity)
+                {
+                    throw new InvalidOperationException(
+                        $"No hay suficiente stock para el equipo: {equipo.EquipmentName}. " +
+                        $"Disponible: {equipo.Stock}, solicitado: {detalle.Quantity}."
+                    );
+                }
+
+
+                // Si hay stock suficiente, recién aquí:
                 db.OrderDetails.Add(new OrderDetailDA
                 {
                     OrderId = entidad.OrderId,
@@ -36,23 +55,12 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                     Quantity = detalle.Quantity
                 });
 
-                var equipo = db.Equipment.FirstOrDefault(e => e.EquipmentId == detalle.EquipmentId);
-                if (equipo != null)
+                equipo.Stock -= detalle.Quantity;
+
+                if (equipo.Stock <= 0)
                 {
-                    Console.WriteLine($"Equipo: {equipo.EquipmentName} | Stock actual: {equipo.Stock} | Cantidad alquilada: {detalle.Quantity}");
-
-                    if (equipo.Stock < detalle.Quantity)
-                    {
-                        throw new InvalidOperationException($"No hay suficiente stock para el equipo: {equipo.EquipmentName}");
-                    }
-
-                    equipo.Stock -= detalle.Quantity;
-
-                    if (equipo.Stock <= 0)
-                    {
-                        equipo.Stock = 0;
-                        equipo.Status = 2; 
-                    }
+                    equipo.Stock = 0;
+                    equipo.Status = 2; // Agotado / Sin stock
                 }
             }
 
@@ -61,3 +69,4 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
         }
     }
 }
+
