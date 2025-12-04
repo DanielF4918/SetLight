@@ -46,6 +46,8 @@ namespace SetLight.Entidades
         public int? IdEmpleado { get; set; }
 
 
+        public int? OrderId { get; set; }
+        public virtual RentalOrderDA RentalOrder { get; set; }  // opcional, si quieres navegación
 
 
     }
