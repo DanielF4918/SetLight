@@ -6,7 +6,9 @@ using System.Web;
 using System.Web.Mvc;
 using SetLight.Abstracciones.LogicaDeNegocio.EqCategory.CrearEqCategory;
 using SetLight.Abstracciones.ModelosParaUI;
+using SetLight.AccesoADatos;
 using SetLight.LogicaDeNegocio.EqCategory.CrearEqCategory;
+using SetLight.LogicaDeNegocio.EqCategory.EditarEqcategory;
 
 namespace SetLight.UI.Controllers
 {
@@ -15,9 +17,32 @@ namespace SetLight.UI.Controllers
     {
         private ICrearEqCategoryLN _crearEqCategoryLN;
 
+        private readonly EditarEqCategoryLN _editarEqCategoryLN;
+        private readonly Contexto _contexto;
+
         public EqCategoryController()
         {
             _crearEqCategoryLN = new CrearEqCategoryLN();
+            _editarEqCategoryLN = new EditarEqCategoryLN();
+            _contexto = new Contexto();
+        }
+
+
+        private bool ExisteNombreCategoria(string nombre, int? excluirId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                return false;
+
+            var normalizado = nombre.Trim().ToLower();
+
+            var query = _contexto.EqCategory.AsQueryable();
+
+            if (excluirId.HasValue)
+            {
+                query = query.Where(c => c.CategoryId != excluirId.Value);
+            }
+
+            return query.Any(c => c.CategoryName.Trim().ToLower() == normalizado);
         }
 
         // GET: EqCategory
@@ -40,10 +65,18 @@ namespace SetLight.UI.Controllers
 
         // POST: EqCategory/CrearEqCategory (usado por AJAX)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearEqCategory(EqCategoryDto eqCategoryAguardar)
         {
             if (!ModelState.IsValid)
             {
+                return PartialView("CrearEqCategory", eqCategoryAguardar);
+            }
+
+            // 🔹 Validar nombre único (crear)
+            if (ExisteNombreCategoria(eqCategoryAguardar.CategoryName))
+            {
+                ModelState.AddModelError("CategoryName", "Ya existe una categoría con ese nombre.");
                 return PartialView("CrearEqCategory", eqCategoryAguardar);
             }
 
@@ -59,27 +92,70 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // GET: EqCategory/Edit/5
-        public ActionResult Edit(int id)
+
+
+        // Lista de categorías en un PartialView (tabla)
+        public ActionResult ListarCategoriasPartial()
         {
-            return View();
+            var categorias = _contexto.EqCategory
+                .Select(c => new EqCategoryDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName
+                })
+                .OrderBy(c => c.CategoryName)
+                .ToList();
+
+            return PartialView("_ListaCategorias", categorias);
         }
 
-        // POST: EqCategory/Edit/5
+        // Formulario de edición en un PartialView
+        public ActionResult EditarCategoriaPartial(int id)
+        {
+            var categoriaEnBd = _contexto.EqCategory
+                .FirstOrDefault(c => c.CategoryId == id);
+
+            if (categoriaEnBd == null)
+                return HttpNotFound();
+
+            var modelo = new EqCategoryDto
+            {
+                CategoryId = categoriaEnBd.CategoryId,
+                CategoryName = categoriaEnBd.CategoryName
+            };
+
+            return PartialView("_EditarCategoria", modelo);
+        }
+
+        // POST AJAX para guardar cambios
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult EditarCategoriaAjax(EqCategoryDto model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // TODO: Add update logic here
-                return RedirectToAction("Index");
+                return Json(new { success = false, mensaje = "Datos inválidos." });
             }
-            catch
-            {
-                return View();
-            }
-        }
 
+            // 🔹 Validar nombre único (editar)
+            if (ExisteNombreCategoria(model.CategoryName, model.CategoryId))
+            {
+                return Json(new
+                {
+                    success = false,
+                    mensaje = "Ya existe una categoría con ese nombre."
+                });
+            }
+
+            int resultado = _editarEqCategoryLN.Actualizar(model);
+
+            if (resultado == 0)
+            {
+                return Json(new { success = false, mensaje = "No fue posible actualizar la categoría." });
+            }
+
+            return Json(new { success = true });
+        }
         // GET: EqCategory/Delete/5
         public ActionResult Delete(int id)
         {

@@ -215,6 +215,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Properties\PublishProfiles\SetLight - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\setlightapp - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -231,6 +232,7 @@
     <Content Include="Scripts\Modals\CreateOrder\CreateOrder.js" />
     <Content Include="Scripts\Modals\EditOrder\EditOrder.js" />
     <Content Include="Scripts\Modals\Empleado\EditEmpleado.js" />
+    <Content Include="Scripts\Modals\EqCategory\EqCategoryList.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
     <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
     <Content Include="Scripts\Modals\Maintenance\CreateMaintenance.js" />
@@ -295,9 +297,12 @@
     <Content Include="Views\ReturnDetails\EditarMantenimiento.cshtml" />
     <Content Include="Views\ReturnDetails\CreateMaintenance.cshtml" />
     <Content Include="Views\ReturnDetails\_ModalSeleccionarEquipo.cshtml" />
+    <Content Include="Views\EqCategory\_ListaCategorias.cshtml" />
+    <Content Include="Views\EqCategory\_EditarCategoria.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Uploads\Equipment\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

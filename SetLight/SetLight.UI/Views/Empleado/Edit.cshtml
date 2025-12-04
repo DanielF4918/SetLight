@@ -35,10 +35,9 @@
 
     <hr />
 
-    <!-- Cédula (visible pero no editable) -->
     <div class="mb-3">
         @Html.LabelFor(m => m.Cedula)
-        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @readonly = "readonly" })
+        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control" })
         @Html.HiddenFor(m => m.Cedula)
     </div>
 

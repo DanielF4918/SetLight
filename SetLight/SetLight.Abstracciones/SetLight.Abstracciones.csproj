@@ -55,6 +55,7 @@
     <Compile Include="AccesoADatos\Empleado\IListarEmpleadoAD.cs" />
     <Compile Include="AccesoADatos\Empleado\IObtenerEmpleadoPorIDAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
+    <Compile Include="AccesoADatos\EqCategory\EditEqCategory\IEditEqCategoryAD.cs" />
     <Compile Include="AccesoADatos\Equipment\CrearEquipment\ICrearEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\EditarEquipment\IEditarEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\ListarEquipment\IListarEquipmentAD.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="LogicaDeNegocio\Empleado\IListarEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\Empleado\IObtenerEmpleadoPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
+    <Compile Include="LogicaDeNegocio\EqCategory\EditEqCategory\IEditEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\EditarEquipment\IEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\IObtenerEqPorIDLN.cs" />

@@ -63,6 +63,7 @@
     <Compile Include="Empleado\ListarEmpleado\ListarEmpleadoAD.cs" />
     <Compile Include="Empleado\ObtenerEmpleadoPorID\ObtenerEmpleadoPorIDAD.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryAD.cs" />
+    <Compile Include="EqCategory\EditEqCategory\EditEqCategoryAD.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />
     <Compile Include="Equipment\EditarEquipment\EditarEquipmentAD.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentAD.cs" />
