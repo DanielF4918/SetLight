@@ -83,5 +83,15 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("Scripts", required: false)
+
+    @if (Request.IsAuthenticated)
+    {
+        <script>
+            // URL para cerrar sesión automáticamente
+            window.autoLogOffUrl = '@Url.Action("AutoLogOff", "Account")';
+        </script>
+
+        <script src="~/Scripts/Modals/Seguridad/Temporizador.js"></script>
+    }
 </body>
 </html>

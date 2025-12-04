@@ -479,15 +479,39 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
+
+        //
+        // GET: /Account/AutoLogOff
+        [Authorize]
+        [HttpGet]
+        public ActionResult AutoLogOff()
+        {
+            // Cierra la cookie de autenticación
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+
+            // Limpia la sesión
+            Session.Clear();
+
+            // Redirige al login
+            return RedirectToAction("Login", "Account");
+        }
+
         //
         // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
+            // Cierra la cookie de autenticación
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+
+            // Limpia la sesión (por si guardás cosas ahí)
+            Session.Clear();
+
+            // Redirige al login
             return RedirectToAction("Login", "Account");
         }
+
 
         //
         // GET: /Account/ExternalLoginFailure
