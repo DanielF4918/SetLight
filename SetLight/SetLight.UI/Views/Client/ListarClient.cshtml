@@ -1,4 +1,6 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.ClientDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.ClientDto>
+@using PagedList.Mvc
+@using PagedList
 
 @{
     ViewBag.Title = "Clientes";
@@ -7,70 +9,224 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-black">Clientes</h2>
-        @Html.ActionLink("+ Registrar nuevo cliente", "Create", null, new { @class = "btn btn-danger text-white fw-semibold" })
+        @Html.ActionLink("+ Registrar nuevo cliente", "Create", null, new { @class = "btn btn-success text-white fw-semibold" })
     </div>
 
     @using (Html.BeginForm("ListarClient", "Client", FormMethod.Get))
     {
-        <div class="row g-3 align-items-end mb-4">
-            <div class="col-md-3">
-                <label class="form-label text-black">Nombre completo</label>
-                <input type="text" name="nombre" value="@ViewBag.NombreBuscado" class="form-control border-dark" placeholder="Ej: Daniel Fuentes" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label text-black">Teléfono</label>
-                <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado" class="form-control border-dark" placeholder="Ej: 8888-8888" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label text-black">Correo</label>
-                <input type="text" name="correo" value="@ViewBag.CorreoBuscado" class="form-control border-dark" placeholder="Ej: correo@ejemplo.com" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label text-black">Estado</label>
-                @Html.DropDownList("status", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control border-dark" })
-            </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+        <!-- Filtros estilo Mantenimiento -->
+        <div class="card p-3 mb-3">
+            <div class="row g-2 align-items-end">
+                <!-- Fila 1 -->
+                <div class="col-md-3">
+                    <label class="form-label text-black">Nombre completo</label>
+                    <input type="text" name="nombre" value="@ViewBag.NombreBuscado"
+                           class="form-control border-dark" placeholder="Ej: Daniel Fuentes" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-black">Teléfono</label>
+                    <input type="text" name="telefono" value="@ViewBag.TelefonoBuscado"
+                           class="form-control border-dark" placeholder="Tel. personal o de empresa" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-black">Correo</label>
+                    <input type="text" name="correo" value="@ViewBag.CorreoBuscado"
+                           class="form-control border-dark" placeholder="Ej: correo@ejemplo.com" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-black">Empresa</label>
+                    <input type="text" name="empresa" value="@ViewBag.EmpresaBuscada"
+                           class="form-control border-dark" placeholder="Ej: Amazon, Coca Cola" />
+                </div>
+
+                <!-- Fila 2: Estado + Botones -->
+                <div class="col-md-3">
+                    <label class="form-label text-black">Estado</label>
+                    @Html.DropDownList(
+                        "status",
+                        (IEnumerable<SelectListItem>)ViewBag.Estados,
+                        "Todos",
+                        new { @class = "form-select border-dark" }
+                    )
+                </div>
+
+                <div class="col-md-9 d-flex justify-content-end gap-2 mt-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
+                    <a href="@Url.Action("ListarClient","Client")"
+                       class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
             </div>
         </div>
     }
 
-    <div class="table-responsive">
-        <table class="styled-table align-middle text-center w-100">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Estado</th>
-                    <th colspan="2">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
+    <div class="card-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var c in Model)
+            {
+                bool isActivo = (c.Status == 1);
+                string nombre = string.Format("{0} {1}", c.FirstName ?? "", c.LastName ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nombre))
                 {
-                    <tr>
-                        <td>@item.FirstName @item.LastName</td>
-                        <td>@item.Phone</td>
-                        <td>@item.Email</td>
-                        <td>@item.EstadoEnTexto</td>
-                        <td>
-                            @if (item.Status == 1)
+                    nombre = "(Sin nombre)";
+                }
+
+                var telefonoMostrar = !string.IsNullOrWhiteSpace(c.Phone)
+                    ? c.Phone
+                    : (string.IsNullOrWhiteSpace(c.EmpresaTelefono) ? "—" : c.EmpresaTelefono);
+
+                var empresaNombre = string.IsNullOrWhiteSpace(c.EmpresaNombre)
+                    ? "—"
+                    : c.EmpresaNombre;
+
+                <div class="sl-card">
+                    <div class="sl-body">
+                        <div class="sl-title">@nombre</div>
+
+                        <div class="sl-sub">
+                            Correo: <strong>@c.Email</strong>
+                        </div>
+
+                        <div class="sl-sub">
+                            Empresa: <strong>@empresaNombre</strong>
+                        </div>
+
+                        <div class="sl-sub">
+                            Tel: <strong>@telefonoMostrar</strong>
+                        </div>
+
+                        <div class="sl-badges">
+                            <span class="badge-soft @(isActivo ? "badge-green" : "badge-gray")">
+                                @c.EstadoEnTexto
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sl-footer">
+                        <div>
+                            @if (isActivo)
                             {
-                                @Html.ActionLink("Inactivar", "Inactivar", new { id = item.ClientId }, new { @class = "btn btn-dark" })
+                                <a class="sl-switch-link sl-switch--on" title="Inactivar"
+                                   href="@Url.Action("Inactivar","Client", new { id = c.ClientId })">
+                                    <span class="knob"></span>
+                                </a>
                             }
                             else
                             {
-                                @Html.ActionLink("Activar", "Activar", new { id = item.ClientId }, new { @class = "btn btn-success" })
+                                <a class="sl-switch-link sl-switch--off" title="Activar"
+                                   href="@Url.Action("Activar","Client", new { id = c.ClientId })">
+                                    <span class="knob"></span>
+                                </a>
                             }
-                        </td>
-                        <td>
-                            @Html.ActionLink("Editar", "Edit", "Client", new { id = item.ClientId }, new { @class = "btn btn-secondary me-1" })
-                            @Html.ActionLink("Historial", "History", "RentalOrder", new { clientId = item.ClientId }, new { @class = "btn btn-danger" })
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Edit","Client", new { id = c.ClientId })"
+                               class="btn btn-warning btn-sm rounded-circle"
+                               title="Editar cliente">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <button type="button"
+                                    class="btn btn-dark btn-sm rounded-circle"
+                                    title="Ver detalles"
+                                    data-bs-toggle="modal" data-bs-target="#cltModal_@c.ClientId">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <a href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })"
+                               class="btn btn-secondary btn-sm rounded-circle"
+                               title="Ver historial de órdenes">
+                                <i class="bi bi-clock-history"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Modal Detalles -->
+                <div class="modal fade" id="cltModal_@c.ClientId" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalles de cliente</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-2"><strong>Nombre:</strong> @nombre</div>
+                                <div class="mb-2"><strong>Correo:</strong> @c.Email</div>
+                                <div class="mb-2"><strong>Teléfono personal:</strong> @(string.IsNullOrWhiteSpace(c.Phone) ? "—" : c.Phone)</div>
+                                <div class="mb-2"><strong>Nombre de la empresa:</strong> @empresaNombre</div>
+                                <div class="mb-2"><strong>Teléfono de la empresa:</strong> @(string.IsNullOrWhiteSpace(c.EmpresaTelefono) ? "—" : c.EmpresaTelefono)</div>
+                                <div class="mb-2"><strong>Estado:</strong> @c.EstadoEnTexto</div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <a href="@Url.Action("History","RentalOrder", new { clientId = c.ClientId })" class="btn btn-outline-dark">
+                                    <i class="bi bi-clock-history"></i> Historial
+                                </a>
+                                <div>
+                                    <a href="@Url.Action("Edit","Client", new { id = c.ClientId })" class="btn btn-warning">Editar</a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">No hay clientes para los filtros seleccionados.</div>
+        }
+    </div>
+
+    <div class="mt-4">
+        @Html.PagedListPager(
+            Model,
+            page => Url.Action("ListarClient", new
+            {
+                page,
+                nombre = ViewBag.NombreBuscado,
+                telefono = ViewBag.TelefonoBuscado,
+                correo = ViewBag.CorreoBuscado,
+                empresa = ViewBag.EmpresaBuscada,
+                status = ViewBag.EstadoSeleccionado
+            }),
+            PagedListRenderOptions.ClassicPlusFirstAndLast
+        )
     </div>
 </div>
+
+<style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+</style>

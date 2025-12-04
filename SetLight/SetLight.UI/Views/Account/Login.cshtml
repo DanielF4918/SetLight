@@ -12,6 +12,14 @@
         <p class="text-center">Utilice una cuenta local para iniciar sesión.</p>
         <hr />
 
+        @* 🔐 Mensaje cuando el filtro lo sacó por cuenta desactivada *@
+        @if (ViewBag.CuentaDesactivada != null)
+        {
+            <div class="alert alert-warning text-center">
+                @ViewBag.CuentaDesactivada
+            </div>
+        }
+
         @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
         {
             @Html.AntiForgeryToken()
@@ -37,7 +45,8 @@
             <button type="submit" class="btn btn-dark w-100">Iniciar sesión</button>
 
             <div class="mt-3 text-center">
-                @Html.ActionLink("Registrarse como usuario nuevo", "Register", "Account", null, new { @class = "text-decoration-none" })
+                @Html.ActionLink("Registrarse como usuario nuevo", "Register", "Account", null, new { @class = "text-decoration-none me-2" })
+                @Html.ActionLink("¿Olvidaste tu contraseña?", "ForgotPassword", "Account")
             </div>
         }
     </div>

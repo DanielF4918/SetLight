@@ -38,12 +38,11 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string RolId { get; set; }
 
         [DisplayName("Rol")]
-        public string NombreRol { get; set; }
+        public string RolNombre { get; set; }
 
         [Required]
         [DisplayName("Estado")]
         public bool Estado { get; set; } = true;
-
 
         [StringLength(20)]
         [DisplayName("Número de Cédula")]
@@ -72,5 +71,16 @@ namespace SetLight.Abstracciones.ModelosParaUI
         [StringLength(1000)]
         [DisplayName("Información Médica")]
         public string InfoMedica { get; set; }
+
+        [StringLength(500)]
+        [DisplayName("Foto de Perfil")]
+        public string FotoPerfil { get; set; }
+
+        // 🔐 Campo solo para confirmar cambios críticos
+ 
+        [DataType(DataType.Password)]
+        [Display(Name = "Contraseña de administrador")]
+        public string AdminPassword { get; set; }
+
     }
 }

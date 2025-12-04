@@ -34,7 +34,9 @@ namespace SetLight.AccesoADatos.Empleado.ObtenerEmpleadoPorID
                                                  ContactoEmergenciaParentesco = elEmpleado.ContactoEmergenciaParentesco,
                                                  TipoSangre = elEmpleado.TipoSangre,
                                                  Alergias = elEmpleado.Alergias,
-                                                 InfoMedica = elEmpleado.InfoMedica
+                                                 InfoMedica = elEmpleado.InfoMedica,
+
+                                                 FotoPerfil = elEmpleado.FotoPerfil
                                              }).FirstOrDefault();
 
             return empleadoARetornar;

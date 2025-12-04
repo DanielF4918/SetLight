@@ -55,6 +55,7 @@
     <Compile Include="AccesoADatos\Empleado\IListarEmpleadoAD.cs" />
     <Compile Include="AccesoADatos\Empleado\IObtenerEmpleadoPorIDAD.cs" />
     <Compile Include="AccesoADatos\EqCategory\CrearEqCategory\ICrearEqCategoryAD.cs" />
+    <Compile Include="AccesoADatos\EqCategory\EditEqCategory\IEditEqCategoryAD.cs" />
     <Compile Include="AccesoADatos\Equipment\CrearEquipment\ICrearEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\EditarEquipment\IEditarEquipmentAD.cs" />
     <Compile Include="AccesoADatos\Equipment\ListarEquipment\IListarEquipmentAD.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="LogicaDeNegocio\Empleado\IListarEmpleadoLN.cs" />
     <Compile Include="LogicaDeNegocio\Empleado\IObtenerEmpleadoPorIDLN.cs" />
     <Compile Include="LogicaDeNegocio\EqCategory\CrearEqCategory\ICrearEqCategoryLN.cs" />
+    <Compile Include="LogicaDeNegocio\EqCategory\EditEqCategory\IEditEqCategoryLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\CrearEquipment\ICrearEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\EditarEquipment\IEquipmentLN.cs" />
     <Compile Include="LogicaDeNegocio\Equipment\IObtenerEqPorIDLN.cs" />
@@ -88,11 +90,13 @@
     <Compile Include="ModelosParaUI\EmpeladoDto.cs" />
     <Compile Include="ModelosParaUI\EqCategoryDto.cs" />
     <Compile Include="ModelosParaUI\EquipmentDto.cs" />
+    <Compile Include="ModelosParaUI\MaintenanceDto.cs" />
     <Compile Include="ModelosParaUI\OrderDetailDto.cs" />
     <Compile Include="ModelosParaUI\RentalOrderDto.cs" />
     <Compile Include="ModelosParaUI\ReturnDetailsDto.cs" />
     <Compile Include="ModelosParaUI\TrazabilidadDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\CrearMaintenanceViewModel.cs" />
     <Compile Include="ViewModels\CrearRentalOrderViewModel .cs" />
     <Compile Include="ViewModels\EquipmentReturnViewModel.cs" />
     <Compile Include="ViewModels\PerfilUsuarioViewModel.cs" />
@@ -100,6 +104,8 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="AccesoADatos\Maintenance\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -44,6 +44,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +63,7 @@
     <Compile Include="Empleado\ListarEmpleado\ListarEmpleadoAD.cs" />
     <Compile Include="Empleado\ObtenerEmpleadoPorID\ObtenerEmpleadoPorIDAD.cs" />
     <Compile Include="EqCategory\CrearEqCategory\CrearEqCategoryAD.cs" />
+    <Compile Include="EqCategory\EditEqCategory\EditEqCategoryAD.cs" />
     <Compile Include="Equipment\CrearEquipment\CrearEquipmentAD.cs" />
     <Compile Include="Equipment\EditarEquipment\EditarEquipmentAD.cs" />
     <Compile Include="Equipment\ListarEquipment\ListarEquipmentAD.cs" />
@@ -69,6 +71,26 @@
     <Compile Include="Migrations\202510022359336_Baseline.cs" />
     <Compile Include="Migrations\202510022359336_Baseline.Designer.cs">
       <DependentUpon>202510022359336_Baseline.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.cs" />
+    <Compile Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.Designer.cs">
+      <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511122252387_ActualizarMaintenance.cs" />
+    <Compile Include="Migrations\202511122252387_ActualizarMaintenance.Designer.cs">
+      <DependentUpon>202511122252387_ActualizarMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511130132004_SyncSchema.cs" />
+    <Compile Include="Migrations\202511130132004_SyncSchema.Designer.cs">
+      <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.cs" />
+    <Compile Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.Designer.cs">
+      <DependentUpon>202511151904010_Sync_Maintenance_IdEmpleado.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.cs" />
+    <Compile Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.Designer.cs">
+      <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Modelos\ClientDa.cs" />
@@ -101,6 +123,21 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202510022359336_Baseline.resx">
       <DependentUpon>202510022359336_Baseline.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511052244409_AgregarCampoFotoEmpleado.resx">
+      <DependentUpon>202511052244409_AgregarCampoFotoEmpleado.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511122252387_ActualizarMaintenance.resx">
+      <DependentUpon>202511122252387_ActualizarMaintenance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511130132004_SyncSchema.resx">
+      <DependentUpon>202511130132004_SyncSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511151904010_Sync_Maintenance_IdEmpleado.resx">
+      <DependentUpon>202511151904010_Sync_Maintenance_IdEmpleado.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.resx">
+      <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

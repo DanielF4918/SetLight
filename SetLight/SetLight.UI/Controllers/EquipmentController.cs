@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using SetLight.Abstracciones.AccesoADatos.Equipment.CrearEquipment;
+using PagedList;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.CrearEquipment;
 using SetLight.Abstracciones.LogicaDeNegocio.Equipment.EditarEquipment;
@@ -37,8 +37,8 @@ namespace SetLight.UI.Controllers
             _equipmentLN = new EditarEquipmentLN();
         }
 
-        // GET: Equipment
-        public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado)
+        // GET: Equipment/ListarEquipment
+        public ActionResult ListarEquipment(string Nombre, int? CategoriaId, int? Estado, int? page)
         {
             var lista = _listarEquipmentLN.Obtener();
 
@@ -49,34 +49,66 @@ namespace SetLight.UI.Controllers
                     .Where(o => o.StatusOrder == 1)
                     .SelectMany(o => o.OrderDetails)
                     .GroupBy(d => d.EquipmentId)
-                    .Select(g => new { EquipmentId = g.Key, Cant = g.Sum(x => (int?)x.Quantity) ?? 0 })
+                    .Select(g => new
+                    {
+                        EquipmentId = g.Key,
+                        Cant = g.Sum(x => (int?)x.Quantity) ?? 0
+                    })
                     .ToDictionary(x => x.EquipmentId, x => x.Cant);
 
-                // MANTENIMIENTO: cantidad de mantenimientos activos por equipo
+                // Mantenimientos por equipo - SOLO pendientes (status 0)
                 var mantenimientoPorEquipo = contexto.Maintenance
-                    .Where(m => m.MaintenanceStatus != 2) 
+                    .Where(m => m.MaintenanceStatus == 0) // 0 = Pendiente
                     .GroupBy(m => m.EquipmentId)
-                    .Select(g => new { EquipmentId = g.Key, Cant = g.Count() })
+                    .Select(g => new
+                    {
+                        EquipmentId = g.Key,
+                        Cant = g.Count()
+                    })
                     .ToDictionary(x => x.EquipmentId, x => x.Cant);
 
                 foreach (var e in lista)
                 {
-                    e.Alquilados = alquiladosPorEquipo.TryGetValue(e.EquipmentId, out var cantAlq) ? cantAlq : 0;
-                    e.EnMantenimiento = mantenimientoPorEquipo.TryGetValue(e.EquipmentId, out var cantMant) ? cantMant : 0; 
-                    e.Disponibles = Math.Max(0, e.Stock - e.Alquilados); 
+                    e.Alquilados = alquiladosPorEquipo.TryGetValue(e.EquipmentId, out var cantAlq)
+                        ? cantAlq
+                        : 0;
+
+                    e.EnMantenimiento = mantenimientoPorEquipo.TryGetValue(e.EquipmentId, out var cantMant)
+                        ? cantMant
+                        : 0;
+
+                    // Stock en BD ya refleja lo disponible, no restamos alquilados otra vez
+                    e.Disponibles = e.Stock < 0 ? 0 : e.Stock;
                 }
 
-                // ViewBags para combos
-                ViewBag.Categorias = contexto.EqCategory
-                    .Select(c => new SelectListItem
+                // ----- Combo de categorías (Tipo) -----
+                var categoriasBD = contexto.EqCategory
+                    .OrderBy(c => c.CategoryName)
+                    .ToList();
+
+                var categorias = new List<SelectListItem>
+                {
+                    new SelectListItem
+                    {
+                        Value = "0",
+                        Text = "Todos",
+                        Selected = !CategoriaId.HasValue || CategoriaId == 0
+                    }
+                };
+
+                categorias.AddRange(
+                    categoriasBD.Select(c => new SelectListItem
                     {
                         Value = c.CategoryId.ToString(),
                         Text = c.CategoryName,
-                        Selected = (CategoriaId.HasValue && CategoriaId == c.CategoryId)
-                    }).ToList();
+                        Selected = CategoriaId.HasValue && CategoriaId.Value == c.CategoryId
+                    })
+                );
+
+                ViewBag.Categorias = categorias;
             }
 
-            // Filtros
+            // -------- Filtros --------
             if (!string.IsNullOrWhiteSpace(Nombre))
             {
                 var n = Nombre.Trim().ToLower();
@@ -107,33 +139,33 @@ namespace SetLight.UI.Controllers
                 }
             }
 
+            // Combo de estados
             ViewBag.Estados = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "0", Text = "Todos",             Selected = Estado == null || Estado == 0 },
-        new SelectListItem { Value = "1", Text = "Activo",            Selected = Estado == 1 },
-               new SelectListItem { Value = "2", Text = "Alquilado",         Selected = Estado == 2 },
-        new SelectListItem { Value = "3", Text = "Inactivo",          Selected = Estado == 3 },
-        new SelectListItem { Value = "4", Text = "En mantenimiento",  Selected = Estado == 4 }
-    };
+            {
+                new SelectListItem { Value = "0", Text = "Todos",            Selected = !Estado.HasValue || Estado == 0 },
+                new SelectListItem { Value = "1", Text = "Activo",           Selected = Estado == 1 },
+                new SelectListItem { Value = "2", Text = "Alquilado",        Selected = Estado == 2 },
+                new SelectListItem { Value = "3", Text = "Inactivo",         Selected = Estado == 3 },
+                new SelectListItem { Value = "4", Text = "En mantenimiento", Selected = Estado == 4 }
+            };
 
             ViewBag.NombreBuscado = Nombre;
             ViewBag.PlaceholderImagen = Url.Content("~/content/img/placeholder-equipment.png");
 
-            return View(lista);
+            int pageNumber = page ?? 1;
+            int pageSize = 12;
+
+            return View(lista.ToPagedList(pageNumber, pageSize));
         }
 
+        // --- el resto de tu controller queda igual ---
 
-
-
-
-        // GET: Equipment/Details/5
         public ActionResult Details(int id)
         {
             List<EquipmentDto> LaListaEquipment = _listarEquipmentLN.Obtener();
             return View(LaListaEquipment);
         }
 
-        // GET: Equipment/Create
         public ActionResult CrearEquipment()
         {
             using (var contexto = new Contexto())
@@ -151,8 +183,6 @@ namespace SetLight.UI.Controllers
             return View();
         }
 
-
-        // POST: Equipment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearEquipment(EquipmentDto equipmentguardar, HttpPostedFileBase imagen)
@@ -178,25 +208,21 @@ namespace SetLight.UI.Controllers
                         return View(equipmentguardar);
                     }
 
-                    if (imagen.ContentLength > 5 * 1024 * 1024) 
+                    if (imagen.ContentLength > 5 * 1024 * 1024)
                     {
                         ModelState.AddModelError("", "La imagen supera el tamaño máximo permitido (5 MB).");
                         CargarCategoriasEnViewBag(equipmentguardar.CategoryId);
                         return View(equipmentguardar);
                     }
 
-                    // Asegurar carpeta
                     var carpetaFisica = Server.MapPath(UploadRoot);
                     Directory.CreateDirectory(carpetaFisica);
 
-                    // Nombre único
                     var fileName = $"{Guid.NewGuid():N}{ext}";
                     var rutaFisica = Path.Combine(carpetaFisica, fileName);
 
-                    // Guardar archivo
                     imagen.SaveAs(rutaFisica);
 
-                    // Ruta virtual para guardar en BD
                     rutaGuardada = Url.Content($"{UploadRoot}/{fileName}");
                     equipmentguardar.ImageUrl = rutaGuardada;
                 }
@@ -215,7 +241,7 @@ namespace SetLight.UI.Controllers
                         if (System.IO.File.Exists(rutaFisica))
                             System.IO.File.Delete(rutaFisica);
                     }
-                    catch { /* swallow */ }
+                    catch { }
                 }
 
                 ModelState.AddModelError("", "Error al guardar: " + ex.Message);
@@ -238,8 +264,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-        // GET: Equipment/Edit/5
         [HttpGet]
         public ActionResult Edit(int id)
         {
@@ -260,23 +284,20 @@ namespace SetLight.UI.Controllers
             return View("EditEquipment", elEquipment);
         }
 
-        // POST: Equipment/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(
             EquipmentDto elEquipment,
-            HttpPostedFileBase nuevaImagen, 
-            bool? eliminarImagen             
+            HttpPostedFileBase nuevaImagen,
+            bool? eliminarImagen
         )
         {
-            // 1) Validación de modelo
             if (!ModelState.IsValid)
             {
                 CargarCategorias(elEquipment.CategoryId);
                 return View("EditEquipment", elEquipment);
             }
 
-            // 2) Obtener registro actual para conocer la ImageUrl previa
             var actual = _ObtenerEqPorIDLN.Obtener(elEquipment.EquipmentId);
             if (actual == null)
             {
@@ -285,12 +306,13 @@ namespace SetLight.UI.Controllers
                 return View("EditEquipment", elEquipment);
             }
 
-            string oldUrl = actual.ImageUrl;
-            string newUrlGuardada = null;   
+            elEquipment.Status = actual.Status;
+
+            var oldUrl = actual.ImageUrl;
+            string newUrlGuardada = null;
 
             try
             {
-
                 if (eliminarImagen == true)
                 {
                     elEquipment.ImageUrl = null;
@@ -301,7 +323,7 @@ namespace SetLight.UI.Controllers
                     var okExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                     if (!okExt.Contains(ext))
                     {
-                        ModelState.AddModelError("", "Formato inválido. Solo .jpg, .jpeg, .png, .webp");
+                        ModelState.AddModelError("", "Formato inválido. Solo se permite .jpg, .jpeg, .png o .webp");
                         CargarCategorias(elEquipment.CategoryId);
                         return View("EditEquipment", elEquipment);
                     }
@@ -312,6 +334,7 @@ namespace SetLight.UI.Controllers
                         return View("EditEquipment", elEquipment);
                     }
 
+                    const string UploadRoot = "~/Uploads/Equipment";
                     var carpetaFisica = Server.MapPath(UploadRoot);
                     Directory.CreateDirectory(carpetaFisica);
 
@@ -320,7 +343,7 @@ namespace SetLight.UI.Controllers
                     nuevaImagen.SaveAs(rutaFisica);
 
                     newUrlGuardada = Url.Content($"{UploadRoot}/{fileName}");
-                    elEquipment.ImageUrl = newUrlGuardada; // asignamos nueva
+                    elEquipment.ImageUrl = newUrlGuardada;
                 }
                 else
                 {
@@ -354,7 +377,6 @@ namespace SetLight.UI.Controllers
             }
         }
 
-        // Helpers
         private void CargarCategorias(int? seleccion = null)
         {
             using (var contexto = new Contexto())
@@ -375,30 +397,26 @@ namespace SetLight.UI.Controllers
             {
                 if (string.IsNullOrWhiteSpace(urlVirtual)) return;
 
-                // si es URL absoluta (CDN), no intentamos borrar
                 if (Uri.IsWellFormedUriString(urlVirtual, UriKind.Absolute)) return;
 
                 var rutaFisica = Server.MapPath(urlVirtual);
                 if (System.IO.File.Exists(rutaFisica))
                     System.IO.File.Delete(rutaFisica);
             }
-            catch { /* swallow */ }
+            catch { }
         }
 
-        // GET: Equipment/Delete/5
         public ActionResult Delete(int id)
         {
             return View();
         }
 
-        // POST: Equipment/Delete/5
         [HttpPost]
         public ActionResult Delete(int id, FormCollection collection)
         {
             try
             {
                 // TODO: Add delete logic here
-
                 return RedirectToAction("Index");
             }
             catch
@@ -406,7 +424,7 @@ namespace SetLight.UI.Controllers
                 return View();
             }
         }
-        // GET: Equipment/Activar/5
+
         public ActionResult Activar(int id)
         {
             var equipo = _ObtenerEqPorIDLN.Obtener(id);
@@ -415,7 +433,6 @@ namespace SetLight.UI.Controllers
             return RedirectToAction("ListarEquipment");
         }
 
-        // GET: Equipment/Inactivar/5
         public ActionResult Inactivar(int id)
         {
             var equipo = _ObtenerEqPorIDLN.Obtener(id);

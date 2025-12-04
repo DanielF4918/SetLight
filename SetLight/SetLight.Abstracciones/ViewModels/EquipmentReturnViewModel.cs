@@ -23,7 +23,9 @@ namespace SetLight.Abstracciones.ViewModels
         public string Observaciones { get; set; }
 
         public int Quantity { get; set; }
-        public int MaintenanceType { get; set; }
+        public int? MaintenanceType { get; set; }
+
+        public int CantidadFaltante { get; set; }
 
     }
 

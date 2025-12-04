@@ -1,4 +1,5 @@
 ﻿function mostrarEquiposModal(orderId) {
-    const modalId = '#modalEquipos-' + orderId;
-    $(modalId).modal('show');
+    const modalEl = document.getElementById('modalEquipos-' + orderId);
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
 }

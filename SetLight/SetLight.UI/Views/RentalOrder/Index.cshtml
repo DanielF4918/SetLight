@@ -2,177 +2,461 @@
 @using PagedList.Mvc
 @using PagedList
 
-
-
 @{
     ViewBag.Title = "Órdenes de Alquiler";
+
+    // Lista de empleados que viene del controlador
+    var empleados = ViewBag.Empleados as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
 }
 
-<div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
-    <h2 class="mb-4 text-dark fw-bold">Órdenes de Alquiler Registradas</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <div class="text-end mb-3">
+<br />
+<div>
+    <h2 class="mb-4 text-dark fw-bold" style="float: left">Órdenes de Alquiler Registradas</h2>
+    <div class="text-end mb-3" style="float: right">
         @Html.ActionLink("Crear Nueva Orden", "Create", "RentalOrder", null, new { @class = "btn btn-success" })
     </div>
+</div>
+<br />
+<br />
 
-    <div class="table-responsive">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th># Orden</th>
-                    <th>Cliente</th>
-                    <th>Fecha Orden</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Colaborador</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var orden in Model)
+<div class="container mt-4 mb-5">
+
+    <!-- Filtros (mismo orden/estilo que Mantenimientos) -->
+    <div class="card p-3 mb-3">
+        <form method="get" class="row g-2 align-items-end">
+            <!-- N° Orden -->
+            <div class="col-md-2">
+                <label class="form-label text-black">N° Orden</label>
+                <input type="text"
+                       name="orderId"
+                       value="@ViewBag.FiltroOrderId"
+                       class="form-control border-dark" />
+            </div>
+
+            <!-- Estado -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Estado</label>
+                <select name="estado" class="form-select border-dark">
+                    <option value="">-- Todos --</option>
+                    <option value="1" @(ViewBag.FiltroEstado == 1 ? "selected" : "")>Activa</option>
+                    <option value="2" @(ViewBag.FiltroEstado == 2 ? "selected" : "")>Completada</option>
+                    <option value="3" @(ViewBag.FiltroEstado == 3 ? "selected" : "")>Cancelada</option>
+                </select>
+            </div>
+
+            <!-- Cliente -->
+            <div class="col-md-3">
+                <label class="form-label text-black">Cliente</label>
+                <input type="text"
+                       name="cliente"
+                       value="@ViewBag.FiltroCliente"
+                       class="form-control border-dark"
+                       placeholder="Nombre del cliente" />
+            </div>
+
+            <!-- Empleado -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Empleado</label>
+
+                @if (empleados.Any())
                 {
-                    <tr>
-                        <td>@orden.OrderId</td>
-                        <td>@orden.ClientName</td>
-                        <td>@orden.OrderDate.ToShortDateString()</td>
-                        <td>@orden.StartDate.ToShortDateString()</td>
-                        <td>@orden.EndDate.ToShortDateString()</td>
-                        <td>@orden.EmpleadoNombreCompleto</td>
-                        <td>
-                            @{
-                                string estado = orden.StatusOrder == 1 ? "Activa" :
-                                                orden.StatusOrder == 2 ? "Completada" :
-                                                "Cancelada";
-                            }
-                            @estado
-                        </td>
-                        <td>
-                            <button class="btn btn-dark mb-1" onclick="mostrarEquiposModal(@orden.OrderId)">
-                                Ver equipos
+                    @Html.DropDownList(
+                        "empleadoId",
+                        empleados,
+                        "-- Todos --",
+                        new { @class = "form-select border-dark" }
+                    )
+                }
+                else
+                {
+                    <select name="empleadoId" class="form-select border-dark">
+                        <option value="">-- Todos --</option>
+                    </select>
+                }
+            </div>
+
+            <!-- Desde -->
+            <div class="col-md-1">
+                <label class="form-label text-black">Desde</label>
+                <input type="date"
+                       name="desde"
+                       value="@ViewBag.FiltroDesde"
+                       class="form-control border-dark" />
+            </div>
+
+            <!-- Hasta -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Hasta</label>
+                <input type="date"
+                       name="hasta"
+                       value="@ViewBag.FiltroHasta"
+                       class="form-control border-dark" />
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
+                <a href="@Url.Action("Index","RentalOrder")"
+                   class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div class="row g-3">
+    @foreach (var orden in Model)
+    {
+        string estadoTexto = orden.StatusOrder == 1 ? "Activa"
+                            : orden.StatusOrder == 2 ? "Completada"
+                            : "Cancelada";
+        string estadoColor = orden.StatusOrder == 1 ? "badge bg-warning"
+                            : orden.StatusOrder == 2 ? "bg-success"
+                            : "bg-danger";
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="fw-bold text-dark mb-2">
+                            Orden #@orden.OrderId
+                        </h5>
+                        <span class="badge @estadoColor text-white">@estadoTexto</span>
+                    </div>
+
+                    <p class="mb-1"><strong>Cliente:</strong> @orden.ClientName</p>
+                    <p class="mb-1"><strong>Colaborador:</strong> @orden.EmpleadoNombreCompleto</p>
+                    <p class="mb-1"><strong>Fecha:</strong> @orden.OrderDate.ToShortDateString()</p>
+                    <p class="mb-1"><strong>Inicio:</strong> @orden.StartDate.ToShortDateString()</p>
+                    <p class="mb-3"><strong>Fin:</strong> @orden.EndDate.ToShortDateString()</p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group" role="group">
+
+                            <!-- Ver equipos -->
+                            <button class="btn btn-dark btn-sm rounded-circle" title="Ver equipos"
+                                    onclick="mostrarEquiposModal(@orden.OrderId)">
+                                <i class="bi bi-eye"></i>
                             </button>
 
+                            <!-- Editar orden -->
                             @if (orden.StatusOrder == 1)
                             {
-                                @Html.ActionLink("Editar", "Edit", new { id = orden.OrderId }, new { @class = "btn btn-warning mb-1" })
-                                @Html.ActionLink("Registrar devolución", "CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-secondary mb-1" })
-                            }
-
-                            @if (orden.StatusOrder == 2)
-                            {
-                                @Html.ActionLink("Ver devolución", "DetallesDevolucion", "ReturnDetails", new { orderId = orden.OrderId }, new { @class = "btn btn-secondary mb-1" })
-                            }
-
-                            @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
-                            {
-                                <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })" class="btn btn-success mb-1">
-                                    Descargar comprobante
+                                <a href="@Url.Action("Edit", "RentalOrder", new { id = orden.OrderId })"
+                                   class="btn btn-warning btn-sm rounded-circle" title="Editar orden">
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
                             }
                             else
                             {
-                                <span class="text-muted">No disponible</span>
+                                <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                    <i class="bi bi-pencil-square text-muted"></i>
+                                </button>
                             }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
 
-    <!-- Paginación -->
-    <div class="mt-3">
-        @Html.PagedListPager(Model, page => Url.Action("Index", new
-        {
-            page,
-            orderId = ViewBag.FiltroOrderId,
-            estado = ViewBag.FiltroEstado,
-            cliente = ViewBag.FiltroCliente,
-            empleadoId = ViewBag.FiltroEmpleadoId,
-            desde = ViewBag.FiltroDesde,
-            hasta = ViewBag.FiltroHasta
-        }), PagedList.Mvc.PagedListRenderOptions.ClassicPlusFirstAndLast)
-    </div>
+                            <!-- Registrar / Ver devolución -->
+                            @if (orden.StatusOrder == 1)
+                            {
+                                <a href="@Url.Action("CrearReturnDetails", "ReturnDetails", new { orderId = orden.OrderId })"
+                                   class="btn btn-info btn-sm rounded-circle" title="Registrar devolución">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
+                            }
+                            else if (orden.StatusOrder == 2)
+                            {
+                                <a href="@Url.Action("DetallesDevolucion", "ReturnDetails", new { orderId = orden.OrderId })"
+                                   class="btn btn-secondary btn-sm rounded-circle" title="Ver devolución">
+                                    <i class="bi bi-box-seam"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                    <i class="bi bi-box-seam text-muted"></i>
+                                </button>
+                            }
 
-    <style>
-
-        .pagination {
-            display: flex !important;
-            justify-content: center !important;
-            padding-left: 0;
-            list-style: none;
-        }
-
-            .pagination li a,
-            .pagination li span {
-                color: black !important;
-                margin: 0 5px;
-                border-radius: 4px;
-                padding: 5px 10px;
-                display: inline-block;
-            }
-
-            .pagination li.active span {
-                background-color: #e9ecef !important;
-                color: black !important;
-            }
-
-            .pagination li a:hover {
-                background-color: #f0f0f0;
-                color: black !important;
-            }
-    </style>
-
-
-    <!-- Modales -->
-    @foreach (var orden in Model)
-    {
-        <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="modalLabel-@orden.OrderId">Equipos de la orden #@orden.OrderId</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="styled-table">
-                            <thead>
-                                <tr>
-                                    <th>Equipo</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Cantidad</th>
-                                    <th>Valor Unitario</th>
-                                    <th>Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var detalle in orden.Details)
+                            <!-- Cancelar orden -->
+                            @if (orden.StatusOrder == 1)
+                            {
+                                using (Html.BeginForm("Cancelar", "RentalOrder",
+                                                      new { id = orden.OrderId },
+                                                      FormMethod.Post,
+                                                      new { @class = "d-inline", onsubmit = "return confirm('¿Seguro que desea cancelar esta orden?');" }))
                                 {
-                                    <tr>
-                                        <td>@detalle.EquipmentName</td>
-                                        <td>@detalle.Brand</td>
-                                        <td>@detalle.Model</td>
-                                        <td>@detalle.Quantity</td>
-                                        <td>₡@detalle.RentalValue</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity)</td>
-                                    </tr>
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm rounded-circle"
+                                            title="Cancelar orden">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                    <i class="bi bi-x-circle text-muted"></i>
+                                </button>
+                            }
+
+                            <!-- Descargar comprobante -->
+                            @if (orden.StatusOrder == 1 || orden.StatusOrder == 2)
+                            {
+                                <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = orden.OrderId })"
+                                   class="btn btn-success btn-sm rounded-circle" title="Descargar comprobante">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-light btn-sm rounded-circle disabled" title="No disponible">
+                                    <i class="bi bi-download text-muted"></i>
+                                </button>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     }
+</div>
 
-    @section Scripts {
-        <script>
-            function mostrarEquiposModal(orderId) {
-                $('#modalEquipos-' + orderId).modal('show');
-            }
-        </script>
+<div class="mt-4">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new
+    {
+        page,
+        orderId = ViewBag.FiltroOrderId,
+        estado = ViewBag.FiltroEstado,
+        cliente = ViewBag.FiltroCliente,
+        empleadoId = ViewBag.FiltroEmpleadoId,
+        desde = ViewBag.FiltroDesde,
+        hasta = ViewBag.FiltroHasta
+    }), PagedList.Mvc.PagedListRenderOptions.ClassicPlusFirstAndLast)
+</div>
+
+<style>
+    .pagination .page-link {
+        border: none !important;
+        background: none !important;
+        padding: 4px 8px !important;
+        color: #000 !important;
+        box-shadow: none !important;
     }
+
+    .pagination .page-item.active .page-link {
+        background: none !important;
+        color: #000 !important;
+        font-weight: bold;
+    }
+
+    .pagination .page-link:hover {
+        background: none !important;
+        color: #000 !important;
+        text-decoration: underline;
+    }
+
+    .pagination {
+        gap: 6px;
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+
+    .card {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 10px;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+        .btn-group .btn {
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    .hover-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .hover-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+</style>
+
+@* Modales de equipos *@
+@foreach (var orden in Model)
+{
+    <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Cantidad</th>
+                                <th>Valor Unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body-@orden.OrderId">
+                            @foreach (var detalle in orden.Details)
+                            {
+                                <tr>
+                                    <td>@detalle.EquipmentName</td>
+                                    <td>@detalle.Brand</td>
+                                    <td>@detalle.Model</td>
+                                    <td>@detalle.Quantity</td>
+                                    <td>$@detalle.RentalValue</td>
+                                    <td>$@(detalle.RentalValue * detalle.Quantity)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-center mt-2">
+                    <nav>
+                        <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
+                    </nav>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function mostrarEquiposModal(orderId) {
+            const modal = new bootstrap.Modal(document.getElementById('modalEquipos-' + orderId));
+            modal.show();
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            @foreach (var orden in Model)
+            {
+                @:paginarTabla("@orden.OrderId", 5);
+            }
+
+            function paginarTabla(orderId, rowsPerPage) {
+                const table = document.querySelector(`#table-body-${orderId}`);
+                const rows = Array.from(table.querySelectorAll("tr"));
+                const totalRows = rows.length;
+                const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+                if (totalPages === 0) return;
+
+                const pagination = document.querySelector(`#pagination-${orderId}`);
+
+                function mostrarPagina(page) {
+                    const start = (page - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+
+                    rows.forEach((row, i) => {
+                        row.style.display = (i >= start && i < end) ? "" : "none";
+                    });
+
+                    dibujarPaginacion(page);
+                }
+
+                function boton(text, disabled, onClick) {
+                    const li = document.createElement("li");
+                    li.className = "page-item " + (disabled ? "disabled" : "");
+
+                    const a = document.createElement("a");
+                    a.className = "page-link";
+                    a.href = "#";
+                    a.textContent = text;
+
+                    if (!disabled) {
+                        a.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            onClick();
+                        });
+                    }
+
+                    li.appendChild(a);
+                    return li;
+                }
+
+                function dibujarPaginacion(currentPage) {
+                    pagination.innerHTML = "";
+
+                    pagination.appendChild(
+                        boton("««", currentPage === 1, () => mostrarPagina(1))
+                    );
+
+                    pagination.appendChild(
+                        boton("«", currentPage === 1, () => mostrarPagina(currentPage - 1))
+                    );
+
+                    for (let i = 1; i <= totalPages; i++) {
+                        const li = boton(i, false, () => mostrarPagina(i));
+                        if (i === currentPage) li.classList.add("active");
+                        pagination.appendChild(li);
+                    }
+
+                    pagination.appendChild(
+                        boton("»", currentPage === totalPages, () => mostrarPagina(currentPage + 1))
+                    );
+
+                    pagination.appendChild(
+                        boton("»»", currentPage === totalPages, () => mostrarPagina(totalPages))
+                    );
+                }
+
+                mostrarPagina(1);
+            }
+
+        });
+    </script>
+}

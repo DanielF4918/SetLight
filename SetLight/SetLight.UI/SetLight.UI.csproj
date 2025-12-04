@@ -151,6 +151,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="X.PagedList, Version=10.5.9.0, Culture=neutral, PublicKeyToken=525ccaa9023f010c, processorArchitecture=MSIL">
+      <HintPath>..\packages\X.PagedList.10.5.9\lib\netstandard2.0\X.PagedList.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
@@ -173,6 +176,7 @@
     <Compile Include="Controllers\RentalOrderController.cs" />
     <Compile Include="Controllers\ReturnDetailsController.cs" />
     <Compile Include="Controllers\TrazabilidadController.cs" />
+    <Compile Include="Filters\VerificarEmpleadoActivoAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -211,6 +215,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Properties\PublishProfiles\SetLight - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\setlightapp - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -226,8 +231,11 @@
     <Content Include="Scripts\Modals\CreateOrder\AgregarCliente.js" />
     <Content Include="Scripts\Modals\CreateOrder\CreateOrder.js" />
     <Content Include="Scripts\Modals\EditOrder\EditOrder.js" />
+    <Content Include="Scripts\Modals\Empleado\EditEmpleado.js" />
+    <Content Include="Scripts\Modals\EqCategory\EqCategoryList.js" />
     <Content Include="Scripts\Modals\EqCategory\EqCategoryModal.js" />
     <Content Include="Scripts\Modals\HistoryOrder\HistoryOrder.js" />
+    <Content Include="Scripts\Modals\Maintenance\CreateMaintenance.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -283,9 +291,18 @@
     <Content Include="Views\Empleado\CrearEmpleado.cshtml" />
     <Content Include="Views\Empleado\Edit.cshtml" />
     <Content Include="Views\Empleado\Details.cshtml" />
+    <Content Include="Views\Shared\_UserMiniProfile.cshtml" />
+    <Content Include="Views\ReturnDetails\Finalize.cshtml" />
+    <Content Include="Views\ReturnDetails\DetallesMantenimiento.cshtml" />
+    <Content Include="Views\ReturnDetails\EditarMantenimiento.cshtml" />
+    <Content Include="Views\ReturnDetails\CreateMaintenance.cshtml" />
+    <Content Include="Views\ReturnDetails\_ModalSeleccionarEquipo.cshtml" />
+    <Content Include="Views\EqCategory\_ListaCategorias.cshtml" />
+    <Content Include="Views\EqCategory\_EditarCategoria.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Uploads\Equipment\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

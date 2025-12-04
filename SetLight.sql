@@ -186,3 +186,97 @@ BEGIN
     ADD ImageUrl NVARCHAR(500) NULL;   
 END
 
+
+----Cambios 28/10/2025----
+
+ALTER TABLE dbo.Empleado
+ADD CONSTRAINT UQ_Empleado_Correo UNIQUE (CorreoElectronico);
+GO
+
+-- Crear restricción única para Cedula
+ALTER TABLE dbo.Empleado
+ADD CONSTRAINT UQ_Empleado_Cedula UNIQUE (Cedula);
+GO
+
+--Agregar imagen para empleados
+IF COL_LENGTH('dbo.Empleado', 'FotoPerfil') IS NULL
+BEGIN
+    ALTER TABLE dbo.Empleado
+    ADD FotoPerfil NVARCHAR(500) NULL;
+END
+
+
+
+---Cambios en Mantenimiento--
+ALTER TABLE dbo.Maintenance
+ADD Comments NVARCHAR(500) NULL,
+    Cost DECIMAL(10,2) NULL,
+    EvidencePath NVARCHAR(255) NULL;
+
+
+ALTER TABLE dbo.Maintenance
+ADD FinalizadoPor NVARCHAR(256) NULL;
+
+
+
+	----en caso de tener problemas con las migraciones
+	ALTER TABLE dbo.Maintenance
+DROP COLUMN Comments, Cost, EvidencePath;
+	ALTER TABLE dbo.Maintenance
+DROP COLUMN FinalizadoPor
+
+
+
+----para obtener el nombre del tecnico
+ALTER TABLE Maintenance
+ADD IdEmpleado INT NULL;  -- técnico que atiende el mantenimiento
+
+ALTER TABLE Maintenance
+ADD CONSTRAINT FK_Maintenance_Empleado
+FOREIGN KEY (IdEmpleado) REFERENCES Empleado(IdEmpleado);
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE Name = 'IdEmpleado'
+      AND Object_ID = Object_ID('dbo.Maintenance')
+)
+BEGIN
+    ALTER TABLE dbo.Maintenance
+        ADD IdEmpleado INT NULL;
+END
+
+
+
+---datos de empresa en la tabla de clientes
+
+-- Agregar columna: Nombre de la empresa del cliente (opcional)
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.columns
+    WHERE Name = 'EmpresaNombre'
+      AND Object_ID = Object_ID('dbo.Clients')
+)
+BEGIN
+    ALTER TABLE dbo.Clients
+        ADD EmpresaNombre NVARCHAR(150) NULL;
+END
+GO
+
+-- Agregar columna: Teléfono de la empresa del cliente (opcional)
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.columns
+    WHERE Name = 'EmpresaTelefono'
+      AND Object_ID = Object_ID('dbo.Clients')
+)
+BEGIN
+    ALTER TABLE dbo.Clients
+        ADD EmpresaTelefono NVARCHAR(25) NULL;
+END
+GO
+ -- Cambio en el Null de Mantenimiento del EndDate --
+ALTER TABLE [dbo].[Maintenance]
+ALTER COLUMN [EndDate] DATETIME NULL;
+
+
+

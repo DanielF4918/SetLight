@@ -39,7 +39,9 @@ namespace SetLight.AccesoADatos.Empleado.CrearEmpleado
                 ContactoEmergenciaParentesco = empleado.ContactoEmergenciaParentesco,
                 TipoSangre = empleado.TipoSangre,
                 Alergias = empleado.Alergias,
-                InfoMedica = empleado.InfoMedica
+                InfoMedica = empleado.InfoMedica,
+
+                FotoPerfil = empleado.FotoPerfil
             };
         }
     }

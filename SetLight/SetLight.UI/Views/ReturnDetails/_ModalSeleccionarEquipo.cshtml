@@ -1,0 +1,53 @@
+﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+
+<div class="mb-3">
+    <input type="text"
+           id="filtroEquipos"
+           class="form-control"
+           placeholder="Buscar por nombre, marca o modelo..." />
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle"
+           id="tablaEquiposMantenimiento">
+        <thead class="table-dark text-white">
+            <tr>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Stock</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var eq in Model)
+                {
+                    <tr>
+                        <td class="col-nombre">@eq.EquipmentName</td>
+                        <td class="col-marca">@eq.Brand</td>
+                        <td class="col-modelo">@eq.Model</td>
+                        <td class="col-stock">@eq.Stock</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-primary btn-seleccionar-equipo"
+                                    data-id="@eq.EquipmentId"
+                                    data-nombre="@eq.EquipmentName">
+                                Seleccionar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-muted">
+                        No hay equipos disponibles.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,42 +1,35 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.EquipmentDto>
+@using PagedList.Mvc
+@using PagedList
 @using System.Globalization
 @using System.Web
 
 @{
     ViewBag.Title = "Inventario";
 
-    // Moneda
     var us = CultureInfo.GetCultureInfo("en-US");
-
-    // Placeholder (OJO: 'Content' con C mayúscula)
     var PLACEHOLDER = Url.Content("~/Content/img/placeholder-equipment.png");
 
-    // === Helper de imagen ===
     Func<string, string> Src = (raw) =>
     {
         if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
 
         var url = raw.Trim();
 
-        // URLs absolutas o data-URI
         if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
             url.StartsWith("//") ||
             url.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
             return url;
 
-        // Normaliza backslashes
         url = url.Replace("\\", "/");
 
-        // ~/ o / (app-relative) -> resolver
         if (url.StartsWith("~/")) return Url.Content(url);
         if (url.StartsWith("/")) return Url.Content("~" + url);
 
-        // Sin prefijo -> forzar "~/" (ej. "Uploads/Equipment/xxx.jpg")
         return Url.Content("~/" + url.TrimStart('/'));
     };
 
-    // Chip de estado
     Func<int, IHtmlString> ChipEstado = (estado) =>
     {
         var t = "Desconocido";
@@ -51,8 +44,33 @@
     };
 }
 
-<!-- ====== ESTILOS: Grid 3 por fila, cards pequeños y uniformes ====== -->
 <style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+
     .inv-header {
         display: flex;
         justify-content: space-between;
@@ -67,7 +85,7 @@
 
     .equip-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0,1fr)); /* 3 por fila */
+        grid-template-columns: repeat(3, minmax(0,1fr));
         gap: 18px;
         align-items: stretch;
     }
@@ -103,7 +121,7 @@
 
     .equip-photo {
         width: 100%;
-        height: 180px; /* altura fija para uniformidad */
+        height: 180px;
         object-fit: cover;
         background: #f3f3f3;
         display: block;
@@ -121,7 +139,7 @@
         font-size: .95rem;
         font-weight: 800;
         line-height: 1.25;
-        min-height: 2.4em; /* 2 líneas */
+        min-height: 2.4em;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -154,10 +172,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 16px;
     }
 
-    /* Botón-ícono */
     .icon-btn {
         display: inline-flex;
         align-items: center;
@@ -179,7 +196,7 @@
             color: #222;
         }
 
-    /* Switch rojo/verde */
+
     .toggle {
         position: relative;
         display: inline-flex;
@@ -222,61 +239,98 @@
                 transform: translateX(20px);
             }
 
-    /* Filtros (compactos) */
-    .inv-filters {
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        margin: 10px 0 18px;
-    }
-
-        .inv-filters .form-control {
-            min-width: 220px;
-        }
-
     .btn-primary {
         display: inline-block;
         background: #198754;
         color: #fff;
         padding: .5rem .9rem;
         border-radius: .5rem;
+        border: 1px solid #198754;
         text-decoration: none;
     }
 
-    .btn {
-        background: #d71920;
+        .btn-primary:hover {
+            filter: brightness(1.05);
+        }
+
+    .btn-dark {
+        background: #111827;
         color: #fff;
-        border: none;
-        padding: .45rem .9rem;
-        border-radius: .5rem;
+        border: 1px solid #111827;
     }
+
+        .btn-dark:hover {
+            filter: brightness(1.08);
+        }
+
+    .btn-outline-secondary {
+        background: #fff;
+        color: #111827;
+        border: 1px solid #9ca3af;
+    }
+
+        .btn-outline-secondary:hover {
+            background: #f3f4f6;
+        }
 </style>
-<!-- ====== FIN ESTILOS ====== -->
 
 <div class="inv-page">
     <div class="inv-header">
         <h2 class="inv-title">Inventario de equipos</h2>
         @Html.ActionLink("+ Registrar equipo", "CrearEquipment", null, new { @class = "btn-primary" })
     </div>
+    <button type="button"
+            class="btn btn-outline-secondary ms-2"
+            id="btnAdministrarCategorias">
+        Administrar categorías
+    </button>
+
 
     @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
     {
-        <div class="inv-filters">
-            <div>
-                <label class="text-muted">Nombre</label><br />
-                <input type="text" name="Nombre" value="@ViewBag.NombreBuscado" class="form-control" placeholder="Canon, Sony..." />
-            </div>
-            <div>
-                <label class="text-muted">Tipo</label><br />
-                @Html.DropDownList("CategoriaId", (IEnumerable<SelectListItem>)ViewBag.Categorias, "Todos", new { @class = "form-control" })
-            </div>
-            <div>
-                <label class="text-muted">Estado</label><br />
-                @Html.DropDownList("Estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos", new { @class = "form-control" })
-            </div>
-            <div>
-                <button type="submit" class="btn">Filtrar</button>
+        <div class="card p-3 mb-3">
+            <div class="row g-2 align-items-end">
+                <!-- Nombre -->
+                <div class="col-md-4">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="Nombre"
+                           value="@ViewBag.NombreBuscado"
+                           class="form-control"
+                           placeholder="Canon, Sony, SN..." />
+                </div>
+
+                <!-- Tipo / Categoría -->
+                <div class="col-md-4">
+                    <label class="form-label">Tipo</label>
+                    @Html.DropDownList(
+                        "CategoriaId",
+                        (IEnumerable<SelectListItem>)ViewBag.Categorias,
+                        null,
+                        new { @class = "form-select" }
+                    )
+                </div>
+
+                <!-- Estado -->
+                <div class="col-md-4">
+                    <label class="form-label">Estado</label>
+                    @Html.DropDownList(
+                        "Estado",
+                        (IEnumerable<SelectListItem>)ViewBag.Estados,
+                        null,
+                        new { @class = "form-select" }
+                    )
+                </div>
+
+                <!-- Botones -->
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
+                    <a href="@Url.Action("ListarEquipment","Equipment")"
+                       class="btn btn-outline-secondary">
+                        Limpiar
+                    </a>
+                </div>
             </div>
         </div>
     }
@@ -312,6 +366,9 @@
 
                             <span class="chip">Disp: @e.Disponibles</span>
 
+                            @if (e.Alquilados > 0)
+                            {<span class="chip">Alq: @e.Alquilados</span>}
+
                             @if (e.EnMantenimiento > 0)
                             {<span class="chip">Mant: @e.EnMantenimiento</span>}
 
@@ -321,24 +378,33 @@
                         <div class="equip-price">@e.RentalValue.ToString("C2", us)</div>
 
                         <div class="equip-actions">
-                            <a href="@toggle" class="toggle" title="@(activo ? "Inactivar" : "Activar")" onclick="return confirm('¿Seguro?');">
+                            <a href="@toggle" class="toggle" title="@(activo ? "Inactivar" : "Activar")">
                                 <input type="checkbox" @(activo ? "checked" : "") />
                                 <span class="track"></span>
                             </a>
 
-                            <div style="display:flex;gap:10px;">
-                                <a class="icon-btn" title="Editar"
-                                   href="@Url.Action("Edit","Equipment",new { id = e.EquipmentId })">
+                            <div class="btn-group ms-2" role="group">
+                                <!-- Editar equipo -->
+                                <a href="@Url.Action("Edit","Equipment", new { id = e.EquipmentId })"
+                                   class="btn btn-warning btn-sm rounded-circle"
+                                   title="Editar equipo">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                <a class="icon-btn" title="Ver detalles"
-                                   href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#@detId" aria-expanded="false">
-                                    <i class="bi bi-search"></i>
-                                </a>
+                                <!-- Ver detalles del equipo -->
+                                <button type="button"
+                                        class="btn btn-dark btn-sm rounded-circle"
+                                        title="Ver detalles"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@detId"
+                                        aria-expanded="false">
+                                    <i class="bi bi-eye"></i>
+                                </button>
 
-                                <a class="icon-btn" title="Trazabilidad"
-                                   href="@Url.Action("VerTrazabilidad","Trazabilidad",new { equipoId = e.EquipmentId })">
+                                <!-- Ver trazabilidad -->
+                                <a href="@Url.Action("VerTrazabilidad","Trazabilidad", new { equipoId = e.EquipmentId })"
+                                   class="btn btn-secondary btn-sm rounded-circle"
+                                   title="Ver trazabilidad">
                                     <i class="bi bi-graph-up"></i>
                                 </a>
                             </div>
@@ -363,4 +429,83 @@
             <div class="text-muted">No hay equipos para mostrar.</div>
         }
     </div>
+
+    <div class="mt-4">
+        @Html.PagedListPager(
+            Model,
+            page => Url.Action("ListarEquipment", new
+            {
+                page,
+                Nombre = Request["Nombre"],
+                CategoriaId = Request["CategoriaId"],
+                Estado = Request["Estado"]
+            }),
+            PagedListRenderOptions.ClassicPlusFirstAndLast
+        )
+    </div>
 </div>
+
+<!-- Modal: Lista de categorías -->
+<div class="modal fade" id="modalCategorias" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Categorías de equipos</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body" id="contenedorListaCategorias">
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-danger"
+                        id="btnAbrirCrearCategoriaDesdeLista">
+                    + Nueva categoría
+                </button>
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal: Editar categoría -->
+<div class="modal fade" id="modalEditarCategoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="contenedorEditarCategoria">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear nueva categoría -->
+<div class="modal fade" id="modalEqCategory" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modal-content-category"></div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+    <script src="~/Scripts/Modals/EqCategory/EqCategoryList.js"></script>
+    <script src="~/Scripts/Modals/EqCategory/EqCategoryModal.js"></script>
+}
+

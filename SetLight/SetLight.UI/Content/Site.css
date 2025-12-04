@@ -19,9 +19,9 @@
 /* =========================
    NAVBAR FIJA (mismo tamaño)
    ========================= */
-.sl-navbar{
-  background:#0d0d0d !important;     /* negro del logo */
-  border-bottom:2px solid var(--brand);
+.sl-navbar {
+    background: #030303 !important; /* nuevo color del header */
+    border-bottom: 2px solid var(--brand);
 }
 .sl-navbar .nav-link{ color:#f5f6f7 !important; }
 .sl-navbar .nav-link:hover,
@@ -253,3 +253,492 @@ body{
         position: relative;
         z-index: 1;
     }
+
+/* ====== Cards SetLight ====== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
+    gap: 16px
+}
+
+.sl-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    overflow: hidden
+}
+
+.sl-body {
+    padding: 14px 16px
+}
+
+.sl-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin: 0 0 6px
+}
+
+.sl-sub {
+    color: #6b7280;
+    font-size: .9rem
+}
+
+.sl-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px
+}
+
+.badge-soft {
+    padding: .25rem .5rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #e5e7eb
+}
+
+.badge-green {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0
+}
+
+.badge-gray {
+    background: #f3f4f6;
+    color: #374151
+}
+
+.sl-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid #eef2f7
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff
+}
+
+    .btn-icon:hover {
+        background: #f9fafb
+    }
+
+    .btn-icon.success {
+        border-color: #d1fae5;
+        background: #ecfdf5
+    }
+
+    .btn-icon.warning {
+        border-color: #fde68a;
+        background: #fffbeb
+    }
+
+    .btn-icon.info {
+        border-color: #dbeafe;
+        background: #eff6ff
+    }
+
+.switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    display: inline-block
+}
+
+    .switch input {
+        display: none
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #e5e7eb;
+    transition: .2s;
+    border-radius: 999px
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background: #fff;
+        transition: .2s;
+        border-radius: 50%
+    }
+
+input:checked + .slider {
+    background: #10b981
+}
+
+    input:checked + .slider:before {
+        transform: translateX(20px)
+    }
+
+/* === Switch como <a> (sin JS) === */
+.sl-switch-link {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    text-decoration: none;
+    vertical-align: middle;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+}
+
+    .sl-switch-link .knob {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.15);
+        transition: transform .15s ease;
+    }
+
+.sl-switch--on {
+    background: #16a34a;
+}
+/* Activo -> verde */
+.sl-switch--off {
+    background: #b91c1c;
+}
+/* Inactivo -> rojo */
+.sl-switch--on .knob {
+    transform: translateX(20px);
+}
+/* Espacio entre los botoncitos redondos de acciones */
+.btn-group {
+    gap: 6px; /* espacio entre cada círculo */
+}
+
+    .btn-group .btn.rounded-circle {
+        margin: 0; /* por si quedó algo anterior */
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+/* Tarjeta genérica SetLight con hover (igual a equipos/órdenes) */
+.sl-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+    .sl-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    }
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.maint-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+@media (max-width: 992px) {
+    .maint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .maint-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
+
+.maint-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    border: 1px solid #e9e9e9;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.maint-photo {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+}
+
+.maint-info {
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.maint-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+}
+
+.maint-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    background: #f1f1f1;
+    color: #333;
+}
+
+.mant-status-pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.mant-status-finalizado {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.mant-status-cancelado {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.mant-status-desconocido {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.maint-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.maint-cost {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* ========== Mantenimientos ========== */
+
+.maint-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .maint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .maint-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.maint-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform .15s ease, box-shadow .15s ease;
+    animation: maint-pop .25s ease-out;
+}
+
+    .maint-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    }
+
+@keyframes maint-pop {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.maint-photo {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    background: #f3f4f6;
+    display: block;
+}
+
+.maint-info {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.maint-name {
+    font-size: .95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    min-height: 2.4em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.maint-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: .8rem;
+}
+
+.chip {
+    background: #f6f7f9;
+    border: 1px solid #e9ebf0;
+    padding: .22rem .45rem;
+    border-radius: 999px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Estados */
+.mant-status-pendiente {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #c05621;
+}
+
+.mant-status-finalizado {
+    background: #ecfdf3;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.mant-status-cancelado {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.mant-status-desconocido {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.maint-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.maint-cost {
+    font-weight: 800;
+    font-size: .95rem;
+}
+
+.pagination {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+
+    .pagination li a,
+    .pagination li span {
+        padding: 0 !important;
+        margin: 0 6px;
+        background: none !important;
+        border: none !important;
+        color: #555 !important;
+        font-weight: 500;
+        text-decoration: none !important;
+        font-size: 16px;
+    }
+
+    .pagination li.active span {
+        color: #000 !important;
+        font-weight: 700;
+    }
+
+    .pagination li a:hover {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }
+
+/* Opcional, por si quieres una clase reutilizable */
+.sl-filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+
+@media (max-width: 768px) {
+    .sl-filter-actions .btn {
+        flex: 1;
+    }
+}

@@ -1,10 +1,39 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+﻿@using PagedList;
+@using PagedList.Mvc;
+@model IPagedList<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+
+
 
 @{
     ViewBag.Title = "Historial de órdenes";
 }
 
 <h2>Historial de órdenes de @ViewBag.ClientName</h2>
+<form method="get" class="row mb-3">
+    <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
+
+    <div class="col-md-3">
+        <label>Desde</label>
+        <input type="date" name="desde" class="form-control" value="@ViewBag.FiltroDesde" />
+    </div>
+
+    <div class="col-md-3">
+        <label>Hasta</label>
+        <input type="date" name="hasta" class="form-control" value="@ViewBag.FiltroHasta" />
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-dark">
+            <i class="bi bi-funnel me-1"></i> Filtrar
+        </button>
+
+        <a style="text-align: right" href="@Url.Action("History", new { clientId = ViewBag.ClientId })" class="btn btn-outline-secondary">
+            Limpiar
+        </a>
+    </div>
+</form>
+
+
 
 @if (!Model.Any())
 {
@@ -13,7 +42,7 @@
 else
 {
     <table class="table table-bordered">
-        <thead class="thead-dark">
+        <thead class="table-dark">
             <tr>
                 <th># Orden</th>
                 <th>Fecha de Orden</th>
@@ -49,24 +78,76 @@ else
                         {
                             <span class="text-muted">No disponible</span>
                         }
-
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 
+
+    <div class="pagination-container text-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("History",
+            new
+                {
+                    clientId = ViewBag.ClientId,
+                page,
+                desde = ViewBag.FiltroDesde,
+                hasta = ViewBag.FiltroHasta
+            }),
+            new PagedListRenderOptions
+                {
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToIndividualPages = true,
+                MaximumPageNumbersToDisplay = 10,
+                UlElementClasses = new[] { "pagination-custom" }
+            }
+        )
+    </div>
+
+    <style>
+        .pagination-custom {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 0;
+        }
+
+            .pagination-custom li {
+                list-style: none;
+            }
+
+                .pagination-custom li a,
+                .pagination-custom li span {
+                    font-size: 20px;
+                    color: black;
+                    text-decoration: none;
+                    padding: 4px 8px;
+                }
+
+                .pagination-custom li.active span {
+                    font-weight: bold;
+                }
+
+                .pagination-custom li.disabled span {
+                    color: #999;
+                }
+    </style>
+
+
     foreach (var order in Model)
     {
-        <div class="modal fade" id="modalEquipos-@order.OrderId" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@order.OrderId" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+        <div class="modal fade" id="modalEquipos-@order.OrderId" tabindex="-1" aria-labelledby="modalLabel-@order.OrderId" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalLabel-@order.OrderId">Equipos de la orden #@order.OrderId</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h5 class="modal-title" id="modalLabel-@order.OrderId">
+                            Equipos de la orden #@order.OrderId
+                        </h5>
                     </div>
+
                     <div class="modal-body">
                         <table class="table table-sm table-bordered">
                             <thead>
@@ -87,15 +168,18 @@ else
                                         <td>@detalle.Brand</td>
                                         <td>@detalle.Model</td>
                                         <td>@detalle.Quantity</td>
-                                        <td>₡@detalle.RentalValue.ToString("N2")</td>
-                                        <td>₡@(detalle.RentalValue * detalle.Quantity)
+                                        <td>$@detalle.RentalValue.ToString("N2")</td>
+                                        <td>$@((detalle.RentalValue * detalle.Quantity).ToString("N2"))</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
+
+
+
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -106,6 +190,8 @@ else
 <p>
     @Html.ActionLink("Volver al listado de clientes", "ListarClient", "Client", null, new { @class = "btn btn-secondary" })
 </p>
+
+
 
 @section Scripts {
     <script src="~/Scripts/Modals/HistoryOrder/HistoryOrder.js"></script>

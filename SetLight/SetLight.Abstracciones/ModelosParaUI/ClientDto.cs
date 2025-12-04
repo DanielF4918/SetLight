@@ -10,16 +10,22 @@ namespace SetLight.Abstracciones.ModelosParaUI
     public class ClientDto
     {
         public int ClientId { get; set; }
+
         [Display(Name = "Nombre")]
         public string FirstName { get; set; }
+
         [Display(Name = "Apellido")]
         public string LastName { get; set; }
-        [Display(Name = "Teléfono")]
+
+        [Display(Name = "Teléfono personal")]
         public string Phone { get; set; }
+
         [Display(Name = "Correo")]
         public string Email { get; set; }
+
         [Display(Name = "Estado")]
         public int Status { get; set; }
+
         [Display(Name = "Estado")]
         public string EstadoEnTexto
         {
@@ -34,7 +40,11 @@ namespace SetLight.Abstracciones.ModelosParaUI
                 }
             }
         }
+
+        [Display(Name = "Nombre de la empresa")]
+        public string EmpresaNombre { get; set; }
+
+        [Display(Name = "Teléfono de la empresa")]
+        public string EmpresaTelefono { get; set; }
     }
 }
-
-

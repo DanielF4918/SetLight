@@ -1,67 +1,239 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.EmpleadoDto>
+﻿@model PagedList.IPagedList<SetLight.Abstracciones.ModelosParaUI.EmpleadoDto>
+@using PagedList.Mvc
+@using PagedList
 
 @{
     ViewBag.Title = "Listado de Empleados";
+
+    // Placeholder por si no tienen imagen
+    var PLACEHOLDER = Url.Content("~/Content/img/placeholder-user.png");
+
+    Func<string, string> Src = (raw) =>
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
+
+        var url = raw.Trim();
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("//") ||
+            url.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        url = url.Replace("\\", "/");
+        if (url.StartsWith("~/")) return Url.Content(url);
+        if (url.StartsWith("/")) return url;
+
+        return PLACEHOLDER;
+    };
 }
 
 <div class="container mt-4 mb-5">
-    <h2 class="mb-4">Listado de Empleados</h2>
-
-    <div class="text-end mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Empleados</h2>
         @Html.ActionLink("Crear nuevo empleado", "CrearEmpleado", null, new { @class = "btn btn-success" })
     </div>
 
-    <div class="table-responsive">
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Cédula</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th style="width:220px">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@(string.IsNullOrWhiteSpace(item.Cedula) ? "-" : item.Cedula)</td>
-                            <td>@item.Nombre</td>
-                            <td>@item.Apellido</td>
-                            <td>@item.TelefonoCelular</td>
-                            <td>@item.CorreoElectronico</td>
-                            <td>@(string.IsNullOrWhiteSpace(item.NombreRol) ? item.RolId : item.NombreRol)</td>
-                            <td>
-                                @if (item.Estado)
-                                {
-                                    <span class="badge bg-success">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                }
-                            </td>
-                            <td>
-                                @Html.ActionLink("Editar", "Edit", new { id = item.IdEmpleado }, new { @class = "btn btn-warning btn-sm me-1" })
-                                @Html.ActionLink("Detalles", "Details", new { id = item.IdEmpleado }, new { @class = "btn btn-dark btn-sm me-1" })
-                                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEmpleado }, new { @class = "btn btn-danger btn-sm" })
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">No hay empleados registrados.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <!-- Filtros -->
+    <div class="card p-3 mb-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input id="fNombre" name="nombre"
+                       value="@Request["nombre"]"
+                       class="form-control"
+                       placeholder="Ej: Daniel Fuentes" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Cargo</label>
+                <input id="fCargo" name="cargo"
+                       value="@Request["cargo"]"
+                       class="form-control"
+                       placeholder="Ej: Administrador, Técnico..." />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select id="fEstado" name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="true" @(Request["estado"] == "true" ? "selected" : "")>Activo</option>
+                    <option value="false" @(Request["estado"] == "false" ? "selected" : "")>Inactivo</option>
+                </select>
+            </div>
+
+            <!-- Botones alineados a la derecha, como Mantenimientos -->
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button id="btnFiltrar" type="submit" class="btn btn-dark">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
+
+                <a id="btnLimpiar"
+                   href="@Url.Action("ListarEmpleado","Empleado")"
+                   class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+        </form>
     </div>
+
+
+    <!-- Cards -->
+    <div id="gridEmpleados" class="card-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var e in Model)
+            {
+                var nombreCompleto = (e.Nombre ?? "") + " " + (e.Apellido ?? "");
+                var cargo = string.IsNullOrWhiteSpace(e.RolNombre) ? e.RolId : e.RolNombre;
+
+                <div class="sl-card emp-card"
+                     data-nombre="@nombreCompleto.ToLower()"
+                     data-cargo="@cargo.ToLower()"
+                     data-estado="@e.Estado.ToString().ToLower()">
+                    <div class="sl-body text-center p-3">
+
+                        <!-- Foto de perfil -->
+                        <img src="@Src(e.FotoPerfil)"
+                             alt="Foto de @nombreCompleto"
+                             class="img-thumbnail rounded-circle shadow-sm mb-2"
+                             style="width: 90px; height: 90px; object-fit: cover;" />
+
+                        <div class="sl-title fw-bold">@nombreCompleto</div>
+                        <div class="sl-sub text-muted small">
+                            Cargo: <strong>@cargo</strong>
+                        </div>
+                        <div class="sl-badges mt-1">
+                            <span class="badge-soft @(e.Estado ? "badge-green" : "badge-gray")">
+                                @(e.Estado ? "Activo" : "Inactivo")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sl-footer d-flex justify-content-between align-items-center px-3 py-2">
+                        <!-- Switch sin JS adicional -->
+                        <div>
+                            @if (e.Estado)
+                            {
+                                <a class="sl-switch-link sl-switch--on" title="Inactivar"
+                                   href="@Url.Action("Inactivar","Empleado", new { id = e.IdEmpleado })">
+                                    <span class="knob"></span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="sl-switch-link sl-switch--off" title="Activar"
+                                   href="@Url.Action("Activar","Empleado", new { id = e.IdEmpleado })">
+                                    <span class="knob"></span>
+                                </a>
+                            }
+                        </div>
+
+                        <!-- Editar / Detalles -->
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("Edit","Empleado", new { id = e.IdEmpleado })"
+                               class="btn btn-warning btn-sm rounded-circle"
+                               title="Editar empleado">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <a href="@Url.Action("Details","Empleado", new { id = e.IdEmpleado })"
+                               class="btn btn-dark btn-sm rounded-circle"
+                               title="Ver detalles del empleado">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">No hay empleados registrados.</div>
+        }
+    </div>
+
+    <!-- Paginación -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="mt-4 d-flex justify-content-center">
+            @Html.PagedListPager(
+                Model,
+                page => Url.Action("ListarEmpleado", "Empleado", new { page }),
+                new PagedListRenderOptions
+                {
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    MaximumPageNumbersToDisplay = 12,
+                    UlElementClasses = new[] { "pagination" }
+                }
+            )
+        </div>
+    }
 </div>
+
+@section Scripts{
+    <script>
+        (() => {
+            const $nombre = document.getElementById('fNombre');
+            const $cargo = document.getElementById('fCargo');
+            const $estado = document.getElementById('fEstado');
+
+            const cards = Array.from(document.querySelectorAll('#gridEmpleados .emp-card'));
+
+            function filtrar() {
+                const qNombre = ($nombre.value || '').trim().toLowerCase();
+                const qCargo = ($cargo.value || '').trim().toLowerCase();
+                const qEstado = ($estado.value || '').trim().toLowerCase();
+
+                cards.forEach(card => {
+                    const okN = !qNombre || (card.dataset.nombre || '').includes(qNombre);
+                    const okC = !qCargo || (card.dataset.cargo || '').includes(qCargo);
+                    const okS = !qEstado || (card.dataset.estado || '') === qEstado;
+
+                    card.style.display = (okN && okC && okS) ? '' : 'none';
+                });
+            }
+
+            document.getElementById('btnFiltrar').addEventListener('click', filtrar);
+
+            document.getElementById('btnLimpiar').addEventListener('click', () => {
+                $nombre.value = '';
+                $cargo.value = '';
+                $estado.value = '';
+                filtrar();
+            });
+
+            $nombre.addEventListener('keyup', e => { if (e.key === 'Enter') filtrar(); });
+        })();
+    </script>
+}
+
+<style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
+        }
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+</style>

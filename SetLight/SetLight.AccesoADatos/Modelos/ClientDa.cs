@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SetLight.AccesoADatos.Modelos;
 
 namespace SetLight.AccesoADatos.Modelos
 {
@@ -32,7 +31,12 @@ namespace SetLight.AccesoADatos.Modelos
         public int Status { get; set; }
 
 
+        [Column("EmpresaNombre")]
+        [StringLength(150)]
+        public string EmpresaNombre { get; set; }
+
+        [Column("EmpresaTelefono")]
+        [StringLength(25)]
+        public string EmpresaTelefono { get; set; }
     }
 }
-
-

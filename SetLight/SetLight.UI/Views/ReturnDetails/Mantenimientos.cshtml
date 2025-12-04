@@ -1,57 +1,276 @@
-﻿@model List<SetLight.Entidades.Maintenance>
+﻿@model PagedList.IPagedList<SetLight.Entidades.Maintenance>
+@using System.Globalization
+@using PagedList.Mvc
+@using PagedList
 
 @{
-    ViewBag.Title = "Mantenimientos en curso";
+    ViewBag.Title = "Mantenimientos";
+
+    var us = CultureInfo.GetCultureInfo("en-US");
+    var PLACEHOLDER = Url.Content("~/Content/img/placeholder-equipment.png");
+
+    Func<SetLight.Entidades.Maintenance, string> GetImg = m =>
+    {
+        var raw = m.Equipment != null ? m.Equipment.ImageUrl : null;
+        if (string.IsNullOrWhiteSpace(raw)) return PLACEHOLDER;
+        return Url.Content(raw);
+    };
+
+    Func<int, string> Tipo = t =>
+        t == 1 ? "Revisión por daño" :
+        t == 2 ? "Reparación mayor" :
+        t == 3 ? "Mantenimiento preventivo" :
+        "—";
+
+    Func<int, string> Estado = s =>
+        s == 0 ? "Pendiente" :
+        s == 1 ? "Finalizado" :
+        s == 2 ? "Cancelado" :
+        "Desconocido";
+
+    Func<int, string> EstadoClase = s =>
+        s == 0 ? "mant-status-pendiente" :
+        s == 1 ? "mant-status-finalizado" :
+        s == 2 ? "mant-status-cancelado" :
+        "mant-status-desconocido";
 }
 
-<h2>Mantenimientos en curso</h2>
+<div class="container mt-5">
+    <!-- Título + botón registrar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-black">Mantenimientos</h2>
+        @Html.ActionLink(
+            "+ Registrar mantenimiento manual",
+            "CreateMaintenance",
+            "ReturnDetails",
+            null,
+            new { @class = "btn btn-success text-white fw-semibold" }
+        )
+    </div>
 
-<div class="mb-3">
-    @Html.ActionLink(
-        "Ver Histórico",
-        "Historico",
-        "ReturnDetails",
-        new { area = "" },
-        new { @class = "btn btn-secondary" }
-    )
+    <!-- Filtros -->
+    <div class="card p-3 mb-4">
+        <form method="get" class="row g-2 align-items-end">
+            <!-- Equipo -->
+            <div class="col-md-3">
+                <label class="form-label text-black">Equipo</label>
+                <input type="text"
+                       name="equipo"
+                       placeholder="Buscar equipo..."
+                       value="@ViewBag.FiltroEquipo"
+                       class="form-control border-dark" />
+            </div>
+
+            <!-- Tipo -->
+            <div class="col-md-3">
+                <label class="form-label text-black">Tipo</label>
+                <select name="tipo" class="form-select border-dark">
+                    <option value="">-- Todos --</option>
+                    <option value="1" @(ViewBag.FiltroTipo == 1 ? "selected" : "")>Revisión por daño</option>
+                    <option value="2" @(ViewBag.FiltroTipo == 2 ? "selected" : "")>Reparación mayor</option>
+                    <option value="3" @(ViewBag.FiltroTipo == 3 ? "selected" : "")>Mantenimiento preventivo</option>
+                </select>
+            </div>
+
+            <!-- Fecha desde -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Desde</label>
+                <input type="date"
+                       name="desde"
+                       value="@ViewBag.FiltroDesde"
+                       class="form-control border-dark" />
+            </div>
+
+            <!-- Fecha hasta -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Hasta</label>
+                <input type="date"
+                       name="hasta"
+                       value="@ViewBag.FiltroHasta"
+                       class="form-control border-dark" />
+            </div>
+
+            <!-- Estado -->
+            <div class="col-md-2">
+                <label class="form-label text-black">Estado</label>
+                <select name="estado" class="form-select border-dark">
+                    <option value="">-- Todos --</option>
+                    <option value="0" @(ViewBag.FiltroEstado == 0 ? "selected" : "")>Pendiente</option>
+                    <option value="1" @(ViewBag.FiltroEstado == 1 ? "selected" : "")>Finalizado</option>
+                    <option value="2" @(ViewBag.FiltroEstado == 2 ? "selected" : "")>Cancelado</option>
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-funnel me-1"></i>Filtrar
+                </button>
+                <a href="@Url.Action("Mantenimientos","ReturnDetails")"
+                   class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- GRID DE CARDS -->
+    <div class="maint-grid">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var m in Model)
+            {
+                var nombreEquipo = m.Equipment != null && !string.IsNullOrWhiteSpace(m.Equipment.EquipmentName)
+                    ? m.Equipment.EquipmentName
+                    : "(Sin nombre)";
+
+                <div class="maint-card">
+                    <img class="maint-photo"
+                         src="@GetImg(m)"
+                         alt="Foto @nombreEquipo"
+                         onerror="this.onerror=null;this.src='@PLACEHOLDER';" />
+
+                    <div class="maint-info">
+                        <div class="maint-name">
+                            @nombreEquipo
+                        </div>
+
+                        <div class="maint-chips">
+                            <span class="chip">@Tipo(m.MaintenanceType)</span>
+
+                            <span class="chip">
+                                <strong>Inicio:</strong> @m.StartDate.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+
+                            <span class="chip">
+                                <strong>Fin:</strong>
+                                @(m.EndDate.HasValue ? m.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "-")
+                            </span>
+
+                            <span class="chip @EstadoClase(m.MaintenanceStatus)">
+                                @Estado(m.MaintenanceStatus)
+                            </span>
+                        </div>
+
+                        <div class="maint-footer">
+                            <span class="maint-cost">
+                                @(m.Cost.HasValue
+                                    ? m.Cost.Value.ToString("C2", us)
+                                    : "Sin costo")
+                            </span>
+
+                            <div class="btn-group" role="group">
+                                <!-- Ver detalles -->
+                                <a href="@Url.Action("DetallesMantenimiento","ReturnDetails", new { id = m.MaintenanceId })"
+                                   class="btn btn-dark btn-sm rounded-circle"
+                                   title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <!-- Editar solo si está pendiente -->
+                                @if (m.MaintenanceStatus == 0)
+                                {
+                                    <a href="@Url.Action("EditarMantenimiento","ReturnDetails", new { id = m.MaintenanceId })"
+                                       class="btn btn-warning btn-sm rounded-circle ms-1"
+                                       title="Editar mantenimiento (activo)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-warning btn-sm rounded-circle ms-1 disabled"
+                                            title="Solo se puede editar si el mantenimiento está activo"
+                                            disabled>
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                }
+
+                                <!-- Finalizar solo si está pendiente -->
+                                @if (m.MaintenanceStatus == 0)
+                                {
+                                    <a href="@Url.Action("Finalize","ReturnDetails", new { id = m.MaintenanceId })"
+                                       class="btn btn-success btn-sm rounded-circle ms-1"
+                                       title="Finalizar mantenimiento">
+                                        <i class="bi bi-check2"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-muted">
+                No hay mantenimientos registrados con los filtros actuales.
+            </div>
+        }
+    </div>
+
+    <!-- Paginación (igual estilo que otros módulos) -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="mt-4 d-flex justify-content-center">
+            @Html.PagedListPager(
+                Model,
+                page => Url.Action(
+                    "Mantenimientos",
+                    "ReturnDetails",
+                    new
+                    {
+                        page,
+                        equipo = ViewBag.FiltroEquipo,
+                        tipo = ViewBag.FiltroTipo,
+                        estado = ViewBag.FiltroEstado,
+                        desde = ViewBag.FiltroDesde,
+                        hasta = ViewBag.FiltroHasta
+                    }
+                ),
+                new PagedListRenderOptions
+                {
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    MaximumPageNumbersToDisplay = 12,
+                    UlElementClasses = new[] { "pagination" }
+                }
+            )
+        </div>
+    }
 </div>
 
-<table class="styled-table">
-    <thead>
-        <tr>
-            <th>Equipo</th>
-            <th>Inicio</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in Model)
-        {
-            <tr>
-                <td>@m.Equipment.EquipmentName</td>
-                <td>@m.StartDate.ToString("dd/MM/yyyy")</td>
-                <td>
-                    @{
-                        var tipo = m.MaintenanceType == 1 ? "Revisión por daño"
-                                 : m.MaintenanceType == 2 ? "Reparación mayor"
-                                 : m.MaintenanceType == 3 ? "Mantenimiento preventivo"
-                                 : "—";
-                    }
-                    @tipo
-                </td>
-                <td>
-                    @(m.MaintenanceStatus == 1 ? "En curso" : "Finalizado")
-                </td>
-                <td>
-                    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails", FormMethod.Post))
-                    {
-                        @Html.Hidden("id", m.MaintenanceId)
-                        <button type="submit" class="btn btn-success">Finalizar</button>
-                    }
-                </td>
-            </tr>
+<style>
+    .pagination {
+        display: flex !important;
+        justify-content: center !important;
+        padding-left: 0;
+        list-style: none;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            color: black !important;
+            margin: 0 5px;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: inline-block;
         }
-    </tbody>
-</table>
+
+        .pagination li.active span {
+            background-color: #e9ecef !important;
+            color: black !important;
+        }
+
+        .pagination li a:hover {
+            background-color: #f0f0f0;
+            color: black !important;
+        }
+</style>
