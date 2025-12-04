@@ -11,6 +11,9 @@
     {
         @Html.AntiForgeryToken()
 
+        @* Muestra errores generales, como el de stock insuficiente *@
+        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
         @* Por si quieres tener el Id en el modelo del post *@
         @Html.HiddenFor(m => m.OrderId)
 
@@ -42,8 +45,6 @@
             )
         </div>
 
-
-
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Descuento manual (%)</label>
             <input type="number"
@@ -54,10 +55,9 @@
                    min="0"
                    max="999999"
                    value="@(Model.DescuentoManual.HasValue
-                   ? Model.DescuentoManual.Value.ToString(CultureInfo.InvariantCulture)
-                   : "")" />
+                       ? Model.DescuentoManual.Value.ToString(CultureInfo.InvariantCulture)
+                       : "")" />
         </div>
-
 
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Equipos</label><br />

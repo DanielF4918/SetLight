@@ -8,78 +8,63 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const inputEquipmentId = document.getElementById("EquipmentId");
     const inputEquipmentName = document.getElementById("EquipoNombreVisible");
-    const inputCantidadForm = document.getElementById("Cantidad"); // 👈 input del formulario principal
+    const inputCantidad = document.getElementById("Cantidad");
 
-    // Abrir modal
-    if (btnAbrirModal && modalEquiposEl) {
+    if (!modalEquiposEl) return;
+
+    // Instancia única del modal de Bootstrap 5
+    const modalEquipos = new bootstrap.Modal(modalEquiposEl);
+
+    // Abrir modal al dar clic en "Buscar equipo"
+    if (btnAbrirModal) {
         btnAbrirModal.addEventListener("click", function () {
-            const modal = new bootstrap.Modal(modalEquiposEl);
-            modal.show();
+            modalEquipos.show();
         });
     }
 
-    // Búsqueda / filtro en el modal
+    // Click en "Seleccionar" dentro de la tabla
+    if (tbodyEquipos) {
+        tbodyEquipos.addEventListener("click", function (e) {
+            const boton = e.target.closest(".seleccionar-equipo");
+            if (!boton) return;
+
+            const fila = boton.closest("tr");
+            const id = boton.getAttribute("data-id");
+            const nombre = boton.getAttribute("data-nombre");
+            const inputCantFila = fila.querySelector(".input-cantidad");
+
+            let cantidad = 1;
+            if (inputCantFila) {
+                const val = parseInt(inputCantFila.value, 10);
+                cantidad = isNaN(val) || val <= 0 ? 1 : val;
+            }
+
+            // Setear valores en el formulario principal
+            if (inputEquipmentId) inputEquipmentId.value = id;
+            if (inputEquipmentName) inputEquipmentName.value = nombre;
+            if (inputCantidad) inputCantidad.value = cantidad;
+
+            // Cerrar el modal correctamente
+            modalEquipos.hide();
+        });
+    }
+
+    // Filtro simple por texto en la tabla
     if (filtroInput && tbodyEquipos) {
         filtroInput.addEventListener("input", function () {
-            const texto = (filtroInput.value || "").toLowerCase();
+            const filtro = filtroInput.value.toLowerCase();
 
-            tbodyEquipos.querySelectorAll("tr").forEach(function (row) {
-                const nombre = (row.querySelector(".col-nombre")?.textContent || "").toLowerCase();
-                const marca = (row.querySelector(".col-marca")?.textContent || "").toLowerCase();
-                const modelo = (row.querySelector(".col-modelo")?.textContent || "").toLowerCase();
+            tbodyEquipos.querySelectorAll("tr.fila-equipo").forEach(function (fila) {
+                const nombre = fila.querySelector(".col-nombre")?.textContent.toLowerCase() || "";
+                const marca = fila.querySelector(".col-marca")?.textContent.toLowerCase() || "";
+                const modelo = fila.querySelector(".col-modelo")?.textContent.toLowerCase() || "";
 
-                const coincide =
-                    !texto ||
-                    nombre.includes(texto) ||
-                    marca.includes(texto) ||
-                    modelo.includes(texto);
-
-                row.style.display = coincide ? "" : "none";
+                if (nombre.includes(filtro) || marca.includes(filtro) || modelo.includes(filtro)) {
+                    fila.style.display = "";
+                } else {
+                    fila.style.display = "none";
+                }
             });
-        });
-    }
-
-    // Seleccionar equipo + cantidad desde el modal
-    if (tbodyEquipos && inputEquipmentId && inputEquipmentName && inputCantidadForm && modalEquiposEl) {
-        tbodyEquipos.addEventListener("click", function (e) {
-            const btn = e.target.closest(".seleccionar-equipo");
-            if (!btn) return;
-
-            const fila = btn.closest("tr");
-            if (!fila) return;
-
-            const id = btn.getAttribute("data-id");
-            const nombre = btn.getAttribute("data-nombre");
-
-            // Stock mostrado en la fila
-            const stockTexto = (fila.querySelector(".col-stock")?.textContent || "0").trim();
-            const stock = parseInt(stockTexto, 10) || 0;
-
-            // Cantidad que el usuario escribió en el input de esa fila
-            const inputCantFila = fila.querySelector(".input-cantidad");
-            let cantidad = parseInt(inputCantFila?.value, 10) || 0;
-
-            // Validaciones básicas
-            if (!cantidad || cantidad < 1) {
-                alert("La cantidad debe ser al menos 1.");
-                return;
-            }
-
-            if (cantidad > stock) {
-                alert("No puede enviar más equipos de los que hay en stock (" + stock + ").");
-                return;
-            }
-
-            // Rellenar el formulario principal
-            inputEquipmentId.value = id;
-            inputEquipmentName.value = nombre;
-            inputCantidadForm.value = cantidad; // 👈 aquí pasamos la cantidad al form
-
-            // Cerrar el modal
-            const modal = bootstrap.Modal.getInstance(modalEquiposEl);
-            if (modal) {
-                modal.hide();
-            }
         });
     }
 });

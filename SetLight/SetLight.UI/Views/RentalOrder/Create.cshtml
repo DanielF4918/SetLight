@@ -7,6 +7,8 @@
 
         @Html.AntiForgeryToken()
 
+        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
         <div class="form-group mb-3">
             <label class="form-label fw-semibold">Cliente</label>
             <input type="hidden" name="ClientId" id="clienteId" value="@Model.ClientId" />
@@ -101,8 +103,6 @@
     </div>
 }
 
-}
-
 <!-- Modal de equipos -->
 <div class="modal fade" id="modalSeleccionarEquipos" tabindex="-1" role="dialog" aria-labelledby="modalLabelEquipos" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
@@ -145,15 +145,11 @@
     <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
-
             const modalEquipos = document.getElementById("modalSeleccionarEquipos");
 
             modalEquipos.addEventListener("shown.bs.modal", function () {
-                paginarEquipos(5); 
+                paginarEquipos(5);
             });
-
         });
     </script>
-
 }
