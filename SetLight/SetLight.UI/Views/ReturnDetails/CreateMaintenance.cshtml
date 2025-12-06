@@ -11,7 +11,8 @@
     {
         @Html.AntiForgeryToken()
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @* Muestra errores generales, incluido el de stock insuficiente *@
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
         @* Id oculto del equipo *@
         @Html.HiddenFor(m => m.EquipmentId, new { id = "EquipmentId" })
@@ -29,7 +30,9 @@
 
                 <button type="button"
                         id="btnAbrirModalEquipos"
-                        class="btn btn-dark">
+                        class="btn btn-dark"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalEquipos">
                     Buscar equipo
                 </button>
             </div>
@@ -40,65 +43,65 @@
         @* 🔢 Cantidad de equipos a enviar a mantenimiento *@
         <div class="form-group mb-3">
             <label class="form-label fw-semibold" for="Cantidad">Cantidad de equipos</label>
-            <input type="number"
-                   name="Cantidad"
-                   id="Cantidad"
-                   class="form-control border-dark"
-                   min="1"
-                   value="1"
-                   readonly />   
-                <small class="text-muted">
-                    Número de unidades del mismo equipo que se enviarán a mantenimiento.
-                   
-                </small>
-                @Html.ValidationMessage("Cantidad", "", new { @class = "text-danger" })
-            </div>
+            @Html.TextBoxFor(m => m.Cantidad, new
+            {
+                @class = "form-control border-dark",
+                type = "number",
+                min = "1",
+                id = "Cantidad",
+                // si quieres que sea solo lectura y se llene desde el modal:
+                // @readonly = "readonly"
+            })
+            <small class="text-muted">
+                Número de unidades del mismo equipo que se enviarán a mantenimiento.
+            </small>
+            @Html.ValidationMessageFor(m => m.Cantidad, "", new { @class = "text-danger" })
+        </div>
 
+        @* Tipo de mantenimiento *@
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Tipo de mantenimiento</label>
+            @Html.DropDownListFor(
+                m => m.MaintenanceType,
+                new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Revisión por daño",        Value = "1" },
+                    new SelectListItem { Text = "Reparación mayor",         Value = "2" },
+                    new SelectListItem { Text = "Mantenimiento preventivo", Value = "3" }
+                },
+                "-- Seleccione --",
+                new { @class = "form-control border-dark", id = "MaintenanceType" }
+            )
+            @Html.ValidationMessageFor(m => m.MaintenanceType, "", new { @class = "text-danger" })
+        </div>
 
-            @* Tipo de mantenimiento *@
-            <div class="form-group mb-3">
-                <label class="form-label fw-semibold">Tipo de mantenimiento</label>
-                @Html.DropDownListFor(
-                    m => m.MaintenanceType,
-                    new List<SelectListItem>
-                    {
-                        new SelectListItem { Text = "Revisión por daño",        Value = "1" },
-                        new SelectListItem { Text = "Reparación mayor",         Value = "2" },
-                        new SelectListItem { Text = "Mantenimiento preventivo", Value = "3" }
-                    },
-                    "-- Seleccione --",
-                    new { @class = "form-control border-dark", id = "MaintenanceType" }
-                )
-                @Html.ValidationMessageFor(m => m.MaintenanceType, "", new { @class = "text-danger" })
-            </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Comentarios / descripción del daño</label>
+            @Html.TextAreaFor(m => m.Comments,
+                new
+                {
+                    @class = "form-control border-dark",
+                    rows = "4",
+                    placeholder = "Detalle el motivo del mantenimiento, daños observados, etc."
+                })
+        </div>
 
-            <div class="form-group mb-3">
-                <label class="form-label fw-semibold">Comentarios / descripción del daño</label>
-                @Html.TextAreaFor(m => m.Comments,
-                    new
-                    {
-                        @class = "form-control border-dark",
-                        rows = "4",
-                        placeholder = "Detalle el motivo del mantenimiento, daños observados, etc."
-                    })
-            </div>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Evidencia (foto, PDF, etc.)</label>
+            <input type="file"
+                   name="evidenceFile"
+                   id="evidenceFile"
+                   class="form-control border-dark" />
+            <small class="text-muted">Opcional, puede adjuntar una imagen o archivo como evidencia.</small>
+        </div>
 
-            <div class="form-group mb-3">
-                <label class="form-label fw-semibold">Evidencia (foto, PDF, etc.)</label>
-                <input type="file"
-                       name="evidenceFile"
-                       id="evidenceFile"
-                       class="form-control border-dark" />
-                <small class="text-muted">Opcional, puede adjuntar una imagen o archivo como evidencia.</small>
-            </div>
-
-            <div class="form-group mt-4 text-center">
-                <button type="submit" class="btn btn-success px-4 fw-semibold">
-                    Guardar mantenimiento
-                </button>
-                @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary ms-3" })
-            </div>
-        }
+        <div class="form-group mt-4 text-center">
+            <button type="submit" class="btn btn-success px-4 fw-semibold">
+                Guardar mantenimiento
+            </button>
+            @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null, new { @class = "btn btn-secondary ms-3" })
+        </div>
+    }
 </div>
 
 @* Modal de selección de equipo *@
@@ -125,8 +128,8 @@
                                 <th>Nombre</th>
                                 <th>Marca</th>
                                 <th>Modelo</th>
-                                <th>Stock</th>          @* NUEVO *@
-                                <th>Cant. a enviar</th> @* NUEVO *@
+                                <th>Stock</th>
+                                <th>Cant. a enviar</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -139,7 +142,7 @@
                                         <td class="col-nombre">@eq.EquipmentName</td>
                                         <td class="col-marca">@eq.Brand</td>
                                         <td class="col-modelo">@eq.Model</td>
-                                        <td class="col-stock">@eq.Stock</td> @* muestra el stock *@
+                                        <td class="col-stock">@eq.Stock</td>
                                         <td>
                                             <input type="number"
                                                    class="form-control input-cantidad"

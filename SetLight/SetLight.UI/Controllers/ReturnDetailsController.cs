@@ -285,9 +285,36 @@ namespace SetLight.UI.Controllers
                         for (int i = 0; i < item.CantidadFaltante; i++)
                             await ln.Guardar(dtoFaltante);
 
-                        // No se suma al stock
+                        // 🔹 Crear un mantenimiento tipo "faltante" para ESTA orden y ESTE equipo
+                        using (var contexto = new Contexto())
+                        {
+                            var emailUsuario = User.Identity.Name;
+                            var empleado = contexto.Empleado
+                                .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+
+                            var mantenimientoFaltante = new Maintenance
+                            {
+                                StartDate = DateTime.Now,
+                                EndDate = null,
+                                MaintenanceType = 4,                 // 4 = Faltante / no devuelto
+                                MaintenanceStatus = 0,                 // 0 = Pendiente
+                                EquipmentId = item.EquipmentId,
+                                OrderId = model.OrderId,     // 👈 AQUÍ LIGAMOS A LA ORDEN
+                                Comments = item.Observaciones ?? "Equipo no devuelto / perdido",
+                                Cost = null,
+                                EvidencePath = null,
+                                IdEmpleado = empleado?.IdEmpleado
+                            };
+
+                            contexto.Maintenance.Add(mantenimientoFaltante);
+                            contexto.SaveChanges();
+                        }
                     }
+
                 }
+
+
+            
 
                 // ✅ 4️⃣ Verificar si la orden quedó completamente gestionada
                 using (var contexto = new Contexto())
@@ -397,6 +424,8 @@ namespace SetLight.UI.Controllers
             {
                 var q = contexto.Maintenance
                     .Include(m => m.Equipment)
+                    // 👇 Excluir siempre los "no devueltos" (tipo 4) del listado de mantenimiento
+                    .Where(m => m.MaintenanceType != 4)
                     .AsQueryable();
 
                 // Filtros opcionales
@@ -438,6 +467,7 @@ namespace SetLight.UI.Controllers
                 return View(listaPaginada);
             }
         }
+
 
 
         // GET: ReturnDetails/Finalize/5
@@ -654,7 +684,7 @@ namespace SetLight.UI.Controllers
         // POST: ReturnDetails/CreateMaintenance
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateMaintenance(MaintenanceDto model, HttpPostedFileBase evidenceFile)
+        public ActionResult CreateMaintenance(CrearMaintenanceViewModel model, HttpPostedFileBase evidenceFile)
         {
             // 🔹 Validación de cantidad
             if (model.Cantidad <= 0)
@@ -665,7 +695,7 @@ namespace SetLight.UI.Controllers
             if (!ModelState.IsValid)
             {
                 CargarCombosMantenimiento(model.EquipmentId);
-                return View("CreateMaintenance", model);
+                return View("CreateMaintenance", model);   // 👈 devolvemos el ViewModel correcto
             }
 
             if (model.StartDate == default(DateTime))
@@ -691,8 +721,13 @@ namespace SetLight.UI.Controllers
                 // 🔹 Validar que haya suficientes unidades disponibles (usando Stock)
                 if (equipo.Stock < model.Cantidad)
                 {
-                    ModelState.AddModelError("Cantidad",
-                        $"Solo hay {equipo.Stock} unidades disponibles para este equipo.");
+                    // Mensaje claro, parecido al de las órdenes
+                    var msg = $"No hay suficientes unidades disponibles para el equipo: {equipo.EquipmentName}. " +
+                              $"Disponibles: {equipo.Stock}, seleccionadas: {model.Cantidad}.";
+
+                    ModelState.AddModelError(string.Empty, msg);   // aparece en ValidationSummary
+                    ModelState.AddModelError("Cantidad", msg);     // aparece junto al campo Cantidad
+
                     CargarCombosMantenimiento(model.EquipmentId);
                     return View("CreateMaintenance", model);
                 }
@@ -704,8 +739,8 @@ namespace SetLight.UI.Controllers
                     var evidenciasRoot = Server.MapPath("~/Evidencias/");
                     Directory.CreateDirectory(evidenciasRoot);
 
-                    var originalName = System.IO.Path.GetFileName(evidenceFile.FileName);
-                    var extension = System.IO.Path.GetExtension(originalName);
+                    var originalName = Path.GetFileName(evidenceFile.FileName);
+                    var extension = Path.GetExtension(originalName);
                     var fileName = $"{Guid.NewGuid():N}{extension}";
                     var fullPath = Path.Combine(evidenciasRoot, fileName);
 
@@ -732,7 +767,7 @@ namespace SetLight.UI.Controllers
                     contexto.Maintenance.Add(mantenimiento);
                 }
 
-                // 🔹 Actualizar Stock (lo tratamos como "disponibles")
+                // 🔹 Actualizar Stock (disponibles)
                 equipo.Stock -= model.Cantidad;
 
                 contexto.SaveChanges();
@@ -741,6 +776,257 @@ namespace SetLight.UI.Controllers
             TempData["Success"] = "Mantenimientos creados correctamente.";
             return RedirectToAction("Mantenimientos");
         }
+
+
+        public ActionResult Faltantes()
+        {
+            using (var contexto = new Contexto())
+            {
+                // 1) Mantenimientos de tipo faltante (ya tienen OrderId y EquipmentId)
+                var mantenimientos = (from m in contexto.Maintenance
+                                      where m.MaintenanceType == 4    // 4 = faltante / no devuelto
+                                      join eq in contexto.Equipment
+                                           on m.EquipmentId equals eq.EquipmentId
+                                      join ro in contexto.RentalOrders
+                                           on m.OrderId equals ro.OrderId
+                                      join cl in contexto.Clients
+                                           on ro.ClientId equals cl.ClientId
+                                      select new
+                                      {
+                                          m.MaintenanceId,
+                                          m.OrderId,
+                                          m.EquipmentId,
+                                          EquipmentName = eq.EquipmentName,
+                                          Cliente = cl.FirstName + " " + cl.LastName,
+                                          m.MaintenanceStatus,
+                                          m.Cost,
+                                          m.StartDate,
+                                          m.EndDate
+                                      })
+                                      .ToList(); // 👈 de aquí en adelante estamos en memoria
+
+                // 2) Cantidades de faltantes por Orden + Equipo (solo ReturnDetails con IsReturned = false)
+                var cantidades = contexto.ReturnDetails
+                    .Where(rd => !rd.IsReturned)
+                    .GroupBy(rd => new { rd.OrderId, rd.EquipmentId })
+                    .Select(g => new
+                    {
+                        g.Key.OrderId,
+                        g.Key.EquipmentId,
+                        Cantidad = g.Count()
+                    })
+                    .ToList();
+
+                // 3) Diccionario (OrderId, EquipmentId) -> Cantidad
+                var mapaCantidades = cantidades
+                    .ToDictionary(
+                        x => Tuple.Create(x.OrderId, x.EquipmentId),
+                        x => x.Cantidad
+                    );
+
+                // 4) Armamos el DTO final
+                // 4) Armamos el DTO final
+                var faltantes = mantenimientos
+                    .Select(m =>
+                    {
+                        int cantidad = 0;
+
+                        // Solo buscamos en el diccionario si OrderId tiene valor
+                        if (m.OrderId.HasValue)
+                        {
+                            mapaCantidades.TryGetValue(
+                                Tuple.Create(m.OrderId.Value, m.EquipmentId), // 👈 aquí usamos Value (int)
+                                out cantidad);
+                        }
+
+                        return new MaintenanceDto
+                        {
+                            MaintenanceId = m.MaintenanceId,
+                            OrderId = m.OrderId,
+                            EquipmentId = m.EquipmentId,
+                            EquipmentName = m.EquipmentName,
+                            ClientName = m.Cliente,
+                            Cantidad = cantidad,          // cantidad REAL de esa orden/equipo
+                            MaintenanceStatus = m.MaintenanceStatus,
+                            Cost = m.Cost,
+                            StartDate = m.StartDate,
+                            EndDate = m.EndDate
+                        };
+                    })
+                    .Where(f => f.Cantidad > 0)
+                    .OrderByDescending(f => f.OrderId)
+                    .ThenBy(f => f.EquipmentName)
+                    .ToList();
+
+
+                return View("Faltantes", faltantes);
+            }
+        }
+
+
+
+
+
+
+
+        // GET: ReturnDetails/EditFaltante/5
+        public ActionResult EditFaltante(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance.Find(id);
+                if (mantenimiento == null || mantenimiento.MaintenanceType != 4)
+                    return HttpNotFound();
+
+                var equipo = contexto.Equipment.FirstOrDefault(e => e.EquipmentId == mantenimiento.EquipmentId);
+
+                // Buscamos info de orden/cliente y cantidad faltante
+                var datosOrden = (from rd in contexto.ReturnDetails
+                                  join ro in contexto.RentalOrders on rd.OrderId equals ro.OrderId
+                                  join cl in contexto.Clients on ro.ClientId equals cl.ClientId
+                                  where rd.IsReturned == false
+                                        && rd.EquipmentId == mantenimiento.EquipmentId
+                                  select new
+                                  {
+                                      rd.OrderId,
+                                      Cliente = cl.FirstName + " " + cl.LastName
+                                  })
+                                  .ToList();
+
+                int? orderId = datosOrden.FirstOrDefault()?.OrderId;
+                string clientName = datosOrden.FirstOrDefault()?.Cliente;
+                int cantidadFaltante = datosOrden.Count; // cuántos ReturnDetails no devueltos hay para ese equipo
+
+                var modelo = new MaintenanceDto
+                {
+                    MaintenanceId = mantenimiento.MaintenanceId,
+                    StartDate = mantenimiento.StartDate,
+                    EndDate = mantenimiento.EndDate,
+                    MaintenanceType = mantenimiento.MaintenanceType,
+                    MaintenanceStatus = mantenimiento.MaintenanceStatus,
+                    EquipmentId = mantenimiento.EquipmentId,
+                    EquipmentName = equipo?.EquipmentName,
+                    Comments = mantenimiento.Comments,
+                    Cost = mantenimiento.Cost,
+                    IdEmpleado = mantenimiento.IdEmpleado,
+                    Cantidad = cantidadFaltante,
+                    OrderId = orderId,
+                    ClientName = clientName
+                };
+
+                return View("EditFaltante", modelo);
+            }
+        }
+
+
+        // POST: ReturnDetails/EditFaltante
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditFaltante(MaintenanceDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Si algo falla en validación volvemos a mostrar la vista con los datos
+                return View("EditFaltante", model);
+            }
+
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance.Find(model.MaintenanceId);
+                if (mantenimiento == null || mantenimiento.MaintenanceType != 4)
+                    return HttpNotFound();
+
+                mantenimiento.Comments = model.Comments;
+                mantenimiento.Cost = model.Cost;
+                mantenimiento.MaintenanceStatus = model.MaintenanceStatus;
+
+                // Si lo marcamos como finalizado y no tiene EndDate, la seteamos
+                if (mantenimiento.MaintenanceStatus == 1 && !mantenimiento.EndDate.HasValue)
+                {
+                    mantenimiento.EndDate = DateTime.Now;
+                }
+
+                contexto.SaveChanges();
+            }
+
+            TempData["Success"] = "Registro de equipo faltante actualizado correctamente.";
+            return RedirectToAction("Faltantes");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult FinalizarFaltante(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var mantenimiento = contexto.Maintenance.Find(id);
+                if (mantenimiento == null || mantenimiento.MaintenanceType != 4)
+                    return HttpNotFound();
+
+                // Marcar como finalizado
+                mantenimiento.MaintenanceStatus = 1; // 1 = Finalizado
+
+                if (!mantenimiento.EndDate.HasValue)
+                {
+                    mantenimiento.EndDate = DateTime.Now;
+                }
+
+                // Opcional: dejar un rastro en comentarios
+                if (string.IsNullOrEmpty(mantenimiento.Comments))
+                {
+                    mantenimiento.Comments = "Faltante marcado como finalizado.";
+                }
+                else if (!mantenimiento.Comments.Contains("finalizado"))
+                {
+                    mantenimiento.Comments += $" | Finalizado el {DateTime.Now:dd/MM/yyyy}";
+                }
+
+                contexto.SaveChanges();
+            }
+
+            TempData["Success"] = "El equipo faltante se marcó como finalizado correctamente.";
+            return RedirectToAction("Faltantes");
+        }
+
+        public ActionResult DetallesFaltante(int id)
+        {
+            using (var contexto = new Contexto())
+            {
+                var m = contexto.Maintenance
+                    .Include("Equipment")
+                    .Include("RentalOrder.Client")
+                    .FirstOrDefault(x => x.MaintenanceId == id && x.MaintenanceType == 4);
+
+                if (m == null)
+                    return HttpNotFound();
+
+                // Cantidad faltante SOLO de esta orden y este equipo
+                int cantidadFaltante = contexto.ReturnDetails
+                    .Where(rd =>
+                        rd.OrderId == m.OrderId &&
+                        rd.EquipmentId == m.EquipmentId &&
+                        rd.IsReturned == false)
+                    .Count();
+
+                var dto = new MaintenanceDto
+                {
+                    MaintenanceId = m.MaintenanceId,
+                    OrderId = m.OrderId,
+                    EquipmentId = m.EquipmentId,
+                    EquipmentName = m.Equipment.EquipmentName,
+                    ClientName = m.RentalOrder.Client.FirstName + " " + m.RentalOrder.Client.LastName,
+                    Cantidad = cantidadFaltante,       
+                    MaintenanceStatus = m.MaintenanceStatus,
+                    Cost = m.Cost,
+                    StartDate = m.StartDate,
+                    EndDate = m.EndDate,
+                    Comments = m.Comments
+                };
+
+                return View(dto);
+            }
+        }
+
 
 
     }

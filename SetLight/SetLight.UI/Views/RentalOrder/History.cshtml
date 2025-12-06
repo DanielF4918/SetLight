@@ -1,10 +1,39 @@
-﻿@model IEnumerable<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+﻿@using PagedList;
+@using PagedList.Mvc;
+@model IPagedList<SetLight.Abstracciones.ModelosParaUI.RentalOrderDto>
+
+
 
 @{
     ViewBag.Title = "Historial de órdenes";
 }
 
 <h2>Historial de órdenes de @ViewBag.ClientName</h2>
+<form method="get" class="row mb-3">
+    <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
+
+    <div class="col-md-3">
+        <label>Desde</label>
+        <input type="date" name="desde" class="form-control" value="@ViewBag.FiltroDesde" />
+    </div>
+
+    <div class="col-md-3">
+        <label>Hasta</label>
+        <input type="date" name="hasta" class="form-control" value="@ViewBag.FiltroHasta" />
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-dark">
+            <i class="bi bi-funnel me-1"></i> Filtrar
+        </button>
+
+        <a style="text-align: right" href="@Url.Action("History", new { clientId = ViewBag.ClientId })" class="btn btn-outline-secondary">
+            Limpiar
+        </a>
+    </div>
+</form>
+
+
 
 @if (!Model.Any())
 {
@@ -55,6 +84,59 @@ else
         </tbody>
     </table>
 
+
+    <div class="pagination-container text-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("History",
+            new
+                {
+                    clientId = ViewBag.ClientId,
+                page,
+                desde = ViewBag.FiltroDesde,
+                hasta = ViewBag.FiltroHasta
+            }),
+            new PagedListRenderOptions
+                {
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToIndividualPages = true,
+                MaximumPageNumbersToDisplay = 10,
+                UlElementClasses = new[] { "pagination-custom" }
+            }
+        )
+    </div>
+
+    <style>
+        .pagination-custom {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 0;
+        }
+
+            .pagination-custom li {
+                list-style: none;
+            }
+
+                .pagination-custom li a,
+                .pagination-custom li span {
+                    font-size: 20px;
+                    color: black;
+                    text-decoration: none;
+                    padding: 4px 8px;
+                }
+
+                .pagination-custom li.active span {
+                    font-weight: bold;
+                }
+
+                .pagination-custom li.disabled span {
+                    color: #999;
+                }
+    </style>
+
+
     foreach (var order in Model)
     {
         <div class="modal fade" id="modalEquipos-@order.OrderId" tabindex="-1" aria-labelledby="modalLabel-@order.OrderId" aria-hidden="true">
@@ -92,6 +174,9 @@ else
                                 }
                             </tbody>
                         </table>
+
+
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

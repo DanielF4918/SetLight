@@ -41,5 +41,7 @@ namespace SetLight.AccesoADatos.Modelos
 
         public decimal? DescuentoManual { get; set; }
 
+
+
     }
 }
