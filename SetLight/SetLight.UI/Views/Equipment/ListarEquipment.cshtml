@@ -36,7 +36,7 @@
         switch (estado)
         {
             case 1: t = "Activo"; break;
-            case 2: t = "Alquilado"; break;
+            case 2: t = "Agotado"; break;
             case 3: t = "Inactivo"; break;
             case 4: t = "Mantenimiento"; break;
         }
@@ -78,9 +78,10 @@
         margin-bottom: 14px;
     }
 
-    .inv-title {
-        margin: 0;
-        font-weight: 800;
+    /* Empuja la página hacia abajo para que no quede pegada al header negro */
+    .inv-page {
+        margin-top: 40px;
+        padding-bottom: 24px;
     }
 
     .equip-grid {
@@ -196,7 +197,6 @@
             color: #222;
         }
 
-
     .toggle {
         position: relative;
         display: inline-flex;
@@ -272,19 +272,66 @@
         .btn-outline-secondary:hover {
             background: #f3f4f6;
         }
+
+    .btn-header-gray {
+        background-color: #e5e7eb;
+        border: 1px solid #d1d5db;
+        color: #111827;
+        padding: 0.45rem 1.4rem;
+        border-radius: 6px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    }
+
+        .btn-header-gray:hover {
+            background-color: #d4d4d8;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+    .btn-header-green {
+        background-color: #15803d;
+        border: 1px solid #15803d;
+        color: #ffffff;
+        padding: 0.45rem 1.7rem;
+        border-radius: 6px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,.08);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-header-green:hover {
+            background-color: #166534;
+            border-color: #166534;
+            color: #ffffff;
+            text-decoration: none;
+        }
 </style>
 
-<div class="inv-page">
-    <div class="inv-header">
-        <h2 class="inv-title">Inventario de equipos</h2>
-        @Html.ActionLink("+ Registrar equipo", "CrearEquipment", null, new { @class = "btn-primary" })
-    </div>
-    <button type="button"
-            class="btn btn-outline-secondary ms-2"
-            id="btnAdministrarCategorias">
-        Administrar categorías
-    </button>
+<div class="container inv-page">
+    <!-- Encabezado igual que Clientes, con Administrar categorías debajo del título -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Título a la izquierda -->
+        <h2 class="fw-bold text-black mb-0">Inventario de equipos</h2>
 
+        <!-- Botones a la derecha, uno al lado del otro -->
+        <div class="d-flex align-items-center gap-2">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="btnAdministrarCategorias">
+                Administrar categorías
+            </button>
+
+            @Html.ActionLink(
+                "+ Registrar equipo",
+                "CrearEquipment",
+                "Equipment",
+                null,
+                new { @class = "btn btn-success text-white fw-semibold" }
+            )
+        </div>
+    </div>
 
     @using (Html.BeginForm("ListarEquipment", "Equipment", FormMethod.Get))
     {
@@ -447,7 +494,6 @@
 
 <!-- Modal: Lista de categorías -->
 <div class="modal fade" id="modalCategorias" tabindex="-1" aria-hidden="true">
-
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -457,11 +503,9 @@
             </div>
 
             <div class="modal-body" id="contenedorListaCategorias">
-
             </div>
 
             <div class="modal-footer">
-
                 <button type="button"
                         class="btn btn-danger"
                         id="btnAbrirCrearCategoriaDesdeLista">
@@ -476,7 +520,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Modal: Editar categoría -->
 <div class="modal fade" id="modalEditarCategoria" tabindex="-1" aria-hidden="true">
@@ -499,7 +542,6 @@
     </div>
 </div>
 
-
 @section Scripts {
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryval")
@@ -508,4 +550,3 @@
     <script src="~/Scripts/Modals/EqCategory/EqCategoryList.js"></script>
     <script src="~/Scripts/Modals/EqCategory/EqCategoryModal.js"></script>
 }
-
