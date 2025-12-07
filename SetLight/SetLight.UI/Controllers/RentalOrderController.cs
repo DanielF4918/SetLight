@@ -18,7 +18,6 @@ using SetLight.LogicaDeNegocio.Services;
 using PagedList;
 using X.PagedList;
 
-
 namespace SetLight.UI.Controllers
 {
     [Authorize(Roles = "Administrador,Colaborador")]
@@ -41,14 +40,25 @@ namespace SetLight.UI.Controllers
             _obtenerROPorIdAD = new ObtenerROPorIdAD();
         }
 
-        public ActionResult History(int clientId, int? page, DateTime? desde, DateTime? hasta)
+        // =======================
+        // HISTORIAL POR CLIENTE
+        // =======================
+        public ActionResult History(int? clientId, int? page, DateTime? desde, DateTime? hasta)
         {
-            ClientDto cliente = _obtenerClPorID.Obtener(clientId);
+            // Si viene sin clientId, redirigimos al listado de clientes
+            if (!clientId.HasValue)
+            {
+                return RedirectToAction("ListarClient", "Client");
+            }
+
+            var id = clientId.Value;
+
+            ClientDto cliente = _obtenerClPorID.Obtener(id);
             if (cliente == null)
                 return HttpNotFound("Cliente no encontrado");
 
             var historial = (from orden in _contexto.RentalOrders
-                             where orden.ClientId == clientId
+                             where orden.ClientId == id
                              select new RentalOrderDto
                              {
                                  OrderId = orden.OrderId,
@@ -73,10 +83,9 @@ namespace SetLight.UI.Controllers
                                             }).ToList()
                              });
 
-
+            // filtros opcionales por fecha de orden
             if (desde.HasValue) historial = historial.Where(o => o.OrderDate >= desde.Value);
             if (hasta.HasValue) historial = historial.Where(o => o.OrderDate <= hasta.Value);
-
 
             int pageSize = 7;
             int pageNumber = page ?? 1;
@@ -87,12 +96,14 @@ namespace SetLight.UI.Controllers
             ViewBag.ClientName = cliente.FirstName + " " + cliente.LastName;
             ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
             ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
-            ViewBag.ClientId = clientId;
+            ViewBag.ClientId = id;
 
             return View(historialPaginado);
         }
 
-        // Listado de órdenes con filtros
+        // =======================
+        // LISTADO GENERAL
+        // =======================
         // GET: /RentalOrder
         public ActionResult Index(
             int? page,
@@ -174,7 +185,9 @@ namespace SetLight.UI.Controllers
             return View(ordenesPaged);
         }
 
-        // Crear orden (GET)
+        // =======================
+        // CREATE GET
+        // =======================
         public ActionResult Create()
         {
             var clientes = _contexto.Clients
@@ -211,7 +224,9 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
-        // Crear orden (POST)
+        // =======================
+        // CREATE POST
+        // =======================
         [HttpPost]
         public async Task<ActionResult> Create(CrearRentalOrderViewModel model)
         {
@@ -303,7 +318,7 @@ namespace SetLight.UI.Controllers
             try
             {
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
-                await crearLN.Guardar(nuevaOrden);   // 👈 aquí se puede lanzar la InvalidOperationException
+                await crearLN.Guardar(nuevaOrden);
 
                 var ordenGuardada = _contexto.RentalOrders
                     .OrderByDescending(o => o.OrderId)
@@ -333,10 +348,8 @@ namespace SetLight.UI.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                // ❗ Aquí llega el "No hay suficiente stock para el equipo: X"
                 ModelState.AddModelError(string.Empty, ex.Message);
 
-                // Volver a cargar combos
                 model.Clientes = _contexto.Clients
                     .Where(c => c.Status == 1)
                     .Select(c => new ClientDto
@@ -359,7 +372,6 @@ namespace SetLight.UI.Controllers
                         Stock = e.Stock
                     }).ToList();
 
-                // Mantener lo que el usuario ya había seleccionado
                 model.EquiposSeleccionados = equiposSeleccionados;
 
                 return View(model);
@@ -397,15 +409,15 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-        // GET: RentalOrder/Edit/5
+        // =======================
+        // EDIT GET
+        // =======================
         public ActionResult Edit(int id)
         {
             var orden = _contexto.RentalOrders.FirstOrDefault(o => o.OrderId == id);
             if (orden == null)
                 return HttpNotFound();
 
-            // Detalles seleccionados en la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
@@ -421,18 +433,13 @@ namespace SetLight.UI.Controllers
                                 Stock = equipo.Stock
                             }).ToList();
 
-            // Diccionario para saber cuántas unidades tiene cada equipo en la orden
             var cantidadesPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.Quantity);
-
-            // Lista de IDs ya seleccionados
             var idsSeleccionados = cantidadesPorEquipo.Keys.ToList();
 
-            // 1) Traemos de la BD los equipos que nos interesan (esto sí es LINQ to Entities)
             var equiposBase = _contexto.Equipment
                 .Where(e => e.Status == 1 || idsSeleccionados.Contains(e.EquipmentId))
-                .ToList();   // 👈 aquí ya pasamos a memoria
+                .ToList();
 
-            // 2) Ahora sí usamos el Dictionary en memoria para armar el DTO del modal
             var equiposParaModal = equiposBase
                 .Select(e =>
                 {
@@ -445,11 +452,10 @@ namespace SetLight.UI.Controllers
                         Model = e.Model,
                         RentalValue = e.RentalValue,
                         Stock = e.Stock,
-                        Quantity = qty // 0 si no estaba en la orden, o la cantidad actual si sí estaba
+                        Quantity = qty
                     };
                 })
                 .ToList();
-
 
             var viewModel = new CrearRentalOrderViewModel
             {
@@ -459,10 +465,8 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 StatusOrder = orden.StatusOrder,
                 DescuentoManual = orden.DescuentoManual,
-
-                EquiposSeleccionados = detalles,      // para la tabla de abajo
-                EquiposDisponibles = equiposParaModal, // para el modal
-
+                EquiposSeleccionados = detalles,
+                EquiposDisponibles = equiposParaModal,
                 Clientes = _contexto.Clients
                     .Select(c => new ClientDto
                     {
@@ -475,13 +479,13 @@ namespace SetLight.UI.Controllers
             return View("Edit", viewModel);
         }
 
-
-        // POST: RentalOrder/Edit/5
+        // =======================
+        // EDIT POST
+        // =======================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, CrearRentalOrderViewModel model)
         {
-            // Normalizamos la lista de equipos seleccionados
             var equiposSeleccionados = model.EquiposSeleccionados?
                 .Where(e => e.Quantity > 0)
                 .ToList() ?? new List<OrderDetailDto>();
@@ -493,7 +497,6 @@ namespace SetLight.UI.Controllers
                     ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
                 }
 
-                // Recargar combos en modo normal (solo equipos con stock)
                 model.Clientes = _contexto.Clients.Select(c => new ClientDto
                 {
                     ClientId = c.ClientId,
@@ -526,14 +529,12 @@ namespace SetLight.UI.Controllers
                     if (orden == null)
                         return HttpNotFound();
 
-                    // Actualizar cabecera
                     orden.ClientId = model.ClientId;
                     orden.StartDate = model.StartDate;
                     orden.EndDate = model.EndDate;
                     orden.OrderDate = DateTime.Now;
                     orden.DescuentoManual = model.DescuentoManual;
 
-                    // Devolver stock de detalles anteriores
                     var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
                     foreach (var detalle in detallesAnteriores)
@@ -551,7 +552,6 @@ namespace SetLight.UI.Controllers
                     _contexto.OrderDetails.RemoveRange(detallesAnteriores);
                     await _contexto.SaveChangesAsync();
 
-                    // Agregar nuevos detalles VALIDANDO STOCK
                     foreach (var item in equiposSeleccionados)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(item.EquipmentId);
@@ -577,7 +577,7 @@ namespace SetLight.UI.Controllers
                             if (equipo.Stock <= 0)
                             {
                                 equipo.Stock = 0;
-                                equipo.Status = 2; // Sin stock
+                                equipo.Status = 2;
                             }
                         }
                     }
@@ -589,13 +589,10 @@ namespace SetLight.UI.Controllers
                 }
                 catch (InvalidOperationException ex)
                 {
-                    // 💥 Caso de stock insuficiente
                     transaction.Rollback();
 
                     ModelState.AddModelError(string.Empty, ex.Message);
 
-                    // Re-cargar combos PERO esta vez SIN filtrar por Stock,
-                    // para que el equipo con stock 0 siga apareciendo en el modal
                     model.Clientes = _contexto.Clients.Select(c => new ClientDto
                     {
                         ClientId = c.ClientId,
@@ -604,7 +601,7 @@ namespace SetLight.UI.Controllers
                     }).ToList();
 
                     model.EquiposDisponibles = _contexto.Equipment
-                        .Where(e => e.Status == 1) // 👈 sin filtro de Stock > 0
+                        .Where(e => e.Status == 1)
                         .Select(e => new OrderDetailDto
                         {
                             EquipmentId = e.EquipmentId,
@@ -624,7 +621,6 @@ namespace SetLight.UI.Controllers
                     transaction.Rollback();
                     ModelState.AddModelError("", "Error al guardar los cambios.");
 
-                    // Recarga normal (solo equipos con stock)
                     model.Clientes = _contexto.Clients.Select(c => new ClientDto
                     {
                         ClientId = c.ClientId,
@@ -651,8 +647,9 @@ namespace SetLight.UI.Controllers
             }
         }
 
-
-        // NUEVO: Cancelar orden
+        // =======================
+        // CANCELAR ORDEN
+        // =======================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Cancelar(int id)
@@ -665,11 +662,9 @@ namespace SetLight.UI.Controllers
                     if (orden == null)
                         return HttpNotFound();
 
-                    // Solo se pueden cancelar órdenes activas
                     if (orden.StatusOrder != 1)
                         return RedirectToAction("Index");
 
-                    // Devolver stock de los equipos de la orden
                     var detalles = _contexto.OrderDetails
                         .Where(d => d.OrderId == id)
                         .ToList();
@@ -686,7 +681,6 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
-                    // 3 = Cancelada
                     orden.StatusOrder = 3;
 
                     await _contexto.SaveChangesAsync();
@@ -695,14 +689,15 @@ namespace SetLight.UI.Controllers
                 catch (Exception)
                 {
                     transaction.Rollback();
-                    // Aquí podrías loguear el error o usar TempData para un mensaje
                 }
             }
 
             return RedirectToAction("Index");
         }
 
-        // GET: VerComprobante
+        // =======================
+        // VER COMPROBANTE
+        // =======================
         public ActionResult VerComprobante(int id)
         {
             var orden = _contexto.RentalOrders.Find(id);
@@ -713,7 +708,6 @@ namespace SetLight.UI.Controllers
             if (cliente == null)
                 return HttpNotFound("Cliente no encontrado");
 
-            // Detalles de la orden
             var detalles = (from detalle in _contexto.OrderDetails
                             join equipo in _contexto.Equipment
                                 on detalle.EquipmentId equals equipo.EquipmentId
@@ -727,7 +721,6 @@ namespace SetLight.UI.Controllers
                                 Quantity = detalle.Quantity
                             }).ToList();
 
-            // ====== Cálculos de alquiler (mismo criterio que en el JS) ======
             var dias = (orden.EndDate - orden.StartDate).Days + 1;
             if (dias < 1) dias = 1;
 
@@ -744,7 +737,6 @@ namespace SetLight.UI.Controllers
             var montoDescuento = Math.Round(totalBruto * (descuentoPct / 100m), 2);
             var total = totalBruto - montoDescuento;
 
-            // DTO completo para el PDF
             var dto = new RentalOrderDto
             {
                 OrderId = orden.OrderId,
@@ -753,8 +745,6 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 ClientName = $"{cliente.FirstName} {cliente.LastName}",
                 Details = detalles,
-
-                //  campos de descuento y totales
                 DescuentoManual = orden.DescuentoManual,
                 CantidadDias = dias,
                 Subtotal = subtotal,
@@ -765,6 +755,5 @@ namespace SetLight.UI.Controllers
             byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
             return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
         }
-
     }
 }

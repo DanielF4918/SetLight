@@ -1323,3 +1323,4 @@ C:\Users\kenca\OneDrive\Escritorio\1 de dic\SetLight\SetLight\SetLight.UI\obj\De
 C:\Users\kenca\OneDrive\Escritorio\1 de dic\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.pdb
 C:\Users\kenca\OneDrive\Escritorio\1 de dic\SetLight\SetLight\SetLight.UI\bin\X.PagedList.dll
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.UI\bin\X.PagedList.dll
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.UI\bin\X.PagedList.dll

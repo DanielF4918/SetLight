@@ -75,4 +75,5 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int? CategoriaId { get; set; }
         public int? Estado { get; set; }
     }
+
 }
