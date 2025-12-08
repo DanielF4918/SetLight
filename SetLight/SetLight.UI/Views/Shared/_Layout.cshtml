@@ -19,6 +19,9 @@
 
     <!--estilos -->
     <link href="~/Content/site.css" rel="stylesheet" />
+
+    <link rel="icon" type="image/png" href="~/Content/favicon.png" />
+
 </head>
 <body>
     <!-- Si ya pusiste las clases sticky en el nav, déjalas; si no, tu nav normal -->
@@ -80,5 +83,15 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("Scripts", required: false)
+
+    @if (Request.IsAuthenticated)
+    {
+        <script>
+            // URL para cerrar sesión automáticamente
+            window.autoLogOffUrl = '@Url.Action("AutoLogOff", "Account")';
+        </script>
+
+        <script src="~/Scripts/Modals/Seguridad/Temporizador.js"></script>
+    }
 </body>
 </html>

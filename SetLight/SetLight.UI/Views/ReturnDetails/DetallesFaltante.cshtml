@@ -1,0 +1,119 @@
+﻿@model SetLight.Entidades.Dto.MaintenanceDto
+
+@{
+    ViewBag.Title = "Detalle de equipo faltante";
+    var orderDate = ViewBag.OrderDate as DateTime?;
+}
+
+<div class="container mt-4 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
+    <h2 class="text-center mb-4 text-dark">Detalle de equipo faltante / no devuelto</h2>
+
+    <div class="mb-3">
+        @Html.ActionLink("← Volver a listado de faltantes", "Faltantes", "ReturnDetails", null, new { @class = "btn btn-secondary" })
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            Información general
+        </div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Orden</dt>
+                <dd class="col-sm-9">
+                    @if (Model.OrderId.HasValue)
+                    {
+                        @Html.ActionLink(
+                            "#" + Model.OrderId.Value,
+                            "DetallesDevolucion",
+                            "ReturnDetails",
+                            new { orderId = Model.OrderId.Value },
+                            new { @class = "link-primary text-decoration-none" }
+                        )
+                        if (orderDate.HasValue)
+                        {
+                            @: ( @orderDate.Value.ToString("dd/MM/yyyy") )
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">N/D</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Cliente</dt>
+                <dd class="col-sm-9">
+                    @(!string.IsNullOrEmpty(Model.ClientName) ? Model.ClientName : "Desconocido")
+                </dd>
+
+                <dt class="col-sm-3">Equipo</dt>
+                <dd class="col-sm-9">@Model.EquipmentName</dd>
+
+                <dt class="col-sm-3">Cantidad faltante</dt>
+                <dd class="col-sm-9">@Model.Cantidad</dd>
+
+                <dt class="col-sm-3">Estado</dt>
+                <dd class="col-sm-9">
+                    @if (Model.MaintenanceStatus == 0)
+                    {
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Finalizado</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Registrado</dt>
+                <dd class="col-sm-9">@Model.StartDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3">Finalizado</dt>
+                <dd class="col-sm-9">
+                    @(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm") : "—")
+                </dd>
+
+                <dt class="col-sm-3">Costo reposición</dt>
+                <dd class="col-sm-9">
+                    @(Model.Cost.HasValue ? Model.Cost.Value.ToString("C") : "Sin definir")
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            Detalle administrativo / nota del caso
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Model.Comments))
+            {
+                <p class="mb-0">@Model.Comments</p>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Sin comentarios registrados.</p>
+            }
+        </div>
+    </div>
+
+    <div class="text-center">
+        @Html.ActionLink("Editar", "EditFaltante", "ReturnDetails",
+            new { id = Model.MaintenanceId },
+            new { @class = "btn btn-warning text-dark me-2" })
+
+        @if (Model.MaintenanceStatus == 0)
+        {
+            using (Html.BeginForm("FinalizarFaltante", "ReturnDetails",
+                                   new { id = Model.MaintenanceId },
+                                   FormMethod.Post,
+                                   new { @class = "d-inline" }))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn btn-success"
+                        onclick="return confirm('¿Marcar este faltante como finalizado?');">
+                    Finalizar
+                </button>
+            }
+        }
+    </div>
+</div>

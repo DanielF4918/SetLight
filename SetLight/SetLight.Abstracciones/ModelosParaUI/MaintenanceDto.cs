@@ -24,5 +24,10 @@ namespace SetLight.Entidades.Dto
         public string FinalizadoPor { get; set; }
 
         public int Cantidad { get; set; } = 1;
+
+        public int? OrderId { get; set; }
+        public string ClientName { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }

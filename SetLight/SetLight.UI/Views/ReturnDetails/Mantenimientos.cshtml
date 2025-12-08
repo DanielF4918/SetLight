@@ -36,16 +36,28 @@
 }
 
 <div class="container mt-5">
-    <!-- Título + botón registrar -->
+
+    <!-- Título + botones -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-black">Mantenimientos</h2>
-        @Html.ActionLink(
-            "+ Registrar mantenimiento manual",
-            "CreateMaintenance",
-            "ReturnDetails",
-            null,
-            new { @class = "btn btn-success text-white fw-semibold" }
-        )
+        <h2 class="fw-bold text-black mb-0">Mantenimientos</h2>
+
+        <div class="d-flex gap-2">
+            @Html.ActionLink(
+                "Equipos faltantes",
+                "Faltantes",
+                "ReturnDetails",
+                null,
+                new { @class = "btn btn-pill-light" }
+            )
+
+            @Html.ActionLink(
+                "+ Registrar mantenimiento manual",
+                "CreateMaintenance",
+                "ReturnDetails",
+                null,
+                new { @class = "btn btn-pill-success" }
+            )
+        </div>
     </div>
 
     <!-- Filtros -->
@@ -273,4 +285,36 @@
             background-color: #f0f0f0;
             color: black !important;
         }
+    .btn-pill-light {
+        background-color: #e5e7eb; 
+        border: 1px solid #d1d5db; 
+        color: #111827;
+        padding: 0.45rem 1.4rem;
+        border-radius: 6px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    }
+
+        .btn-pill-light:hover {
+            background-color: #d4d4d8;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+    .btn-pill-success {
+        background-color: #15803d;
+        border: 1px solid #15803d;
+        color: #ffffff;
+        padding: 0.45rem 1.7rem;
+        border-radius: 6px; 
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    }
+
+        .btn-pill-success:hover {
+            background-color: #166534;
+            border-color: #166534;
+            color: #ffffff;
+        }
+
 </style>

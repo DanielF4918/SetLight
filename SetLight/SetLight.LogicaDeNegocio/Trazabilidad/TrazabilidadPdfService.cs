@@ -38,9 +38,21 @@ namespace SetLight.LogicaDeNegocio.Trazabilidad
                 {
                     table.AddCell(item.TipoEvento);
                     table.AddCell(item.FechaInicio?.ToString("dd/MM/yyyy") ?? "-");
-                    table.AddCell(item.FechaFin?.ToString("dd/MM/yyyy") ?? item.FechaMantenimiento?.ToString("dd/MM/yyyy") ?? "-");
+                    table.AddCell(
+                        item.FechaFin?.ToString("dd/MM/yyyy")
+                        ?? item.FechaMantenimiento?.ToString("dd/MM/yyyy")
+                        ?? "-"
+                    );
                     table.AddCell(item.ClienteNombre ?? item.Tecnico ?? "-");
-                    table.AddCell(item.TipoEvento == "Mantenimiento" ? item.TipoMantenimiento.ToString() : "-");
+
+                    // 👇 Aquí hacemos el mapeo de código → texto solo para mantenimientos
+                    string tipoMantTexto = "-";
+                    if (item.TipoEvento == "Mantenimiento")
+                    {
+                        tipoMantTexto = TextoTipoMantenimiento(item.TipoMantenimiento);
+                    }
+
+                    table.AddCell(tipoMantTexto);
                 }
 
                 doc.Add(table);
@@ -48,6 +60,21 @@ namespace SetLight.LogicaDeNegocio.Trazabilidad
             }
 
             return filePath;
+        }
+
+        // Mapeo de códigos (ajusta los textos si usas otros nombres)
+        private string TextoTipoMantenimiento(int? tipo)
+        {
+            if (!tipo.HasValue)
+                return "-";
+
+            switch (tipo.Value)
+            {
+                case 1: return "Revisión por daño";
+                case 2: return "Reparación mayor";
+                case 3: return "Mantenimiento preventivo";
+                default: return "-";
+            }
         }
     }
 }

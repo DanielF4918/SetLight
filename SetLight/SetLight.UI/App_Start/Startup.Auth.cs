@@ -18,33 +18,38 @@ namespace SetLight.UI
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
 
-            // Permitir que la aplicación use una cookie para almacenar información para el usuario que inicia sesión
-            // y una cookie para almacenar temporalmente información sobre un usuario que inicia sesión con un proveedor de inicio de sesión de terceros
-            // Configurar cookie de inicio de sesión
+            // Cookie de autenticación
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
                 LoginPath = new PathString("/Account/Login"),
+
+                // ⬇Tiempo máximo de inactividad antes de que la cookie expire
+                // horas (ej: 1, 2, 4, etc.)
+                ExpireTimeSpan = TimeSpan.FromHours(1),
+
+                // ⬇️ Si el usuario sigue usando la app, se va renovando el tiempo
+                SlidingExpiration = true,
+
                 Provider = new CookieAuthenticationProvider
                 {
-                    // Permite a la aplicación validar la marca de seguridad cuando el usuario inicia sesión.
-                    // Es una característica de seguridad que se usa cuando se cambia una contraseña o se agrega un inicio de sesión externo a la cuenta.  
+                    // Valida el SecurityStamp cada cierto tiempo
                     OnValidateIdentity = SecurityStampValidator.OnValidateIdentity<ApplicationUserManager, ApplicationUser>(
                         validateInterval: TimeSpan.FromMinutes(30),
                         regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
                 }
-            });            
+            });
+
+            // Cookie para logins externos
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
-            // Permite que la aplicación almacene temporalmente la información del usuario cuando se verifica el segundo factor en el proceso de autenticación de dos factores.
+            // Cookie para 2FA (segundo factor)
             app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie, TimeSpan.FromMinutes(5));
 
-            // Permite que la aplicación recuerde el segundo factor de verificación de inicio de sesión, como el teléfono o correo electrónico.
-            // Cuando selecciona esta opción, el segundo paso de la verificación del proceso de inicio de sesión se recordará en el dispositivo desde el que ha iniciado sesión.
-            // Es similar a la opción Recordarme al iniciar sesión.
+            // Recordar navegador para 2FA
             app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
-            // Quitar los comentarios de las siguientes líneas para habilitar el inicio de sesión con proveedores de inicio de sesión de terceros
+            // Quitar los comentarios de las siguientes líneas para habilitar proveedores externos
             //app.UseMicrosoftAccountAuthentication(
             //    clientId: "",
             //    clientSecret: "");
