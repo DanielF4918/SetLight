@@ -190,14 +190,18 @@ namespace SetLight.UI.Controllers
         // =======================
         public ActionResult Create()
         {
+            // Solo clientes ACTIVOS (Status == 1)
             var clientes = _contexto.Clients
                 .Where(c => c.Status == 1)
+                .OrderBy(c => c.FirstName)
+                .ThenBy(c => c.LastName)
                 .Select(c => new ClientDto
                 {
                     ClientId = c.ClientId,
                     FirstName = c.FirstName,
                     LastName = c.LastName
-                }).ToList();
+                })
+                .ToList();
 
             var equipos = _contexto.Equipment
                 .Where(e => e.Status == 1 && e.Stock > 0)
@@ -210,7 +214,8 @@ namespace SetLight.UI.Controllers
                     RentalValue = e.RentalValue,
                     Quantity = 0,
                     Stock = e.Stock
-                }).ToList();
+                })
+                .ToList();
 
             var model = new CrearRentalOrderViewModel
             {
@@ -223,6 +228,7 @@ namespace SetLight.UI.Controllers
 
             return View(model);
         }
+
 
         // =======================
         // CREATE POST
