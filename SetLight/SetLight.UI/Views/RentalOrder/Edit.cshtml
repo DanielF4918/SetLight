@@ -12,7 +12,7 @@
         @Html.AntiForgeryToken()
 
         @* Muestra errores generales, como el de stock insuficiente *@
-        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
         @* Por si quieres tener el Id en el modelo del post *@
         @Html.HiddenFor(m => m.OrderId)

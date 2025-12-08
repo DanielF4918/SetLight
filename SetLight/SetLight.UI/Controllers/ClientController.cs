@@ -122,6 +122,11 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(ClientDto clientGuardar)
         {
+            // Aseguramos que el estado sea Activo al crear
+            clientGuardar.Status = 1;
+
+            // Si las validaciones de DataAnnotations FALLAN,
+            // volvemos a la vista y mostramos los mensajes por campo.
             if (!ModelState.IsValid)
                 return View(clientGuardar);
 
@@ -130,9 +135,11 @@ namespace SetLight.UI.Controllers
                 await _crearClientLN.Guardar(clientGuardar);
                 return RedirectToAction("ListarClient");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ModelState.AddModelError("", "Error al guardar cliente: " + ex.Message);
+              
+                // ModelState.AddModelError("", "Ocurrió un error al guardar el cliente. Inténtelo de nuevo.");
+
                 return View(clientGuardar);
             }
         }
@@ -160,9 +167,20 @@ namespace SetLight.UI.Controllers
                 return View("EditClient", model);
             }
 
+            // Conservar el estado original del cliente
+            var clienteBD = _obtenerClPorIDLN.Obtener(model.ClientId);
+            if (clienteBD == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Mantener el Status que ya tenía en la base de datos
+            model.Status = clienteBD.Status;
+
             _editClientLN.Actualizar(model);
             return RedirectToAction("ListarClient");
         }
+
 
         // GET: Client/Delete/5
         public ActionResult Delete(int id)
@@ -216,14 +234,26 @@ namespace SetLight.UI.Controllers
         {
             using (var contexto = new Contexto())
             {
-                var clientes = contexto.Clients
-                    .Where(c =>
-                        filtro == null
-                        || c.FirstName.Contains(filtro)
-                        || c.LastName.Contains(filtro)
-                        || (c.EmpresaNombre != null && c.EmpresaNombre.Contains(filtro))
+                var query = contexto.Clients.AsQueryable();
 
-                    )
+                // ✅ Solo clientes ACTIVOS
+                query = query.Where(c => c.Status == 1);
+
+                // Normalizamos el filtro
+                if (!string.IsNullOrWhiteSpace(filtro))
+                {
+                    var term = filtro.Trim().ToLower();
+
+                    query = query.Where(c =>
+                        (c.FirstName != null && c.FirstName.ToLower().Contains(term)) ||
+                        (c.LastName != null && c.LastName.ToLower().Contains(term)) ||
+                        (c.EmpresaNombre != null && c.EmpresaNombre.ToLower().Contains(term)) ||
+                        (c.Email != null && c.Email.ToLower().Contains(term)) ||
+                        (c.Phone != null && c.Phone.ToLower().Contains(term))
+                    );
+                }
+
+                var clientes = query
                     .Select(c => new ClientDto
                     {
                         ClientId = c.ClientId,
@@ -231,7 +261,6 @@ namespace SetLight.UI.Controllers
                         LastName = c.LastName,
                         Email = c.Email,
                         Phone = c.Phone,
-
                         EmpresaNombre = c.EmpresaNombre,
                         EmpresaTelefono = c.EmpresaTelefono
                     })
@@ -240,5 +269,6 @@ namespace SetLight.UI.Controllers
                 return PartialView("_SeleccionarClientePartial", clientes);
             }
         }
+
     }
 }
