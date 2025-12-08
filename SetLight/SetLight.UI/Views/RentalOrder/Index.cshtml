@@ -321,47 +321,63 @@
         padding: 6px 10px;
     }
 </style>
-
 @* Modales de equipos *@
 @foreach (var orden in Model)
 {
+    // Totales por orden (OJO: sin @{} aquí)
+    var totalUnidades = orden.Details.Sum(d => d.Quantity);
+    var totalMonto = orden.Details.Sum(d => d.RentalValue * d.Quantity);
+
     <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
                 </div>
+
                 <div class="modal-body">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Equipo</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Cantidad</th>
-                                <th>Valor Unitario</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body-@orden.OrderId">
-                            @foreach (var detalle in orden.Details)
-                            {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center align-middle">
+                            <thead class="table-dark text-white">
                                 <tr>
-                                    <td>@detalle.EquipmentName</td>
-                                    <td>@detalle.Brand</td>
-                                    <td>@detalle.Model</td>
-                                    <td>@detalle.Quantity</td>
-                                    <td>$@detalle.RentalValue</td>
-                                    <td>$@(detalle.RentalValue * detalle.Quantity)</td>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Cantidad</th>
+                                    <th>Valor unitario</th>
+                                    <th>Subtotal</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="d-flex justify-content-center mt-2">
-                    <nav>
-                        <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
-                    </nav>
+                            </thead>
+                            <tbody id="table-body-@orden.OrderId">
+                                @foreach (var detalle in orden.Details)
+                                {
+                                    var subtotalItem = detalle.RentalValue * detalle.Quantity;
+                                    <tr>
+                                        <td>@detalle.EquipmentName</td>
+                                        <td>@detalle.Brand</td>
+                                        <td>@detalle.Model</td>
+                                        <td>@detalle.Quantity</td>
+                                        <td>$@detalle.RentalValue.ToString("N2")</td>
+                                        <td>$@subtotalItem.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="3" class="text-end">Total de unidades:</td>
+                                    <td>@totalUnidades</td>
+                                    <td class="text-end">Total equipos:</td>
+                                    <td>$@totalMonto.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-2">
+                        <nav>
+                            <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
+                        </nav>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -371,6 +387,7 @@
         </div>
     </div>
 }
+
 
 @section Scripts {
     <script>

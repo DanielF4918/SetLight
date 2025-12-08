@@ -32,140 +32,168 @@
 }
 
 <div class="container mt-5">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold text-black mb-0">Detalles del mantenimiento</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
 
-        <div class="d-flex gap-2">
-            @Html.ActionLink(
-                "Volver a mantenimientos",
-                "Mantenimientos",
-                "ReturnDetails",
-                null,
-                new { @class = "btn btn-outline-secondary" }
-            )
+            <h2 class="fw-bold text-black text-center mb-4">
+                Detalles del mantenimiento
+            </h2>
 
-            @if (Model.MaintenanceStatus == 0)
-            {
-                @Html.ActionLink(
-                    "Editar",
-                    "EditarMantenimiento",
-                    "ReturnDetails",
-                    new { id = Model.MaintenanceId },
-                    new { @class = "btn btn-warning" }
-                )
-            }
-        </div>
-    </div>
-
-    <!-- Card principal -->
-    <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body">
-            <!-- Encabezado -->
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h4 class="mb-1">
-                        @(!string.IsNullOrEmpty(Model.EquipmentName) ? Model.EquipmentName : "Equipo no especificado")
-                    </h4>
-                    <div class="text-muted small">
-                        <span class="me-3">
-                            <i class="bi bi-tools me-1"></i>@tipo
-                        </span>
-                        <span class="me-3">
-                            <i class="bi bi-calendar-event me-1"></i>
-                            Inicio: @Model.StartDate.ToString("dd/MM/yyyy HH:mm")
-                        </span>
-                        <span>
-                            <i class="bi bi-flag me-1"></i>
-                            Fin:
-                            @(Model.EndDate.HasValue
-                                ? Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
-                                : "—")
-                        </span>
+            <div class="card shadow p-4 border-dark rounded-3">
+                <div class="card-body">
+                    <!-- Encabezado -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="mb-1">
+                                @(!string.IsNullOrEmpty(Model.EquipmentName)
+                                    ? Model.EquipmentName
+                                    : "Equipo no especificado")
+                            </h4>
+                            <div class="text-muted small">
+                                <span class="me-3">
+                                    <i class="bi bi-tools me-1"></i>@tipo
+                                </span>
+                                <span class="me-3">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    Inicio: @Model.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                                <span>
+                                    <i class="bi bi-flag me-1"></i>
+                                    Fin:
+                                    @(Model.EndDate.HasValue
+                                        ? Model.EndDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                        : "—")
+                                </span>
+                            </div>
+                        </div>
+                        <span class="@estadoClase">@estadoTexto</span>
                     </div>
-                </div>
-                <span class="@estadoClase">@estadoTexto</span>
-            </div>
 
-            <hr />
+                    <hr />
 
-            <!-- Detalles -->
-            <div class="row g-3">
-                <div class="col-md-7">
-                    <dl class="row mb-0">
-                        <dt class="col-sm-4">Equipo</dt>
-                        <dd class="col-sm-8">
-                            @(!string.IsNullOrEmpty(Model.EquipmentName) ? Model.EquipmentName : "—")
-                        </dd>
+                    <div class="row g-3">
+                        <!-- Detalles -->
+                        <div class="col-md-7">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Equipo</dt>
+                                <dd class="col-sm-8">
+                                    @(!string.IsNullOrEmpty(Model.EquipmentName) ? Model.EquipmentName : "—")
+                                </dd>
 
-                        <dt class="col-sm-4">Tipo</dt>
-                        <dd class="col-sm-8">@tipo</dd>
+                                <dt class="col-sm-4">Orden de origen</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.OrderId.HasValue)
+                                    {
+                                        @("#" + Model.OrderId.Value)
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("—")
+                                    }
+                                </dd>
 
-                        <dt class="col-sm-4">Comentarios</dt>
-                        <dd class="col-sm-8">
-                            @(!string.IsNullOrWhiteSpace(Model.Comments) ? Model.Comments : "—")
-                        </dd>
+                                <dt class="col-sm-4">Cliente responsable</dt>
+                                <dd class="col-sm-8">
+                                    @(!string.IsNullOrEmpty(Model.ClientName)
+                                        ? Model.ClientName
+                                        : "—")
+                                </dd>
 
-                        <dt class="col-sm-4">Costo</dt>
-                        <dd class="col-sm-8">
-                            @(Model.Cost.HasValue ? "$" + Model.Cost.Value.ToString("N2") : "—")
-                        </dd>
+                                <dt class="col-sm-4">Tipo</dt>
+                                <dd class="col-sm-8">@tipo</dd>
 
-                        <dt class="col-sm-4">Estado</dt>
-                        <dd class="col-sm-8">
-                            <span class="@estadoClase">@estadoTexto</span>
-                        </dd>
+                                <dt class="col-sm-4">Comentarios</dt>
+                                <dd class="col-sm-8">
+                                    @(!string.IsNullOrWhiteSpace(Model.Comments) ? Model.Comments : "—")
+                                </dd>
 
-                        <dt class="col-sm-4">Técnico responsable</dt>
-                        <dd class="col-sm-8">
-                            @if (!string.IsNullOrEmpty(Model.TechnicianName))
+                                <dt class="col-sm-4">Costo</dt>
+                                <dd class="col-sm-8">
+                                    @(Model.Cost.HasValue ? "$" + Model.Cost.Value.ToString("N2") : "—")
+                                </dd>
+
+                                <dt class="col-sm-4">Estado</dt>
+                                <dd class="col-sm-8">
+                                    <span class="@estadoClase">@estadoTexto</span>
+                                </dd>
+
+                                <dt class="col-sm-4">Técnico responsable</dt>
+                                <dd class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.TechnicianName))
+                                    {
+                                        @Model.TechnicianName
+                                    }
+                                    else if (!string.IsNullOrEmpty(Model.FinalizadoPor))
+                                    {
+                                        @Model.FinalizadoPor
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("—")
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <!-- Evidencia -->
+                        <div class="col-md-5">
+                            <h6 class="fw-semibold mb-2">Evidencia</h6>
+
+                            @if (!string.IsNullOrEmpty(Model.EvidencePath))
                             {
-                                @Model.TechnicianName
-                            }
-                            else if (!string.IsNullOrEmpty(Model.FinalizadoPor))
-                            {
-                                @Model.FinalizadoPor
+                                var extension = System.IO.Path.GetExtension(Model.EvidencePath)?.ToLower();
+
+                                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
+                                {
+                                    <div class="border rounded p-2 bg-light text-center">
+                                        <img src="@Url.Content(Model.EvidencePath)"
+                                             alt="Evidencia"
+                                             class="img-fluid rounded shadow-sm"
+                                             style="max-height: 260px; object-fit: contain;" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Content(Model.EvidencePath)"
+                                       target="_blank"
+                                       class="btn btn-outline-primary btn-sm">
+                                        Ver archivo de evidencia
+                                    </a>
+                                }
                             }
                             else
                             {
-                                @Html.Raw("—")
+                                <p class="text-muted mb-0">
+                                    No hay evidencia asociada a este mantenimiento.
+                                </p>
                             }
-                        </dd>
-                    </dl>
-                </div>
-
-                <!-- Evidencia -->
-                <div class="col-md-5">
-                    <h6 class="fw-semibold mb-2">Evidencia</h6>
-
-                    @if (!string.IsNullOrEmpty(Model.EvidencePath))
-                    {
-                        var extension = System.IO.Path.GetExtension(Model.EvidencePath)?.ToLower();
-
-                        if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
-                        {
-                            <div class="border rounded p-2 bg-light">
-                                <img src="@Url.Content(Model.EvidencePath)"
-                                     alt="Evidencia"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-height: 260px;" />
-                            </div>
-                        }
-                        else
-                        {
-                            <a href="@Url.Content(Model.EvidencePath)"
-                               target="_blank"
-                               class="btn btn-outline-primary btn-sm">
-                                Ver archivo de evidencia
-                            </a>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted mb-0">No hay evidencia asociada a este mantenimiento.</p>
-                    }
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Botones abajo -->
+            <div class="text-center mt-4">
+                @Html.ActionLink(
+                    "Volver a mantenimientos",
+                    "Mantenimientos",
+                    "ReturnDetails",
+                    null,
+                    new { @class = "btn btn-dark fw-semibold text-white me-2" }
+                )
+
+                @if (Model.MaintenanceStatus == 0)
+                {
+                    @Html.ActionLink(
+                        "Editar",
+                        "EditarMantenimiento",
+                        "ReturnDetails",
+                        new { id = Model.MaintenanceId },
+                        new { @class = "btn btn-warning fw-semibold" }
+                    )
+                }
+            </div>
+
         </div>
     </div>
 </div>
