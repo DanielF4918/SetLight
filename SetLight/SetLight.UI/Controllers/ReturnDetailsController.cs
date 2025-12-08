@@ -778,7 +778,12 @@ namespace SetLight.UI.Controllers
         }
 
 
-        public ActionResult Faltantes()
+        public ActionResult Faltantes(
+            string cliente,
+            string equipo,
+            int? cantidadMin,
+            int? estado
+        )
         {
             using (var contexto = new Contexto())
             {
@@ -801,9 +806,10 @@ namespace SetLight.UI.Controllers
                                           m.MaintenanceStatus,
                                           m.Cost,
                                           m.StartDate,
-                                          m.EndDate
+                                          m.EndDate,
+                                          ImageUrl = eq.ImageUrl
                                       })
-                                      .ToList(); // 👈 de aquí en adelante estamos en memoria
+                                      .ToList(); // de aquí en adelante estamos en memoria
 
                 // 2) Cantidades de faltantes por Orden + Equipo (solo ReturnDetails con IsReturned = false)
                 var cantidades = contexto.ReturnDetails
@@ -825,17 +831,15 @@ namespace SetLight.UI.Controllers
                     );
 
                 // 4) Armamos el DTO final
-                // 4) Armamos el DTO final
                 var faltantes = mantenimientos
                     .Select(m =>
                     {
                         int cantidad = 0;
 
-                        // Solo buscamos en el diccionario si OrderId tiene valor
                         if (m.OrderId.HasValue)
                         {
                             mapaCantidades.TryGetValue(
-                                Tuple.Create(m.OrderId.Value, m.EquipmentId), // 👈 aquí usamos Value (int)
+                                Tuple.Create(m.OrderId.Value, m.EquipmentId),
                                 out cantidad);
                         }
 
@@ -846,11 +850,12 @@ namespace SetLight.UI.Controllers
                             EquipmentId = m.EquipmentId,
                             EquipmentName = m.EquipmentName,
                             ClientName = m.Cliente,
-                            Cantidad = cantidad,          // cantidad REAL de esa orden/equipo
+                            Cantidad = cantidad,
                             MaintenanceStatus = m.MaintenanceStatus,
                             Cost = m.Cost,
                             StartDate = m.StartDate,
-                            EndDate = m.EndDate
+                            EndDate = m.EndDate,
+                            ImageUrl = m.ImageUrl
                         };
                     })
                     .Where(f => f.Cantidad > 0)
@@ -858,11 +863,54 @@ namespace SetLight.UI.Controllers
                     .ThenBy(f => f.EquipmentName)
                     .ToList();
 
+                // 🔍 Filtros en memoria
+                if (!string.IsNullOrWhiteSpace(cliente))
+                {
+                    var term = cliente.Trim().ToLower();
+                    faltantes = faltantes
+                        .Where(f => (f.ClientName ?? "").ToLower().Contains(term))
+                        .ToList();
+                }
+
+                if (!string.IsNullOrWhiteSpace(equipo))
+                {
+                    var term = equipo.Trim().ToLower();
+                    faltantes = faltantes
+                        .Where(f => (f.EquipmentName ?? "").ToLower().Contains(term))
+                        .ToList();
+                }
+
+                if (cantidadMin.HasValue)
+                {
+                    faltantes = faltantes
+                        .Where(f => f.Cantidad >= cantidadMin.Value)
+                        .ToList();
+                }
+
+                if (estado.HasValue)
+                {
+                    faltantes = faltantes
+                        .Where(f => f.MaintenanceStatus == estado.Value)
+                        .ToList();
+                }
+
+                // 🎯 ViewBags para mantener los filtros en la vista
+                ViewBag.FiltroCliente = cliente;
+                ViewBag.FiltroEquipo = equipo;
+                ViewBag.FiltroCantidadMin = cantidadMin;
+                ViewBag.FiltroEstado = estado;
+
+                // 🟢 Combo de estados (esto es lo que te faltaba y daba la excepción)
+                ViewBag.Estados = new[]
+                {
+            new SelectListItem { Text = "Todos",      Value = "",  Selected = !estado.HasValue },
+            new SelectListItem { Text = "Pendiente",  Value = "0", Selected = estado == 0 },
+            new SelectListItem { Text = "Finalizado", Value = "1", Selected = estado == 1 }
+        };
 
                 return View("Faltantes", faltantes);
             }
         }
-
 
 
 
