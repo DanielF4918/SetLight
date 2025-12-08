@@ -58,7 +58,24 @@ namespace SetLight.UI.Controllers
 
                 // Mantenimientos por equipo - SOLO pendientes (status 0)
                 var mantenimientoPorEquipo = contexto.Maintenance
-                    .Where(m => m.MaintenanceStatus == 0) // 0 = Pendiente
+                    .Where(m =>
+    m.MaintenanceStatus == 0 &&
+    m.MaintenanceType != 4)
+                    // 0 = Pendiente
+                    .GroupBy(m => m.EquipmentId)
+                    .Select(g => new
+                    {
+                        EquipmentId = g.Key,
+                        Cant = g.Count()
+                    })
+                    .ToDictionary(x => x.EquipmentId, x => x.Cant);
+                // Faltantes: mantenimiento tipo 4 (equipo no devuelto / perdido) y estado pendiente
+                var faltantesPorEquipo = contexto.Maintenance
+                    .Where(m =>
+    m.MaintenanceType == 4 &&
+    m.MaintenanceStatus == 0 &&
+    m.EquipmentId > 0)
+
                     .GroupBy(m => m.EquipmentId)
                     .Select(g => new
                     {
@@ -79,7 +96,20 @@ namespace SetLight.UI.Controllers
 
                     // Stock en BD ya refleja lo disponible, no restamos alquilados otra vez
                     e.Disponibles = e.Stock < 0 ? 0 : e.Stock;
+
+                    // Faltantes
+                    e.Faltantes = faltantesPorEquipo.TryGetValue(e.EquipmentId, out var cantFalt)
+                        ? cantFalt
+                        : 0;
+
+                    // Mostrar AGOTADO solo si stock = 0 y el equipo está activo
+                    if (e.Disponibles == 0 && e.Status == 1)
+                    {
+                        e.Status = 2; // Agotado (solo visual, no BD)
+                    }
+
                 }
+
 
                 // ----- Combo de categorías (Tipo) -----
                 var categoriasBD = contexto.EqCategory

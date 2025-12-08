@@ -5,6 +5,8 @@ namespace SetLight.Abstracciones.ModelosParaUI
 {
     public class EquipmentDto
     {
+        public int Faltantes { get; set; }
+
         public int EquipmentId { get; set; }
 
         [Display(Name = "Nombre del Equipo")]
