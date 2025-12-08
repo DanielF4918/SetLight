@@ -2,50 +2,50 @@
 @using PagedList.Mvc
 @model IPagedList<SetLight.Abstracciones.ModelosParaUI.TrazabilidadDto>
 
-
-
 @{
     ViewBag.Title = "Trazabilidad del Equipo";
 }
 
-
-
-<div class="container mt-4 mb-5 bg-white p-4 shadow rounded">
-    <h2 class="mb-4 text-dark fw-bold">
+<div class="container mt-4 mb-5 bg-white p-4 shadow rounded border-dark" style="max-width: 1000px;">
+    <h2 class="mb-4 text-dark fw-bold text-center">
         Trazabilidad del Equipo <span class="text-secondary">#@ViewBag.EquipoId</span>
     </h2>
+
+    <!-- Filtros -->
     <form method="get" class="row mb-4">
         <input type="hidden" name="equipoId" value="@ViewBag.EquipoId" />
 
         <div class="col-md-3">
-            <label>Desde</label>
-            <input type="date" name="desde" class="form-control" value="@ViewBag.FiltroDesde" />
+            <label class="form-label fw-semibold text-dark">Desde</label>
+            <input type="date" name="desde" class="form-control border-dark" value="@ViewBag.FiltroDesde" />
         </div>
 
         <div class="col-md-3">
-            <label>Hasta</label>
-            <input type="date" name="hasta" class="form-control" value="@ViewBag.FiltroHasta" />
+            <label class="form-label fw-semibold text-dark">Hasta</label>
+            <input type="date" name="hasta" class="form-control border-dark" value="@ViewBag.FiltroHasta" />
         </div>
 
-        <div class="col-md-3 d-flex align-items-end gap-2">
-            <button class="btn btn-dark">Filtrar</button>
-        
+        <div class="col-md-3 d-flex align-items-end gap-2 mt-3 mt-md-0">
+            <button class="btn btn-dark fw-semibold">Filtrar</button>
+
             <a href="@Url.Action("VerTrazabilidad", new { equipoId = ViewBag.EquipoId, page = 1 })"
-               class="btn btn-outline-secondary">
+               class="btn btn-outline-secondary fw-semibold">
                 Limpiar
             </a>
         </div>
     </form>
 
+    <!-- Botón PDF -->
     <div class="mb-3 text-end">
         <a href="@Url.Action("DescargarTrazabilidad", "Trazabilidad", new { equipoId = ViewBag.EquipoId })"
-           class="btn btn-success">
+           class="btn btn-success fw-semibold">
             Descargar PDF de Trazabilidad
         </a>
     </div>
 
+    <!-- Tabla -->
     <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle text-center">
+        <table class="table table-bordered table-striped align-middle text-center border-dark">
             <thead class="table-dark text-white">
                 <tr>
                     <th>Tipo de Evento</th>
@@ -61,73 +61,86 @@
             <tbody>
                 @foreach (var item in Model)
                 {
+                    var badgeClass = "badge bg-secondary";
+
+                    if (item.TipoEvento == "Préstamo")
+                    {
+                        badgeClass = "badge bg-info text-dark";
+                    }
+                    else if (item.TipoEvento == "Mantenimiento")
+                    {
+                        badgeClass = "badge bg-warning text-dark";
+                    }
+
                     <tr>
-                        <td>@item.TipoEvento</td>
+                        <td>
+                            <span class="@badgeClass">@item.TipoEvento</span>
+                        </td>
 
                         <td>@(item.OrderId.HasValue ? item.OrderId.Value.ToString() : "-")</td>
                         <td>@(item.MaintenanceId.HasValue ? item.MaintenanceId.Value.ToString() : "-")</td>
-
                         <td>
                             @(item.FechaInicio.HasValue
-                                ? item.FechaInicio.Value.ToString("dd/MM/yyyy")
-                                : "-")
+                ? item.FechaInicio.Value.ToString("dd/MM/yyyy")
+                : "-")
                         </td>
-
                         <td>
                             @(
-                                item.FechaFin.HasValue
-                                    ? item.FechaFin.Value.ToString("dd/MM/yyyy")
-                                    : item.FechaMantenimiento.HasValue
-                                        ? item.FechaMantenimiento.Value.ToString("dd/MM/yyyy")
-                                        : "-"
-                            )
+                item.FechaFin.HasValue
+                    ? item.FechaFin.Value.ToString("dd/MM/yyyy")
+                    : item.FechaMantenimiento.HasValue
+                        ? item.FechaMantenimiento.Value.ToString("dd/MM/yyyy")
+                        : "-"
+            )
                         </td>
-
                         <td>
                             @(item.TipoEvento == "Préstamo"
-                                ? (item.ClienteNombre ?? "-")
-                                : "-")
+                ? (item.ClienteNombre ?? "-")
+                : "-")
                         </td>
-
                         <td>
                             @(
-                                item.TipoEvento == "Préstamo"
-                                    ? (item.EncargadoPrestamo ?? "-")
-                                    : item.TipoEvento == "Mantenimiento"
-                                        ? (item.Tecnico ?? "-")
-                                        : "-"
-                            )
+                item.TipoEvento == "Préstamo"
+                    ? (item.EncargadoPrestamo ?? "-")
+                    : item.TipoEvento == "Mantenimiento"
+                        ? (item.Tecnico ?? "-")
+                        : "-"
+            )
                         </td>
-
                         <td>
                             @(
-                                item.TipoEvento == "Mantenimiento"
-                                    ? (
-                                        item.TipoMantenimiento == 1 ? "Revisión por daño"
-                                        : item.TipoMantenimiento == 2 ? "Reparación mayor"
-                                        : item.TipoMantenimiento == 3 ? "Mantenimiento preventivo"
-                                        : "—"
-                                      )
-                                    : "-"
-                            )
+                item.TipoEvento == "Mantenimiento"
+                    ? (
+                        item.TipoMantenimiento == 1 ? "Revisión por daño"
+                        : item.TipoMantenimiento == 2 ? "Reparación mayor"
+                        : item.TipoMantenimiento == 3 ? "Mantenimiento preventivo"
+                        : "—"
+                      )
+                    : "-"
+            )
                         </td>
                     </tr>
                 }
+
             </tbody>
         </table>
+
+        <!-- Paginación -->
         <div class="pagination-container text-center mt-4">
             @Html.PagedListPager(
                 Model,
-                page => Url.Action("VerTrazabilidad",
+                page => Url.Action(
+                    "VerTrazabilidad",
                     new
-                        {
-                            equipoId = ViewBag.EquipoId,
+                    {
+                        equipoId = ViewBag.EquipoId,
                         page,
                         desde = ViewBag.FiltroDesde,
                         hasta = ViewBag.FiltroHasta
-                    }),
+                    }
+                ),
                 new PagedListRenderOptions
-                    {
+                {
                     DisplayLinkToFirstPage = PagedListDisplayMode.Always,
                     DisplayLinkToLastPage = PagedListDisplayMode.Always,
                     DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
@@ -167,11 +180,10 @@
                         color: #999;
                     }
         </style>
-
     </div>
 
-    <div class="mt-4">
-        <a href="@Url.Action("listarEquipment", "Equipment")" class="btn btn-secondary">
+    <div class="mt-4 text-center">
+        <a href="@Url.Action("ListarEquipment", "Equipment")" class="btn btn-secondary fw-semibold">
             Volver al Inventario
         </a>
     </div>

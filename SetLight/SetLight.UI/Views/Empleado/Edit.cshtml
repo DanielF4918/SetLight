@@ -4,136 +4,162 @@
     ViewBag.Title = "Editar Empleado";
 }
 
-<h2 class="mb-4">Editar empleado</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow p-4 border-dark rounded-3">
+                <h2 class="text-center fw-bold text-black mb-4">Editar empleado</h2>
 
-@using (Html.BeginForm("Edit", "Empleado", FormMethod.Post, new { enctype = "multipart/form-data", id = "formEditarEmpleado" }))
-{
-    @Html.AntiForgeryToken()
+                @using (Html.BeginForm("Edit", "Empleado", FormMethod.Post, new { enctype = "multipart/form-data", id = "formEditarEmpleado" }))
+                {
+                    @Html.AntiForgeryToken()
 
-    @Html.HiddenFor(m => m.IdEmpleado)
-    @Html.HiddenFor(m => m.IdEmpleadoGuid)
+                    @Html.HiddenFor(m => m.IdEmpleado)
+                    @Html.HiddenFor(m => m.IdEmpleadoGuid)
 
-    <!-- 🆕 Hidden para la contraseña del admin (se llenará desde el modal vía JS) -->
-    @Html.HiddenFor(m => m.AdminPassword, new { id = "AdminPassword" })
+                    <!-- Hidden para la contraseña del admin (se llena desde el modal vía JS) -->
+                    @Html.HiddenFor(m => m.AdminPassword, new { id = "AdminPassword" })
 
-    <!-- 🆕 Campo de Foto de Perfil -->
-    <div class="mb-4 text-center">
-        <label class="form-label fw-bold">Foto de perfil actual</label>
-        <div class="mb-3">
-            <img id="preview-img"
-                 src="@(!string.IsNullOrWhiteSpace(Model.FotoPerfil) ? Url.Content(Model.FotoPerfil) : Url.Content("~/Content/img/placeholder-user.png"))"
-                 alt="Foto actual"
-                 class="img-thumbnail rounded-circle shadow-sm"
-                 style="width: 120px; height: 120px; object-fit: cover;" />
+                    <!-- Foto de Perfil -->
+                    <div class="mb-4 text-center">
+                        <label class="form-label fw-bold d-block">Foto de perfil actual</label>
+
+                        <div class="mb-3">
+                            <img id="preview-img"
+                                 src="@(!string.IsNullOrWhiteSpace(Model.FotoPerfil) ? Url.Content(Model.FotoPerfil) : Url.Content("~/Content/img/placeholder-user.png"))"
+                                 alt="Foto actual"
+                                 class="img-thumbnail rounded-circle shadow-sm"
+                                 style="width: 120px; height: 120px; object-fit: cover;" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nuevaFoto" class="form-label text-black">Cambiar foto</label>
+                            <input type="file"
+                                   name="nuevaFoto"
+                                   id="nuevaFoto"
+                                   class="form-control border-dark"
+                                   accept="image/*"
+                                   onchange="previewFoto(this)" />
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Cédula (se muestra pero también está el hidden) -->
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Cedula, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control border-dark" })
+                        @Html.HiddenFor(m => m.Cedula)
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Nombre, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Apellido, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.Apellido, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.Apellido, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.TelefonoCelular, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.TelefonoCelular, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.TelefonoCelular, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.CorreoElectronico, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.CorreoElectronico, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.CorreoElectronico, "", new { @class = "text-danger" })
+                    </div>
+
+                    <!-- Dropdown de Roles -->
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.RolId, "Rol", new { @class = "form-label text-black" })
+                        @Html.DropDownListFor(
+                            m => m.RolId,
+                            (IEnumerable<SelectListItem>)ViewBag.Roles,
+                            "Seleccione un rol",
+                            new { @class = "form-select border-dark" }
+                        )
+                        @Html.ValidationMessageFor(m => m.RolId, "", new { @class = "text-danger" })
+                    </div>
+
+                    <!-- Dropdown de Estado -->
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Estado, "Estado", new { @class = "form-label text-black" })
+                        @Html.DropDownListFor(
+                            m => m.Estado,
+                            (IEnumerable<SelectListItem>)ViewBag.Estados,
+                            new { @class = "form-select border-dark" }
+                        )
+                        @Html.ValidationMessageFor(m => m.Estado, "", new { @class = "text-danger" })
+                    </div>
+
+                    <h5 class="mt-4 mb-3 fw-bold text-black">Contacto de Emergencia</h5>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.ContactoEmergenciaNombre, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.ContactoEmergenciaNombre, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.ContactoEmergenciaNombre, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.ContactoEmergenciaTelefono, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.ContactoEmergenciaTelefono, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.ContactoEmergenciaTelefono, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.ContactoEmergenciaParentesco, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.ContactoEmergenciaParentesco, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.ContactoEmergenciaParentesco, "", new { @class = "text-danger" })
+                    </div>
+
+                    <h5 class="mt-4 mb-3 fw-bold text-black">Información Médica</h5>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.TipoSangre, new { @class = "form-label text-black" })
+                        @Html.TextBoxFor(m => m.TipoSangre, new { @class = "form-control border-dark" })
+                        @Html.ValidationMessageFor(m => m.TipoSangre, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Alergias, new { @class = "form-label text-black" })
+                        @Html.TextAreaFor(m => m.Alergias, new { @class = "form-control border-dark", rows = 3 })
+                        @Html.ValidationMessageFor(m => m.Alergias, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.InfoMedica, new { @class = "form-label text-black" })
+                        @Html.TextAreaFor(m => m.InfoMedica, new { @class = "form-control border-dark", rows = 3 })
+                        @Html.ValidationMessageFor(m => m.InfoMedica, "", new { @class = "text-danger" })
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="text-center mt-4">
+                        <!-- Este botón abre el modal de confirmación -->
+                        <button type="button" id="btnGuardarEmpleado" class="btn btn-success fw-semibold me-2 text-white">
+                            Guardar
+                        </button>
+
+                        @Html.ActionLink(
+                            "Volver",
+                            "ListarEmpleado",
+                            null,
+                            new { @class = "btn btn-dark fw-semibold text-white" }
+                        )
+                    </div>
+                }
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label for="nuevaFoto" class="form-label">Cambiar foto</label>
-            <input type="file" name="nuevaFoto" id="nuevaFoto" class="form-control" accept="image/*" onchange="previewFoto(this)" />
-        </div>
     </div>
+</div>
 
-    <hr />
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.Cedula)
-        @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control" })
-        @Html.HiddenFor(m => m.Cedula)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.Nombre)
-        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.Nombre)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.Apellido)
-        @Html.TextBoxFor(m => m.Apellido, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.Apellido)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.TelefonoCelular)
-        @Html.TextBoxFor(m => m.TelefonoCelular, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.TelefonoCelular)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.CorreoElectronico)
-        @Html.TextBoxFor(m => m.CorreoElectronico, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.CorreoElectronico)
-    </div>
-
-    <!-- Dropdown de Roles -->
-    <div class="mb-3">
-        @Html.LabelFor(m => m.RolId, "Rol")
-        @Html.DropDownListFor(
-            m => m.RolId,
-            (IEnumerable<SelectListItem>)ViewBag.Roles,
-            "Seleccione un rol",
-            new { @class = "form-control" }
-        )
-        @Html.ValidationMessageFor(m => m.RolId)
-    </div>
-
-    <!-- Dropdown de Estado -->
-    <div class="mb-3">
-        @Html.LabelFor(m => m.Estado, "Estado")
-        @Html.DropDownListFor(
-            m => m.Estado,
-            (IEnumerable<SelectListItem>)ViewBag.Estados,
-            new { @class = "form-control" }
-        )
-        @Html.ValidationMessageFor(m => m.Estado)
-    </div>
-
-    <h5 class="mt-4">Contacto de Emergencia</h5>
-    <div class="mb-3">
-        @Html.LabelFor(m => m.ContactoEmergenciaNombre)
-        @Html.TextBoxFor(m => m.ContactoEmergenciaNombre, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.ContactoEmergenciaNombre)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.ContactoEmergenciaTelefono)
-        @Html.TextBoxFor(m => m.ContactoEmergenciaTelefono, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.ContactoEmergenciaTelefono)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.ContactoEmergenciaParentesco)
-        @Html.TextBoxFor(m => m.ContactoEmergenciaParentesco, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.ContactoEmergenciaParentesco)
-    </div>
-
-    <h5 class="mt-4">Información Médica</h5>
-    <div class="mb-3">
-        @Html.LabelFor(m => m.TipoSangre)
-        @Html.TextBoxFor(m => m.TipoSangre, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.TipoSangre)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.Alergias)
-        @Html.TextAreaFor(m => m.Alergias, new { @class = "form-control", rows = 3 })
-        @Html.ValidationMessageFor(m => m.Alergias)
-    </div>
-
-    <div class="mb-3">
-        @Html.LabelFor(m => m.InfoMedica)
-        @Html.TextAreaFor(m => m.InfoMedica, new { @class = "form-control", rows = 3 })
-        @Html.ValidationMessageFor(m => m.InfoMedica)
-    </div>
-
-    <div class="mt-4">
-        <!-- 🆕 Este botón ya no envía el form directo, solo abre el modal -->
-        <button type="button" id="btnGuardarEmpleado" class="btn btn-success">Guardar</button>
-        @Html.ActionLink("Volver", "ListarEmpleado", null, new { @class = "btn btn-secondary ms-2" })
-    </div>
-}
-
-<!-- 🆕 Modal para confirmar contraseña de administrador -->
+<!-- Modal para confirmar contraseña de administrador -->
 <div class="modal fade" id="modalConfirmarPassword" tabindex="-1" aria-labelledby="modalConfirmarPasswordLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -149,7 +175,7 @@
 
                 <div class="mb-3">
                     <label for="txtAdminPasswordModal" class="form-label">Contraseña</label>
-                    <input type="password" id="txtAdminPasswordModal" class="form-control" />
+                    <input type="password" id="txtAdminPasswordModal" class="form-control border-dark" />
                     <small class="text-muted">
                         Esta es la contraseña de su propia cuenta, no la del empleado.
                     </small>
@@ -192,4 +218,3 @@
 
     <script src="~/Scripts/Modals/Empleado/EditEmpleado.js"></script>
 }
-

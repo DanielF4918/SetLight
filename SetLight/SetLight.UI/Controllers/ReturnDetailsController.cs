@@ -60,14 +60,24 @@ namespace SetLight.UI.Controllers
         {
             using (var contexto = new Contexto())
             {
+                // 1. Obtener la orden
+                var orden = contexto.RentalOrders
+                    .FirstOrDefault(o => o.OrderId == orderId);
+
+                if (orden == null)
+                    return HttpNotFound("No se encontró la orden especificada.");
+
+                // 2. Obtener el cliente asociado
+                var cliente = contexto.Clients
+                    .FirstOrDefault(c => c.ClientId == orden.ClientId);
+
+                // 3. Cargar devoluciones de la orden
                 var devoluciones = contexto.ReturnDetails
                     .Include("Equipment")
                     .Where(d => d.OrderId == orderId)
                     .ToList();
 
-                if (!devoluciones.Any())
-                    return HttpNotFound("No hay devoluciones registradas para esta orden.");
-
+                // 4. Mapear a DTO (aunque no haya devoluciones, dejamos la lista vacía
                 var viewModel = devoluciones.Select(d => new ReturnDetailsDto
                 {
                     EquipmentName = d.Equipment.EquipmentName,
@@ -77,10 +87,25 @@ namespace SetLight.UI.Controllers
                     RequiresMaintenance = d.RequiresMaintenance
                 }).ToList();
 
-                ViewBag.OrderId = orderId;
+                // 5. Datos para el resumen de la orden en la vista
+                ViewBag.OrderId = orden.OrderId;
+                ViewBag.ClientName = cliente != null
+                    ? (cliente.FirstName + " " + cliente.LastName)
+                    : "Sin cliente";
+
+                ViewBag.StartDate = orden.StartDate;
+                ViewBag.EndDate = orden.EndDate;
+
+                ViewBag.StatusTexto = orden.StatusOrder == 1
+                    ? "Activa"
+                    : orden.StatusOrder == 2
+                        ? "Completada"
+                        : "Desconocido";
+
                 return View(viewModel);
             }
         }
+
 
         // GET: ReturnDetails/Details/5
         public ActionResult Details(int id)
@@ -258,10 +283,14 @@ namespace SetLight.UI.Controllers
                                 MaintenanceType = item.MaintenanceType.Value, // ya validado
                                 MaintenanceStatus = 0, // 0 = Pendiente
                                 EquipmentId = item.EquipmentId,
+
+                                // 👇 AQUÍ ligamos el mantenimiento con la orden que originó la devolución
+                                OrderId = model.OrderId,
+
                                 Comments = item.Observaciones ?? "Pendiente de revisión",
                                 Cost = null,
                                 EvidencePath = null,
-                                IdEmpleado = empleado?.IdEmpleado   // 👈 técnico responsable
+                                IdEmpleado = empleado?.IdEmpleado   // técnico responsable
                             };
 
                             contexto.Maintenance.Add(mantenimiento);
@@ -574,9 +603,22 @@ namespace SetLight.UI.Controllers
                     from m in contexto.Maintenance
                     join eq in contexto.Equipment
                         on m.EquipmentId equals eq.EquipmentId
+
+                    // Join opcional con Empleado (técnico)
                     join emp in contexto.Empleado
                         on m.IdEmpleado equals emp.IdEmpleado into empJoin
                     from emp in empJoin.DefaultIfEmpty()
+
+                        // Join opcional con Orden
+                    join ord in contexto.RentalOrders
+                        on m.OrderId equals ord.OrderId into ordJoin
+                    from ord in ordJoin.DefaultIfEmpty()
+
+                        // Join opcional con Cliente
+                    join cli in contexto.Clients
+                        on ord.ClientId equals cli.ClientId into cliJoin
+                    from cli in cliJoin.DefaultIfEmpty()
+
                     where m.MaintenanceId == id
                     select new MaintenanceDto
                     {
@@ -594,7 +636,13 @@ namespace SetLight.UI.Controllers
                         TechnicianName = emp != null
                             ? emp.Nombre + " " + emp.Apellido
                             : null,
-                        FinalizadoPor = m.FinalizadoPor
+                        FinalizadoPor = m.FinalizadoPor,
+
+                        // 🔹 Nuevos campos para los detalles
+                        OrderId = m.OrderId,
+                        ClientName = cli != null
+                            ? ((cli.FirstName ?? "") + " " + (cli.LastName ?? "")).Trim()
+                            : null
                     }
                 ).FirstOrDefault();
 
@@ -604,6 +652,7 @@ namespace SetLight.UI.Controllers
                 return View(mantenimiento);
             }
         }
+
 
         // GET: ReturnDetails/EditarMantenimiento/5
         public ActionResult EditarMantenimiento(int id)

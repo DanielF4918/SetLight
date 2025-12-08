@@ -6,68 +6,78 @@
     var foto = string.IsNullOrWhiteSpace(Model.FotoPerfil) ? PLACEHOLDER : Url.Content(Model.FotoPerfil);
 }
 
-<main aria-labelledby="title" class="container mt-4 mb-5">
-    <h2 id="title" class="mb-3">@ViewBag.Title</h2>
+<main aria-labelledby="title" class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-    @if (TempData["StatusMessage"] != null)
-    {
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-            @Html.Raw(TempData["StatusMessage"])
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            <h2 id="title" class="mb-4 text-center text-dark fw-bold">@ViewBag.Title</h2>
+
+            @if (TempData["StatusMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @Html.Raw(TempData["StatusMessage"])
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ViewBag.StatusMessage as string))
+            {
+                <p class="text-success text-center fw-semibold">@ViewBag.StatusMessage</p>
+            }
+
+            <div class="text-center mb-4">
+                <img src="@foto"
+                     alt="Foto de @Model.Nombre"
+                     class="img-thumbnail rounded-circle shadow-sm"
+                     style="width: 140px; height: 140px; object-fit: cover;" />
+                <h4 class="mt-3 fw-bold">@Model.Nombre @Model.Apellido</h4>
+                <p class="text-muted mb-0">@Model.CorreoElectronico</p>
+            </div>
+
+            <div class="card shadow p-4 border-dark bg-white rounded-3">
+                <h5 class="mb-3 text-dark fw-semibold">Información personal</h5>
+                <hr />
+
+                <dl class="row">
+                    <dt class="col-sm-4">Teléfono:</dt>
+                    <dd class="col-sm-8">@Model.TelefonoCelular</dd>
+
+                    <dt class="col-sm-4">Cédula:</dt>
+                    <dd class="col-sm-8">@Model.Cedula</dd>
+
+                    <dt class="col-sm-4">Contacto de emergencia:</dt>
+                    <dd class="col-sm-8">
+                        @Model.ContactoEmergenciaNombre (@Model.ContactoEmergenciaParentesco) - @Model.ContactoEmergenciaTelefono
+                    </dd>
+
+                    <dt class="col-sm-4">Tipo de sangre:</dt>
+                    <dd class="col-sm-8">@Model.TipoSangre</dd>
+
+                    <dt class="col-sm-4">Alergias:</dt>
+                    <dd class="col-sm-8">@Model.Alergias</dd>
+
+                    <dt class="col-sm-4">Información médica:</dt>
+                    <dd class="col-sm-8">@Model.InfoMedica</dd>
+                </dl>
+
+                <p class="text-muted mt-3 mb-0">
+                    Si alguno de estos datos es incorrecto, comuníquese con Administrador
+                </p>
+            </div>
+
+            <div class="mt-4">
+                <h5 class="text-dark fw-semibold">Configuración de la cuenta</h5>
+                <hr />
+                <div class="mt-3 text-center">
+                    <button class="btn btn-warning fw-semibold"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalCambiarContrasena">
+                        Cambiar contraseña
+                    </button>
+                </div>
+            </div>
+
         </div>
-    }
-
-
-    <p class="text-success">@ViewBag.StatusMessage</p>
-
-    <div class="text-center mb-4">
-        <img src="@foto"
-             alt="Foto de @Model.Nombre"
-             class="img-thumbnail rounded-circle shadow-sm"
-             style="width: 140px; height: 140px; object-fit: cover;" />
-        <h4 class="mt-3">@Model.Nombre @Model.Apellido</h4>
-        <p class="text-muted mb-0">@Model.CorreoElectronico</p>
-    </div>
-
-    <div class="card shadow-sm p-4 bg-light">
-        <h5 class="mb-3">Información personal</h5>
-        <hr />
-
-        <dl class="row">
-            <dt class="col-sm-4">Teléfono:</dt>
-            <dd class="col-sm-8">@Model.TelefonoCelular</dd>
-
-            <dt class="col-sm-4">Cédula:</dt>
-            <dd class="col-sm-8">@Model.Cedula</dd>
-
-            <dt class="col-sm-4">Contacto de emergencia:</dt>
-            <dd class="col-sm-8">@Model.ContactoEmergenciaNombre (@Model.ContactoEmergenciaParentesco) - @Model.ContactoEmergenciaTelefono</dd>
-
-            <dt class="col-sm-4">Tipo de sangre:</dt>
-            <dd class="col-sm-8">@Model.TipoSangre</dd>
-
-            <dt class="col-sm-4">Alergias:</dt>
-            <dd class="col-sm-8">@Model.Alergias</dd>
-
-            <dt class="col-sm-4">Información médica:</dt>
-            <dd class="col-sm-8">@Model.InfoMedica</dd>
-        </dl>
-
-        <p class="text-muted mt-3">
-            Si alguno de estos datos es incorrecto, comuníquese con su supervisor o con el área de Recursos Humanos.
-        </p>
-    </div>
-
-    <div class="mt-4">
-        <h5>Cambiar la configuración de la cuenta</h5>
-        <hr />
-        <div class="mt-3">
-            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarContrasena">
-                Cambiar contraseña
-            </button>
-        </div>
-
-
     </div>
 </main>
 
@@ -76,7 +86,8 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="modalCambiarContrasenaLabel">Cambiar Contraseña</h5>
+                <h5 class="modal-title" id="modalCambiarContrasenaLabel">Cambiar contraseña</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <div id="msgCambioContrasena"></div>
@@ -84,26 +95,27 @@
                 @using (Html.BeginForm("ChangePassword", "Manage", FormMethod.Post, new { id = "formCambiarContrasena" }))
                 {
                     @Html.AntiForgeryToken()
+
                     <div class="mb-3">
-                        @Html.Label("Contraseña actual", htmlAttributes: new { @class = "form-label" })
-                        <input type="password" name="OldPassword" class="form-control" required />
+                        @Html.Label("Contraseña actual", htmlAttributes: new { @class = "form-label fw-semibold" })
+                        <input type="password" name="OldPassword" class="form-control border-dark" required />
                     </div>
 
                     <div class="mb-3">
-                        @Html.Label("Nueva contraseña", htmlAttributes: new { @class = "form-label" })
-                        <input type="password" name="NewPassword" class="form-control" minlength="6" required />
+                        @Html.Label("Nueva contraseña", htmlAttributes: new { @class = "form-label fw-semibold" })
+                        <input type="password" name="NewPassword" class="form-control border-dark" minlength="6" required />
                     </div>
 
                     <div class="mb-3">
-                        @Html.Label("Confirmar nueva contraseña", htmlAttributes: new { @class = "form-label" })
-                        <input type="password" name="ConfirmPassword" class="form-control" minlength="6" required />
+                        @Html.Label("Confirmar nueva contraseña", htmlAttributes: new { @class = "form-label fw-semibold" })
+                        <input type="password" name="ConfirmPassword" class="form-control border-dark" minlength="6" required />
                     </div>
 
-                    <div class="d-flex justify-content-between mt-3">
-                        <button type="submit" class="btn btn-danger">
+                    <div class="d-flex justify-content-center mt-3 gap-2">
+                        <button type="submit" class="btn btn-success fw-semibold px-3">
                             Guardar cambios
                         </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary fw-semibold px-3" data-bs-dismiss="modal">
                             Cerrar
                         </button>
                     </div>
@@ -115,33 +127,33 @@
 
 @section Scripts {
     <script>
-    document.getElementById("formCambiarContrasena").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const form = this;
-        const msgBox = document.getElementById("msgCambioContrasena");
+        document.getElementById("formCambiarContrasena").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const form = this;
+            const msgBox = document.getElementById("msgCambioContrasena");
 
-        msgBox.innerHTML = "";
+            msgBox.innerHTML = "";
 
-        const formData = new FormData(form);
-        const response = await fetch(form.action, {
-            method: "POST",
-            body: formData
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                msgBox.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                form.reset();
+                setTimeout(() => {
+                    const modalElement = document.getElementById("modalCambiarContrasena");
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    modal.hide();
+                    location.reload();
+                }, 2000);
+            } else {
+                msgBox.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+            }
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            msgBox.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
-            form.reset();
-            setTimeout(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById("modalCambiarContrasena"));
-                modal.hide();
-                location.reload(); 
-            }, 2000);
-        } else {
-            msgBox.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
-        }
-    });
     </script>
 }
-
