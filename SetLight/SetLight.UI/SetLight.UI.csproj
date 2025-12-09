@@ -229,6 +229,7 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\Modals\Clientes\cliente-detalles.js" />
     <Content Include="Scripts\Modals\CreateOrder\AgregarCliente.js" />
     <Content Include="Scripts\Modals\CreateOrder\CreateOrder.js" />
     <Content Include="Scripts\Modals\EditOrder\EditOrder.js" />
@@ -304,6 +305,7 @@
     <Content Include="Views\ReturnDetails\Faltantes.cshtml" />
     <Content Include="Views\ReturnDetails\EditFaltante.cshtml" />
     <Content Include="Views\ReturnDetails\DetallesFaltante.cshtml" />
+    <Content Include="Views\Shared\_ClienteDetallesModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

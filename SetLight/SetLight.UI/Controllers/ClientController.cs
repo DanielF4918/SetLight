@@ -270,5 +270,22 @@ namespace SetLight.UI.Controllers
             }
         }
 
+        // GET: Client/ModalDetallesCliente/5
+        public ActionResult ModalDetallesCliente(int id)
+        {
+            // Usamos tu lógica ya existente
+            var cliente = _obtenerClPorIDLN.Obtener(id);
+            if (cliente == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Renderiza la vista parcial reutilizable
+            return PartialView("_ClienteDetallesModal", cliente);
+        }
+
+
+
+
     }
 }

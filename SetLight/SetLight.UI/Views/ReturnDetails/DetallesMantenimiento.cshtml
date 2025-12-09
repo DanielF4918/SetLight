@@ -84,7 +84,13 @@
                                 <dd class="col-sm-8">
                                     @if (Model.OrderId.HasValue)
                                     {
-                                        @("#" + Model.OrderId.Value)
+                                        @Html.ActionLink(
+                                            "#" + Model.OrderId.Value,
+                                            "DetallesDevolucion",
+                                            "ReturnDetails",
+                                            new { orderId = Model.OrderId.Value },
+                                            new { @class = "text-decoration-underline text-dark fw-semibold" }
+                                        )
                                     }
                                     else
                                     {
@@ -94,10 +100,35 @@
 
                                 <dt class="col-sm-4">Cliente responsable</dt>
                                 <dd class="col-sm-8">
-                                    @(!string.IsNullOrEmpty(Model.ClientName)
-                                        ? Model.ClientName
-                                        : "—")
+                                    @if (!string.IsNullOrEmpty(Model.ClientName))
+                                    {
+                                        // Si tenemos también ClientId, hacemos link + modal
+                                        if (!string.IsNullOrEmpty(Model.ClientId))
+                                        {
+                                            var clientIdStr = Model.ClientId;   // string
+
+                                            <a href="#"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="@("#cltModal_" + clientIdStr)">
+                                                @Model.ClientName
+                                            </a>
+
+                                            @Html.Action("ModalDetallesCliente", "Client", new { id = clientIdStr })
+                                        }
+                                        else
+                                        {
+                                            // No hay ClientId: solo mostramos el nombre (sin modal)
+                                            @Model.ClientName
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("—")
+                                    }
                                 </dd>
+
+
+
 
                                 <dt class="col-sm-4">Tipo</dt>
                                 <dd class="col-sm-8">@tipo</dd>

@@ -22,11 +22,10 @@ namespace SetLight.UI.Controllers
         // GET: /Trazabilidad/VerTrazabilidad?equipoId=1
         public ActionResult VerTrazabilidad(int equipoId)
         {
-
             int pageNumber = 1;
             int pageSize = 8;
 
-
+            // Página
             var pageRaw = Request.QueryString["page"];
             if (!string.IsNullOrWhiteSpace(pageRaw))
             {
@@ -34,7 +33,7 @@ namespace SetLight.UI.Controllers
                 if (pageNumber <= 0) pageNumber = 1;
             }
 
-
+            // Filtro DESDE
             DateTime? desde = null;
             var desdeRaw = Request.QueryString["desde"];
             if (!string.IsNullOrWhiteSpace(desdeRaw))
@@ -43,6 +42,7 @@ namespace SetLight.UI.Controllers
                     desde = tmpDesde.Date;
             }
 
+            // Filtro HASTA
             DateTime? hasta = null;
             var hastaRaw = Request.QueryString["hasta"];
             if (!string.IsNullOrWhiteSpace(hastaRaw))
@@ -51,10 +51,19 @@ namespace SetLight.UI.Controllers
                     hasta = tmpHasta.Date;
             }
 
-
+            // Traer toda la trazabilidad del equipo
             var trazabilidad = _trazabilidadLN.Ejecutar(equipoId);
 
+            // 🔹 Nombre del equipo (lo tomamos ANTES de filtrar para no perderlo)
+            var primero = trazabilidad.FirstOrDefault();
 
+            ViewBag.EquipoNombre = primero != null
+                ? (!string.IsNullOrWhiteSpace(primero.EquipmentNombre)
+                    ? primero.EquipmentNombre
+                    : "Sin nombre configurado")
+                : "Sin registros";
+
+            // Aplicar filtros de fecha
             if (desde.HasValue)
             {
                 trazabilidad = trazabilidad
@@ -73,7 +82,6 @@ namespace SetLight.UI.Controllers
                     ).ToList();
             }
 
-
             var paginado = trazabilidad.ToPagedList(pageNumber, pageSize);
 
             ViewBag.EquipoId = equipoId;
@@ -84,9 +92,48 @@ namespace SetLight.UI.Controllers
         }
 
 
+
+        // GET: /Trazabilidad/DescargarTrazabilidad?equipoId=1&desde=2025-12-01&hasta=2025-12-08
         public ActionResult DescargarTrazabilidad(int equipoId)
         {
+            // Leer filtros desde el querystring (igual que en VerTrazabilidad)
+            DateTime? desde = null;
+            var desdeRaw = Request.QueryString["desde"];
+            if (!string.IsNullOrWhiteSpace(desdeRaw))
+            {
+                if (DateTime.TryParse(desdeRaw, out DateTime tmpDesde))
+                    desde = tmpDesde.Date;
+            }
+
+            DateTime? hasta = null;
+            var hastaRaw = Request.QueryString["hasta"];
+            if (!string.IsNullOrWhiteSpace(hastaRaw))
+            {
+                if (DateTime.TryParse(hastaRaw, out DateTime tmpHasta))
+                    hasta = tmpHasta.Date;
+            }
+
             var trazabilidad = _trazabilidadLN.Ejecutar(equipoId);
+
+            // Aplicar los mismos filtros que en la vista
+            if (desde.HasValue)
+            {
+                trazabilidad = trazabilidad
+                    .Where(x =>
+                        (x.FechaInicio.HasValue && x.FechaInicio.Value.Date >= desde.Value) ||
+                        (x.FechaMantenimiento.HasValue && x.FechaMantenimiento.Value.Date >= desde.Value)
+                    ).ToList();
+            }
+
+            if (hasta.HasValue)
+            {
+                trazabilidad = trazabilidad
+                    .Where(x =>
+                        (x.FechaFin.HasValue && x.FechaFin.Value.Date <= hasta.Value) ||
+                        (x.FechaMantenimiento.HasValue && x.FechaMantenimiento.Value.Date <= hasta.Value)
+                    ).ToList();
+            }
+
             var ruta = new TrazabilidadPdfService().Generar(equipoId, trazabilidad);
             return File(ruta, "application/pdf", Path.GetFileName(ruta));
         }
