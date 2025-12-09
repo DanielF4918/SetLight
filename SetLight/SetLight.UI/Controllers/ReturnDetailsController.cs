@@ -71,27 +71,35 @@ namespace SetLight.UI.Controllers
                 var cliente = contexto.Clients
                     .FirstOrDefault(c => c.ClientId == orden.ClientId);
 
+                // Nombre completo del cliente (si existe)
+                string clienteNombre = cliente != null
+                    ? string.Format("{0} {1}", cliente.FirstName ?? "", cliente.LastName ?? "").Trim()
+                    : "Sin cliente";
+
                 // 3. Cargar devoluciones de la orden
                 var devoluciones = contexto.ReturnDetails
                     .Include("Equipment")
                     .Where(d => d.OrderId == orderId)
                     .ToList();
 
-                // 4. Mapear a DTO (aunque no haya devoluciones, dejamos la lista vacía
+                // 4. Mapear a DTO (aunque no haya devoluciones, dejamos la lista vacía)
                 var viewModel = devoluciones.Select(d => new ReturnDetailsDto
                 {
                     EquipmentName = d.Equipment.EquipmentName,
                     ReturnDate = d.ReturnDate,
                     ConditionReport = d.ConditionReport,
                     IsReturned = d.IsReturned,
-                    RequiresMaintenance = d.RequiresMaintenance
+                    RequiresMaintenance = d.RequiresMaintenance,
+
+                    // 🔹 Coincide con el DTO: int ClientId, string ClientName
+                    ClientId = cliente != null ? cliente.ClientId : 0,
+                    ClientName = clienteNombre
                 }).ToList();
 
-                // 5. Datos para el resumen de la orden en la vista
+                // 5. Datos para el resumen de la orden en la vista (cabecera)
                 ViewBag.OrderId = orden.OrderId;
-                ViewBag.ClientName = cliente != null
-                    ? (cliente.FirstName + " " + cliente.LastName)
-                    : "Sin cliente";
+                ViewBag.ClientName = clienteNombre;
+                ViewBag.ClientId = cliente != null ? (int?)cliente.ClientId : null;
 
                 ViewBag.StartDate = orden.StartDate;
                 ViewBag.EndDate = orden.EndDate;
@@ -105,6 +113,8 @@ namespace SetLight.UI.Controllers
                 return View(viewModel);
             }
         }
+
+
 
 
         // GET: ReturnDetails/Details/5
@@ -638,10 +648,15 @@ namespace SetLight.UI.Controllers
                             : null,
                         FinalizadoPor = m.FinalizadoPor,
 
-                        // 🔹 Nuevos campos para los detalles
+                        // 🔹 Ya tenías estos:
                         OrderId = m.OrderId,
                         ClientName = cli != null
                             ? ((cli.FirstName ?? "") + " " + (cli.LastName ?? "")).Trim()
+                            : null,
+
+                        // 🔹 NUEVO: necesitamos el Id del cliente para el modal
+                        ClientId = cli != null
+                            ? cli.ClientId.ToString()
                             : null
                     }
                 ).FirstOrDefault();
@@ -652,6 +667,7 @@ namespace SetLight.UI.Controllers
                 return View(mantenimiento);
             }
         }
+
 
 
         // GET: ReturnDetails/EditarMantenimiento/5
@@ -1097,6 +1113,10 @@ namespace SetLight.UI.Controllers
                 if (m == null)
                     return HttpNotFound();
 
+                // Referencias seguras
+                var orden = m.RentalOrder;
+                var cliente = orden != null ? orden.Client : null;
+
                 // Cantidad faltante SOLO de esta orden y este equipo
                 int cantidadFaltante = contexto.ReturnDetails
                     .Where(rd =>
@@ -1105,14 +1125,20 @@ namespace SetLight.UI.Controllers
                         rd.IsReturned == false)
                     .Count();
 
+                // Nombre completo del cliente (si existe)
+                string clienteNombre = cliente != null
+                    ? string.Format("{0} {1}", cliente.FirstName ?? "", cliente.LastName ?? "").Trim()
+                    : "Desconocido";
+
                 var dto = new MaintenanceDto
                 {
                     MaintenanceId = m.MaintenanceId,
                     OrderId = m.OrderId,
                     EquipmentId = m.EquipmentId,
                     EquipmentName = m.Equipment.EquipmentName,
-                    ClientName = m.RentalOrder.Client.FirstName + " " + m.RentalOrder.Client.LastName,
-                    Cantidad = cantidadFaltante,       
+                    ClientName = clienteNombre,
+                    ClientId = cliente != null ? cliente.ClientId.ToString() : null, 
+                    Cantidad = cantidadFaltante,
                     MaintenanceStatus = m.MaintenanceStatus,
                     Cost = m.Cost,
                     StartDate = m.StartDate,
@@ -1120,9 +1146,15 @@ namespace SetLight.UI.Controllers
                     Comments = m.Comments
                 };
 
+                if (orden != null)
+                {
+                    ViewBag.OrderDate = orden.StartDate;
+                }
+
                 return View(dto);
             }
         }
+
 
 
 

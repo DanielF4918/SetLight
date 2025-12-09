@@ -25,5 +25,9 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string EquipmentName { get; set; }
 
         public string RentalOrder { get; set; }
+
+        public int ClientId { get; set; }
+        public string ClientName { get; set; }
+
     }
 }

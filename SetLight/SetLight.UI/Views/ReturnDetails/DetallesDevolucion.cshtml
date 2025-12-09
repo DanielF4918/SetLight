@@ -2,6 +2,10 @@
 
 @{
     ViewBag.Title = "Detalles de Devolución";
+
+    // 👇 Tomamos los valores del ViewBag de forma segura
+    string clientName = ViewBag.ClientName as string;
+    string clientIdStr = ViewBag.ClientId != null ? ViewBag.ClientId.ToString() : null;
 }
 
 <div class="container mt-5">
@@ -20,16 +24,45 @@
                             <tr>
                                 <th style="width: 25%;">Cliente</th>
                                 <td>
-                                    @((ViewBag.ClientName ?? "N/D"))
+                                    @if (!string.IsNullOrEmpty(clientName))
+                                    {
+                                        // Si también tenemos ClientId, hacemos link + modal reutilizable
+                                        if (!string.IsNullOrEmpty(clientIdStr))
+                                        {
+                                            <a href="#"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="@("#cltModal_" + clientIdStr)">
+                                                @clientName
+                                            </a>
+
+                                            @Html.Action("ModalDetallesCliente", "Client", new { id = clientIdStr })
+                                        }
+                                        else
+                                        {
+                                            @clientName
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("N/D")
+                                    }
                                 </td>
                             </tr>
                             <tr>
                                 <th>Fecha de inicio</th>
-                                <td>@(ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToShortDateString() : "N/D")</td>
+                                <td>
+                                    @(ViewBag.StartDate != null
+                                        ? ((DateTime)ViewBag.StartDate).ToShortDateString()
+                                        : "N/D")
+                                </td>
                             </tr>
                             <tr>
                                 <th>Fecha de fin</th>
-                                <td>@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToShortDateString() : "N/D")</td>
+                                <td>
+                                    @(ViewBag.EndDate != null
+                                        ? ((DateTime)ViewBag.EndDate).ToShortDateString()
+                                        : "N/D")
+                                </td>
                             </tr>
                             <tr>
                                 <th>Estado de la orden</th>

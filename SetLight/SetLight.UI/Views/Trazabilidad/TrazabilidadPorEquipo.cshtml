@@ -8,8 +8,11 @@
 
 <div class="container mt-4 mb-5 bg-white p-4 shadow rounded border-dark" style="max-width: 1000px;">
     <h2 class="mb-4 text-dark fw-bold text-center">
-        Trazabilidad del Equipo <span class="text-secondary">#@ViewBag.EquipoId</span>
+        Trazabilidad del Equipo
+        <span class="text-primary">@ViewBag.EquipoNombre</span>
+        <small class="text-secondary">(ID #@ViewBag.EquipoId)</small>
     </h2>
+
 
     <!-- Filtros -->
     <form method="get" class="row mb-4">
@@ -37,10 +40,18 @@
 
     <!-- Botón PDF -->
     <div class="mb-3 text-end">
-        <a href="@Url.Action("DescargarTrazabilidad", "Trazabilidad", new { equipoId = ViewBag.EquipoId })"
-           class="btn btn-success fw-semibold">
-            Descargar PDF de Trazabilidad
+        <a class="btn btn-danger"
+           href="@Url.Action(
+        "DescargarTrazabilidad",
+        "Trazabilidad",
+        new {
+            equipoId = ViewBag.EquipoId,
+            desde = ViewBag.FiltroDesde,
+            hasta = ViewBag.FiltroHasta
+        })">
+            Descargar PDF
         </a>
+
     </div>
 
     <!-- Tabla -->
@@ -77,8 +88,42 @@
                             <span class="@badgeClass">@item.TipoEvento</span>
                         </td>
 
-                        <td>@(item.OrderId.HasValue ? item.OrderId.Value.ToString() : "-")</td>
-                        <td>@(item.MaintenanceId.HasValue ? item.MaintenanceId.Value.ToString() : "-")</td>
+                        <td>
+                            @if (item.OrderId.HasValue)
+                            {
+                                @Html.ActionLink(
+                                    item.OrderId.Value.ToString(),
+                                    "DetallesDevolucion",                 // Acción
+                                    "ReturnDetails",                      // Controller
+                                    new { orderId = item.OrderId.Value }, // 🔹 va como querystring ?orderId=49
+                                    new { @class = "text-decoration-underline text-dark fw-semibold" }
+                                )
+                            }
+                            else
+                            {
+                                @Html.Raw("-")
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.MaintenanceId.HasValue)
+                            {
+                                @Html.ActionLink(
+                                    item.MaintenanceId.Value.ToString(),
+                                    "DetallesMantenimiento",              // Acción
+                                    "ReturnDetails",                      // Controller
+                                    new { id = item.MaintenanceId.Value },// 🔹 va en la ruta /DetallesMantenimiento/83
+                                    new { @class = "text-decoration-underline text-dark fw-semibold" }
+                                )
+                            }
+                            else
+                            {
+                                @Html.Raw("-")
+                            }
+                        </td>
+
+
+
                         <td>
                             @(item.FechaInicio.HasValue
                 ? item.FechaInicio.Value.ToString("dd/MM/yyyy")

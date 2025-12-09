@@ -44,7 +44,31 @@
 
                         <dt class="col-sm-3">Cliente</dt>
                         <dd class="col-sm-9">
-                            @(!string.IsNullOrEmpty(Model.ClientName) ? Model.ClientName : "Desconocido")
+                            @if (!string.IsNullOrEmpty(Model.ClientName))
+                            {
+                                // Si también tenemos ClientId, usamos modal reutilizable
+                                if (!string.IsNullOrEmpty(Model.ClientId))
+                                {
+                                    var clientIdStr = Model.ClientId;
+
+                                    <a href="#"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="@("#cltModal_" + clientIdStr)">
+                                        @Model.ClientName
+                                    </a>
+
+                                    @Html.Action("ModalDetallesCliente", "Client", new { id = clientIdStr })
+                                }
+                                else
+                                {
+                                    // Sin ClientId → solo mostramos el nombre
+                                    @Model.ClientName
+                                }
+                            }
+                            else
+                            {
+                                @Html.Raw("Desconocido")
+                            }
                         </dd>
 
                         <dt class="col-sm-3">Equipo</dt>
