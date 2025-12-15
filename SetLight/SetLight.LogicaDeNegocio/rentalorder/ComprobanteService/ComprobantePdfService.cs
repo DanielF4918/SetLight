@@ -1,9 +1,8 @@
-﻿using System;
+﻿using System.Globalization; // USD
 using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using SetLight.Abstracciones.ModelosParaUI;
-using System.Globalization; // USD
 
 namespace SetLight.LogicaDeNegocio.Services
 {

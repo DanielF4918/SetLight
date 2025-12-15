@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SetLight.Abstracciones.AccesoADatos.EqCategory.EditEqCategory;
+﻿using SetLight.Abstracciones.AccesoADatos.EqCategory.EditEqCategory;
 using SetLight.Abstracciones.LogicaDeNegocio.EqCategory.EditEqCategory;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.EqCategory.EditEqCategory;
 
 namespace SetLight.LogicaDeNegocio.EqCategory.EditarEqcategory
 {
-    public class EditarEqCategoryLN:IEditEqCategoryLN
+    public class EditarEqCategoryLN : IEditEqCategoryLN
     {
         private IEditEqCategoryAD _actualizarEqCategory;
 

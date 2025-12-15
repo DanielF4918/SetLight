@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SetLight.Abstracciones.AccesoADatos.Client.ObtenerClPorId;
+﻿using SetLight.Abstracciones.AccesoADatos.Client.ObtenerClPorId;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.ObtenerClPorId;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Clientes.ObtenerClPorID;

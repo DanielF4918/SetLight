@@ -29,6 +29,7 @@
 }
 
 <div class="container mt-4 mb-5">
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0 text-dark fw-bold">
             Historial de órdenes de <span class="text-secondary">@ViewBag.ClientName</span>
@@ -39,37 +40,46 @@
             "ListarClient",
             "Client",
             null,
-            new { @class = "btn btn-secondary" }
+            new { @class = "btn btn-dark fw-semibold text-white" }
         )
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-dark">
         <div class="card-body">
+
             <!-- Filtros -->
-            <form method="get" class="row mb-3">
-                <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
+            <div class="card p-3 mb-3 border-dark">
+                <form method="get" class="row g-2 align-items-end">
+                    <input type="hidden" name="clientId" value="@ViewBag.ClientId" />
 
-                <div class="col-md-3">
-                    <label class="form-label">Desde</label>
-                    <input type="date" name="desde" class="form-control" value="@ViewBag.FiltroDesde" />
-                </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-black fw-semibold">Desde</label>
+                        <input type="date"
+                               name="desde"
+                               class="form-control border-dark"
+                               value="@ViewBag.FiltroDesde" />
+                    </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Hasta</label>
-                    <input type="date" name="hasta" class="form-control" value="@ViewBag.FiltroHasta" />
-                </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-black fw-semibold">Hasta</label>
+                        <input type="date"
+                               name="hasta"
+                               class="form-control border-dark"
+                               value="@ViewBag.FiltroHasta" />
+                    </div>
 
-                <div class="col-md-3 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-dark">
-                        <i class="bi bi-funnel me-1"></i> Filtrar
-                    </button>
+                    <div class="col-md-6 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-funnel me-1"></i> Filtrar
+                        </button>
 
-                    <a href="@Url.Action("History", new { clientId = ViewBag.ClientId })"
-                       class="btn btn-outline-secondary">
-                        Limpiar
-                    </a>
-                </div>
-            </form>
+                        <a href="@Url.Action("History", new { clientId = ViewBag.ClientId })"
+                           class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
 
             @if (!Model.Any())
             {
@@ -80,7 +90,7 @@
             else
             {
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle text-center">
+                    <table class="table table-bordered align-middle text-center">
                         <thead class="table-dark text-white">
                             <tr>
                                 <th># Orden</th>
@@ -96,7 +106,7 @@
                             @foreach (var order in Model)
                             {
                                 <tr>
-                                    <td>@order.OrderId</td>
+                                    <td class="fw-semibold">@order.OrderId</td>
                                     <td>@order.OrderDate.ToShortDateString()</td>
                                     <td>@order.StartDate.ToShortDateString()</td>
                                     <td>@order.EndDate.ToShortDateString()</td>
@@ -106,10 +116,10 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-dark"
+                                        <button class="btn btn-sm btn-dark"
                                                 type="button"
                                                 onclick="mostrarEquiposModal(@order.OrderId)">
-                                            Ver equipos
+                                            <i class="bi bi-eye me-1"></i> Ver equipos
                                         </button>
                                     </td>
                                     <td>
@@ -117,7 +127,7 @@
                                         {
                                             <a href="@Url.Action("VerComprobante", "RentalOrder", new { id = order.OrderId })"
                                                class="btn btn-sm btn-success">
-                                                Descargar comprobante
+                                                <i class="bi bi-download me-1"></i> Descargar
                                             </a>
                                         }
                                         else
@@ -156,11 +166,16 @@
                     )
                 </div>
             }
+
         </div>
     </div>
 </div>
 
 <style>
+    .card {
+        border-radius: 10px;
+    }
+
     .pagination-custom {
         display: flex;
         justify-content: center;
@@ -198,7 +213,7 @@
          aria-labelledby="modalLabel-@order.OrderId"
          aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
+            <div class="modal-content border-dark">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title" id="modalLabel-@order.OrderId">
                         Equipos de la orden #@order.OrderId
@@ -209,7 +224,7 @@
 
                 <div class="modal-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered align-middle text-center">
+                        <table class="table table-bordered align-middle text-center">
                             <thead class="table-dark text-white">
                                 <tr>
                                     <th>Equipo</th>

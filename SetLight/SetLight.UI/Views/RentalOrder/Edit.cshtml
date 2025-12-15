@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "Editar Orden";
+    var clienteNombre = (ViewBag.ClientNameSeleccionado as string) ?? "";
 }
 
 <div class="container mt-5">
@@ -15,20 +16,31 @@
                 {
                     @Html.AntiForgeryToken()
 
-                    @* Muestra errores generales, como el de stock insuficiente *@
                     @Html.ValidationSummary(false, "", new { @class = "text-danger mb-3" })
 
-                    @* Por si quieres tener el Id en el modelo del post *@
                     @Html.HiddenFor(m => m.OrderId)
 
+                    <!-- CLIENTE (Modal, igual al Create) -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-black">Cliente</label>
-                        @Html.DropDownListFor(
-                            m => m.ClientId,
-                            new SelectList(Model.Clientes, "ClientId", "FirstName", Model.ClientId),
-                            "Seleccione un cliente",
-                            new { @class = "form-control border-dark" }
-                        )
+
+                        <input type="hidden" name="ClientId" id="clienteId" value="@Model.ClientId" />
+
+                        <div class="d-flex gap-2">
+                            <input type="text"
+                                   id="clienteNombre"
+                                   class="form-control border-dark"
+                                   placeholder="Seleccione un cliente..."
+                                   value="@clienteNombre"
+                                   readonly />
+
+                            <button type="button"
+                                    class="btn btn-dark fw-semibold text-white"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#clienteModal">
+                                Buscar cliente
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -57,7 +69,7 @@
                                name="DescuentoManual"
                                step="0.01"
                                min="0"
-                               max="999999"
+                               max="100"
                                value="@(Model.DescuentoManual.HasValue
                                    ? Model.DescuentoManual.Value.ToString(CultureInfo.InvariantCulture)
                                    : "")" />
@@ -73,7 +85,7 @@
                         </button>
                     </div>
 
-                    @* Hidden inputs para EquiposSeleccionados que vienen desde el servidor *@
+                    <!-- Hidden inputs para EquiposSeleccionados que vienen desde el servidor -->
                     <div id="inputsEquiposContainer">
                         @if (Model.EquiposSeleccionados != null && Model.EquiposSeleccionados.Any())
                         {
@@ -162,7 +174,7 @@
                     <div class="text-center mt-4">
                         <input type="submit"
                                value="Guardar cambios"
-                               class="btn btn.success fw-semibold text-white btn btn-success fw-semibold text-white me-2" />
+                               class="btn btn-success fw-semibold text-white me-2" />
                         @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-dark fw-semibold text-white" })
                     </div>
                 }
@@ -171,6 +183,7 @@
     </div>
 </div>
 
+<!-- Modal de equipos -->
 <div class="modal fade" id="modalSeleccionarEquipos" tabindex="-1" role="dialog" aria-labelledby="modalLabelEquipos" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -185,6 +198,36 @@
     </div>
 </div>
 
+<!-- Modal de clientes (igual al Create) -->
+<div class="modal fade" id="clienteModal" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="clienteModalLabel">Seleccionar Cliente</h5>
+            </div>
+            <div class="modal-body" id="contenedorClientes">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <!-- Reutilizamos el mismo JS del Create para modal de clientes -->
+    <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
+
+    <!-- Tu JS específico de editar (equipos + totales, etc.) -->
     <script src="~/Scripts/Modals/EditOrder/EditOrder.js"></script>
+
+    <script>
+        // Si tu AgregarCliente.js depende de cargar clientes al abrir, esto ayuda a que
+        // el input venga precargado (ya lo estamos seteando en value, pero por si acaso).
+        document.addEventListener("DOMContentLoaded", function () {
+            // Si ocupas lógica extra para pre-selección, se hace aquí.
+        });
+    </script>
 }

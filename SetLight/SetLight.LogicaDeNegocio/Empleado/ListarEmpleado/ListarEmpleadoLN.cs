@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using SetLight.Abstracciones.AccesoADatos.Empleado;
 using SetLight.Abstracciones.LogicaDeNegocio.Empleado;
 using SetLight.Abstracciones.ModelosParaUI;
@@ -16,7 +12,7 @@ namespace SetLight.LogicaDeNegocio.Empleado.ListarEmpleado
 
         public ListarEmpleadoLN()
         {
-            _listarEmpleadoAD = new ListarEmpleadoAD(); 
+            _listarEmpleadoAD = new ListarEmpleadoAD();
         }
 
         public List<EmpleadoDto> Obtener()
