@@ -10,5 +10,6 @@ namespace SetLight.Abstracciones.LogicaDeNegocio.rentalorder.EditRentalOrder
     public interface IEditRentalOrderLN
     {
         int Actualizar(RentalOrderDto rentalOrderParaActualizar);
+
     }
 }
