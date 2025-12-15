@@ -1,7 +1,7 @@
-﻿using SetLight.Abstracciones.AccesoADatos.RentalOrder.ListarRentalOrder;
+﻿using System.Collections.Generic;
+using SetLight.Abstracciones.AccesoADatos.RentalOrder.ListarRentalOrder;
 using SetLight.Abstracciones.LogicaDeNegocio.RentalOrder.ListarRentalOrder;
 using SetLight.Abstracciones.ModelosParaUI;
-using System.Collections.Generic;
 
 namespace SetLight.LogicaDeNegocio.RentalOrder
 {

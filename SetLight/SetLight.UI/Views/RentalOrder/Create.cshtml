@@ -2,103 +2,131 @@
 
 @using (Html.BeginForm())
 {
-    <div class="container mt-4 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
-        <h2 class="text-center mb-4 text-dark">Crear nueva orden de alquiler</h2>
+    @Html.AntiForgeryToken()
 
-        @Html.AntiForgeryToken()
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-9">
+                <div class="card shadow p-4 border-dark">
+                    <h2 class="text-center fw-bold text-black mb-4">Crear nueva orden de alquiler</h2>
 
-        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger mb-3" })
 
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Cliente</label>
-            <input type="hidden" name="ClientId" id="clienteId" value="@Model.ClientId" />
-            <div class="d-flex gap-2">
-                <input type="text" id="clienteNombre" class="form-control border-dark" placeholder="Seleccione un cliente..." readonly />
-                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#clienteModal">
-                    Buscar cliente
-                </button>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Cliente</label>
+                        <input type="hidden" name="ClientId" id="clienteId" value="@Model.ClientId" />
+                        <div class="d-flex gap-2">
+                            <input type="text"
+                                   id="clienteNombre"
+                                   class="form-control border-dark"
+                                   placeholder="Seleccione un cliente..."
+                                   readonly />
+                            <button type="button" class="btn btn-dark fw-semibold text-white"
+                                    data-bs-toggle="modal" data-bs-target="#clienteModal">
+                                Buscar cliente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Fecha de inicio</label>
+                        @Html.TextBoxFor(m => m.StartDate,
+                            new { type = "date", @class = "form-control border-dark" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Fecha de fin</label>
+                        @Html.TextBoxFor(m => m.EndDate,
+                            new { type = "date", @class = "form-control border-dark" })
+                    </div>
+
+                    @Html.HiddenFor(m => m.StatusOrder)
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Descuento manual (%)</label>
+                        @Html.TextBoxFor(m => m.DescuentoManual,
+                            new
+                            {
+                                @class = "form-control border-dark",
+                                type = "number",
+                                min = "0",
+                                max = "100",
+                                step = "0.01",
+                                id = "DescuentoManual"
+                            })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Equipos</label><br />
+                        <button type="button"
+                                class="btn btn-dark fw-semibold text-white"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalSeleccionarEquipos">
+                            Seleccionar equipos
+                        </button>
+                    </div>
+
+                    <div id="equiposSeleccionadosContainer" class="mt-4">
+                        <h5 class="fw-bold text-dark mb-3">Equipos seleccionados</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center align-middle" id="tablaResumenEquipos">
+                                <thead class="table-dark text-white">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Valor Renta</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div id="resumenCostoAlquiler" class="mt-4 text-center">
+                            <h5 class="fw-bold text-dark mb-3">Cálculo de alquiler</h5>
+                            <table class="table table-bordered mx-auto" style="max-width: 500px;">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 60%;">Días de alquiler</th>
+                                        <td><span id="diasAlquiler">0</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Subtotal</th>
+                                        <td>$<span id="subtotalAlquiler">0</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Descuento aplicado</th>
+                                        <td>$<span id="descuentoAplicado">0</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>IVA (13%)</th>
+                                        <td>$<span id="ivaAlquiler">0</span></td>
+                                    </tr>
+                                    <tr class="fw-bold bg-light">
+                                        <th>Total</th>
+                                        <td>$<span id="totalAlquiler">0</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <div id="inputsEquiposContainer"></div>
+
+                    <div class="text-center mt-4">
+                        <a href="@Url.Action("Index", "RentalOrder")"
+                           class="btn btn-dark fw-semibold text-white me-2">
+                            Volver al listado
+                        </a>
+
+                        <input type="submit" value="Crear orden"
+                               class="btn btn.success fw-semibold text-white btn btn-success fw-semibold text-white" />
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Fecha de inicio</label>
-            @Html.TextBoxFor(m => m.StartDate, new { type = "date", @class = "form-control border-dark" })
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Fecha de fin</label>
-            @Html.TextBoxFor(m => m.EndDate, new { type = "date", @class = "form-control border-dark" })
-        </div>
-
-        @Html.HiddenFor(m => m.StatusOrder)
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Descuento manual (%)</label>
-            @Html.TextBoxFor(m => m.DescuentoManual, new { @class = "form-control border-dark", type = "number", min = "0", max = "100", step = "0.01", id = "DescuentoManual" })
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Equipos</label><br />
-            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalSeleccionarEquipos">
-                Seleccionar equipos
-            </button>
-        </div>
-
-        <div id="equiposSeleccionadosContainer" class="mt-4">
-            <h5 class="fw-bold text-dark mb-3">Equipos seleccionados</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle" id="tablaResumenEquipos">
-                    <thead class="table-dark text-white">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>Valor Renta</th>
-                            <th>Cantidad</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div id="resumenCostoAlquiler" class="mt-4">
-                <h5 class="fw-bold text-dark">Cálculo de alquiler</h5>
-                <table class="table table-bordered" style="max-width: 500px;">
-                    <tbody>
-                        <tr>
-                            <th style="width: 60%;">Días de alquiler</th>
-                            <td><span id="diasAlquiler">0</span></td>
-                        </tr>
-                        <tr>
-                            <th>Subtotal</th>
-                            <td>$<span id="subtotalAlquiler">0</span></td>
-                        </tr>
-                        <tr>
-                            <th>Descuento aplicado</th>
-                            <td>$<span id="descuentoAplicado">0</span></td>
-                        </tr>
-                        <tr>
-                            <th>IVA (13%)</th>
-                            <td>$<span id="ivaAlquiler">0</span></td>
-                        </tr>
-                        <tr class="fw-bold bg-light">
-                            <th>Total</th>
-                            <td>$<span id="totalAlquiler">0</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="inputsEquiposContainer"></div>
-
-        <div class="form-group mt-4 text-center">
-            <a href="@Url.Action("Index", "RentalOrder")" class="btn btn-secondary px-4 fw-semibold me-2">
-                Volver al listado
-            </a>
-
-            <input type="submit" value="Crear orden" class="btn btn-success px-4 fw-semibold" />
         </div>
     </div>
 }

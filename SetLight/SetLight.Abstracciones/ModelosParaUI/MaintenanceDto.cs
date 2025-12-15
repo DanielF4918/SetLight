@@ -27,6 +27,8 @@ namespace SetLight.Entidades.Dto
 
         public int? OrderId { get; set; }
         public string ClientName { get; set; }
+        public string ClientId { get; set; }
+
 
         public string ImageUrl { get; set; }
     }

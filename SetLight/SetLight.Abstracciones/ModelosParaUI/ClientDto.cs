@@ -11,15 +11,21 @@ namespace SetLight.Abstracciones.ModelosParaUI
     {
         public int ClientId { get; set; }
 
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
         [Display(Name = "Nombre")]
         public string FirstName { get; set; }
 
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
         [Display(Name = "Apellido")]
         public string LastName { get; set; }
 
+        [Required(ErrorMessage = "El teléfono personal es obligatorio.")]
+        [Phone(ErrorMessage = "Ingrese un número de teléfono válido.")]
         [Display(Name = "Teléfono personal")]
         public string Phone { get; set; }
 
+        [Required(ErrorMessage = "El correo es obligatorio.")]
+        [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido.")]
         [Display(Name = "Correo")]
         public string Email { get; set; }
 

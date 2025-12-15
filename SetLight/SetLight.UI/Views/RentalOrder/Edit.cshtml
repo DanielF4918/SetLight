@@ -1,164 +1,189 @@
 ﻿@model SetLight.Abstracciones.ViewModels.CrearRentalOrderViewModel
+@using System.Globalization
 
 @{
     ViewBag.Title = "Editar Orden";
+    var clienteNombre = (ViewBag.ClientNameSeleccionado as string) ?? "";
 }
 
-<div class="container mt-4 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
-    <h2 class="text-center mb-4 text-dark">Editar orden de alquiler</h2>
-    @using System.Globalization
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card shadow p-4 border-dark">
+                <h2 class="text-center fw-bold text-black mb-4">Editar orden de alquiler</h2>
 
-        @* Muestra errores generales, como el de stock insuficiente *@
-        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
-
-        @* Por si quieres tener el Id en el modelo del post *@
-        @Html.HiddenFor(m => m.OrderId)
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Cliente</label>
-            @Html.DropDownListFor(
-                m => m.ClientId,
-                new SelectList(Model.Clientes, "ClientId", "FirstName", Model.ClientId),
-                "Seleccione un cliente",
-                new { @class = "form-control border-dark" }
-            )
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Fecha de inicio</label>
-            @Html.TextBoxFor(
-                m => m.StartDate,
-                "{0:yyyy-MM-dd}",
-                new { @class = "form-control border-dark", type = "date", id = "StartDate" }
-            )
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Fecha de fin</label>
-            @Html.TextBoxFor(
-                m => m.EndDate,
-                "{0:yyyy-MM-dd}",
-                new { @class = "form-control border-dark", type = "date", id = "EndDate" }
-            )
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Descuento manual (%)</label>
-            <input type="number"
-                   class="form-control border-dark"
-                   id="DescuentoManual"
-                   name="DescuentoManual"
-                   step="0.01"
-                   min="0"
-                   max="999999"
-                   value="@(Model.DescuentoManual.HasValue
-                       ? Model.DescuentoManual.Value.ToString(CultureInfo.InvariantCulture)
-                       : "")" />
-        </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Equipos</label><br />
-            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalSeleccionarEquipos">
-                Seleccionar equipos
-            </button>
-        </div>
-
-        @* Hidden inputs para EquiposSeleccionados que vienen desde el servidor *@
-        <div id="inputsEquiposContainer">
-            @if (Model.EquiposSeleccionados != null && Model.EquiposSeleccionados.Any())
-            {
-                var index = 0;
-                foreach (var item in Model.EquiposSeleccionados)
+                @using (Html.BeginForm())
                 {
-                    <div>
-                        <input type="hidden" name="EquiposSeleccionados[@index].EquipmentId" value="@item.EquipmentId" />
-                        <input type="hidden" name="EquiposSeleccionados[@index].EquipmentName" value="@item.EquipmentName" />
-                        <input type="hidden" name="EquiposSeleccionados[@index].Brand" value="@item.Brand" />
-                        <input type="hidden" name="EquiposSeleccionados[@index].Model" value="@item.Model" />
-                        <input type="hidden" name="EquiposSeleccionados[@index].RentalValue" value="@item.RentalValue" />
-                        <input type="hidden" name="EquiposSeleccionados[@index].Quantity" value="@item.Quantity" />
-                    </div>
-                    index++;
-                }
-            }
-        </div>
+                    @Html.AntiForgeryToken()
 
-        <div id="equiposSeleccionadosContainer" class="mt-4">
-            <h5 class="fw-bold text-dark mb-3">Equipos seleccionados</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle" id="tablaResumenEquipos">
-                    <thead class="table-dark text-white">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>Valor Renta</th>
-                            <th>Cantidad</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger mb-3" })
+
+                    @Html.HiddenFor(m => m.OrderId)
+
+                    <!-- CLIENTE (Modal, igual al Create) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Cliente</label>
+
+                        <input type="hidden" name="ClientId" id="clienteId" value="@Model.ClientId" />
+
+                        <div class="d-flex gap-2">
+                            <input type="text"
+                                   id="clienteNombre"
+                                   class="form-control border-dark"
+                                   placeholder="Seleccione un cliente..."
+                                   value="@clienteNombre"
+                                   readonly />
+
+                            <button type="button"
+                                    class="btn btn-dark fw-semibold text-white"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#clienteModal">
+                                Buscar cliente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Fecha de inicio</label>
+                        @Html.TextBoxFor(
+                            m => m.StartDate,
+                            "{0:yyyy-MM-dd}",
+                            new { @class = "form-control border-dark", type = "date", id = "StartDate" }
+                        )
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Fecha de fin</label>
+                        @Html.TextBoxFor(
+                            m => m.EndDate,
+                            "{0:yyyy-MM-dd}",
+                            new { @class = "form-control border-dark", type = "date", id = "EndDate" }
+                        )
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Descuento manual (%)</label>
+                        <input type="number"
+                               class="form-control border-dark"
+                               id="DescuentoManual"
+                               name="DescuentoManual"
+                               step="0.01"
+                               min="0"
+                               max="100"
+                               value="@(Model.DescuentoManual.HasValue
+                                   ? Model.DescuentoManual.Value.ToString(CultureInfo.InvariantCulture)
+                                   : "")" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Equipos</label><br />
+                        <button type="button"
+                                class="btn btn-dark fw-semibold text-white"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalSeleccionarEquipos">
+                            Seleccionar equipos
+                        </button>
+                    </div>
+
+                    <!-- Hidden inputs para EquiposSeleccionados que vienen desde el servidor -->
+                    <div id="inputsEquiposContainer">
                         @if (Model.EquiposSeleccionados != null && Model.EquiposSeleccionados.Any())
                         {
-                            var dias = (Model.EndDate - Model.StartDate).Days + 1;
-                            if (dias < 1) { dias = 1; }
-
+                            var index = 0;
                             foreach (var item in Model.EquiposSeleccionados)
                             {
-                                var subtotalItem = item.RentalValue * item.Quantity * dias;
-                                <tr data-valor="@item.RentalValue" data-cantidad="@item.Quantity">
-                                    <td>@item.EquipmentName</td>
-                                    <td>@item.Brand</td>
-                                    <td>@item.Model</td>
-                                    <td>$@item.RentalValue.ToString("N2")</td>
-                                    <td>@item.Quantity</td>
-                                    <td>$@subtotalItem.ToString("N2")</td>
-                                </tr>
+                                <div>
+                                    <input type="hidden" name="EquiposSeleccionados[@index].EquipmentId" value="@item.EquipmentId" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].EquipmentName" value="@item.EquipmentName" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].Brand" value="@item.Brand" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].Model" value="@item.Model" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].RentalValue" value="@item.RentalValue" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].Quantity" value="@item.Quantity" />
+                                </div>
+                                index++;
                             }
                         }
-                    </tbody>
-                </table>
+                    </div>
+
+                    <div id="equiposSeleccionadosContainer" class="mt-4">
+                        <h5 class="fw-bold text-dark mb-3">Equipos seleccionados</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center align-middle" id="tablaResumenEquipos">
+                                <thead class="table-dark text-white">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Valor Renta</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.EquiposSeleccionados != null && Model.EquiposSeleccionados.Any())
+                                    {
+                                        var dias = (Model.EndDate - Model.StartDate).Days + 1;
+                                        if (dias < 1) { dias = 1; }
+
+                                        foreach (var item in Model.EquiposSeleccionados)
+                                        {
+                                            var subtotalItem = item.RentalValue * item.Quantity * dias;
+                                            <tr data-valor="@item.RentalValue" data-cantidad="@item.Quantity">
+                                                <td>@item.EquipmentName</td>
+                                                <td>@item.Brand</td>
+                                                <td>@item.Model</td>
+                                                <td>$@item.RentalValue.ToString("N2")</td>
+                                                <td>@item.Quantity</td>
+                                                <td>$@subtotalItem.ToString("N2")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="resumenCostoAlquiler" class="mt-4 text-center">
+                        <h5 class="fw-bold text-dark mb-3">Cálculo de alquiler</h5>
+                        <table class="table table-bordered mx-auto" style="max-width: 500px;">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 60%;">Días de alquiler</th>
+                                    <td><span id="diasAlquiler">0</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Subtotal</th>
+                                    <td>$<span id="subtotalAlquiler">0</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Descuento manual</th>
+                                    <td>$<span id="descuentoAplicado">0</span></td>
+                                </tr>
+                                <tr>
+                                    <th>IVA (13%)</th>
+                                    <td>$<span id="ivaAlquiler">0</span></td>
+                                </tr>
+                                <tr class="fw-bold bg-light">
+                                    <th>Total a pagar</th>
+                                    <td>$<span id="totalAlquiler">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <input type="submit"
+                               value="Guardar cambios"
+                               class="btn btn-success fw-semibold text-white me-2" />
+                        @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-dark fw-semibold text-white" })
+                    </div>
+                }
             </div>
         </div>
-
-        <div id="resumenCostoAlquiler" class="mt-4">
-            <h5 class="fw-bold text-dark">Cálculo de alquiler</h5>
-            <table class="table table-bordered" style="max-width: 500px;">
-                <tbody>
-                    <tr>
-                        <th style="width: 60%;">Días de alquiler</th>
-                        <td><span id="diasAlquiler">0</span></td>
-                    </tr>
-                    <tr>
-                        <th>Subtotal</th>
-                        <td>$<span id="subtotalAlquiler">0</span></td>
-                    </tr>
-                    <tr>
-                        <th>Descuento manual</th>
-                        <td>$<span id="descuentoAplicado">0</span></td>
-                    </tr>
-                    <tr>
-                        <th>IVA (13%)</th>
-                        <td>$<span id="ivaAlquiler">0</span></td>
-                    </tr>
-                    <tr class="fw-bold bg-light">
-                        <th>Total a pagar</th>
-                        <td>$<span id="totalAlquiler">0</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="form-group mt-4 text-center">
-            <input type="submit" value="Guardar cambios" class="btn btn-success px-4 fw-semibold" />
-            @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary ms-3" })
-        </div>
-    }
+    </div>
 </div>
 
+<!-- Modal de equipos -->
 <div class="modal fade" id="modalSeleccionarEquipos" tabindex="-1" role="dialog" aria-labelledby="modalLabelEquipos" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -173,6 +198,36 @@
     </div>
 </div>
 
+<!-- Modal de clientes (igual al Create) -->
+<div class="modal fade" id="clienteModal" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="clienteModalLabel">Seleccionar Cliente</h5>
+            </div>
+            <div class="modal-body" id="contenedorClientes">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <!-- Reutilizamos el mismo JS del Create para modal de clientes -->
+    <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
+
+    <!-- Tu JS específico de editar (equipos + totales, etc.) -->
     <script src="~/Scripts/Modals/EditOrder/EditOrder.js"></script>
+
+    <script>
+        // Si tu AgregarCliente.js depende de cargar clientes al abrir, esto ayuda a que
+        // el input venga precargado (ya lo estamos seteando en value, pero por si acaso).
+        document.addEventListener("DOMContentLoaded", function () {
+            // Si ocupas lógica extra para pre-selección, se hace aquí.
+        });
+    </script>
 }
