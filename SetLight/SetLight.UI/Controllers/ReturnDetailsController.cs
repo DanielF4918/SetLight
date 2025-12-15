@@ -135,6 +135,13 @@ namespace SetLight.UI.Controllers
 
                 if (orden == null) return HttpNotFound();
 
+                // 🔒 BLINDAJE: solo Activa (1) puede registrar devolución
+                if (orden.StatusOrder != 1)
+                {
+                    TempData["Error"] = "No se puede registrar devolución: la orden ya está completada o cancelada.";
+                    return RedirectToAction("Index", "RentalOrder");
+                }
+
                 var model = new EquipmentReturnViewModel
                 {
                     OrderId = orden.OrderId,
@@ -146,7 +153,9 @@ namespace SetLight.UI.Controllers
                         Quantity = od.Quantity,
                         CantidadBuenas = 0,
                         CantidadDañadas = 0,
-                        Observaciones = ""
+                        CantidadFaltante = 0,
+                        Observaciones = "",
+                        MaintenanceType = null
                     }).ToList()
                 };
 
@@ -154,10 +163,68 @@ namespace SetLight.UI.Controllers
             }
         }
 
+
         // POST: ReturnDetails/CrearReturnDetails
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> CrearReturnDetails(EquipmentReturnViewModel model)
         {
+            // Helper: rehidratar el model desde BD (manteniendo lo que el usuario escribió)
+            EquipmentReturnViewModel RehidratarModel(int orderId, EquipmentReturnViewModel posted = null)
+            {
+                using (var ctx = new Contexto())
+                {
+                    var ordenDb = ctx.RentalOrders
+                        .Include("OrderDetails.Equipment")
+                        .Include("Client")
+                        .FirstOrDefault(o => o.OrderId == orderId);
+
+                    if (ordenDb == null) return null;
+
+                    var map = (posted?.Items ?? new List<EquipmentReturnItem>())
+                        .ToDictionary(x => x.EquipmentId, x => x);
+
+                    var vm = new EquipmentReturnViewModel
+                    {
+                        OrderId = ordenDb.OrderId,
+                        ClientName = ordenDb.Client.FirstName + " " + ordenDb.Client.LastName,
+                        Items = ordenDb.OrderDetails.Select(od =>
+                        {
+                            map.TryGetValue(od.EquipmentId, out var it);
+
+                            return new EquipmentReturnItem
+                            {
+                                EquipmentId = od.EquipmentId,
+                                EquipmentName = od.Equipment.EquipmentName,
+                                Quantity = od.Quantity,
+
+                                CantidadBuenas = it?.CantidadBuenas ?? 0,
+                                CantidadDañadas = it?.CantidadDañadas ?? 0,
+                                CantidadFaltante = it?.CantidadFaltante ?? 0,
+
+                                Observaciones = it?.Observaciones ?? "",
+                                MaintenanceType = it?.MaintenanceType
+                            };
+                        }).ToList()
+                    };
+
+                    return vm;
+                }
+            }
+
+            // 🔒 BLINDAJE CRÍTICO (anti URL / anti POST manual)
+            using (var contexto = new Contexto())
+            {
+                var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
+                if (orden == null) return HttpNotFound();
+
+                if (orden.StatusOrder != 1)
+                {
+                    TempData["Error"] = "No se puede registrar devolución: la orden ya no está activa.";
+                    return RedirectToAction("Index", "RentalOrder");
+                }
+            }
+
             // ✅ Validaciones a nivel de modelo
             if (model.Items != null)
             {
@@ -170,63 +237,41 @@ namespace SetLight.UI.Controllers
                     int faltantes = item.CantidadFaltante;
                     int total = item.Quantity;
 
-                    // 0️⃣ No permitir negativos
                     if (buenas < 0 || danadas < 0 || faltantes < 0)
                     {
-                        ModelState.AddModelError(
-                            $"Items[{i}].CantidadBuenas",
-                            "Las cantidades no pueden ser negativas."
-                        );
+                        ModelState.AddModelError($"Items[{i}].CantidadBuenas", "Las cantidades no pueden ser negativas.");
                     }
 
-                    // 1️⃣ Solo pedir MaintenanceType si hay equipos dañados
                     if (danadas > 0 && !item.MaintenanceType.HasValue)
                     {
-                        ModelState.AddModelError(
-                            $"Items[{i}].MaintenanceType",
-                            "Debe seleccionar el tipo de mantenimiento cuando hay equipos dañados."
-                        );
+                        ModelState.AddModelError($"Items[{i}].MaintenanceType",
+                            "Debe seleccionar el tipo de mantenimiento cuando hay equipos dañados.");
                     }
 
-                    // 2️⃣ Cada campo individual no puede superar la cantidad alquilada
                     if (buenas > total)
-                    {
-                        ModelState.AddModelError(
-                            $"Items[{i}].CantidadBuenas",
-                            "La cantidad en buen estado no puede superar la cantidad alquilada."
-                        );
-                    }
+                        ModelState.AddModelError($"Items[{i}].CantidadBuenas", "La cantidad en buen estado no puede superar la cantidad alquilada.");
 
                     if (danadas > total)
-                    {
-                        ModelState.AddModelError(
-                            $"Items[{i}].CantidadDañadas",
-                            "La cantidad dañada no puede superar la cantidad alquilada."
-                        );
-                    }
+                        ModelState.AddModelError($"Items[{i}].CantidadDañadas", "La cantidad dañada no puede superar la cantidad alquilada.");
 
                     if (faltantes > total)
-                    {
-                        ModelState.AddModelError(
-                            $"Items[{i}].CantidadFaltante",
-                            "La cantidad faltante no puede superar la cantidad alquilada."
-                        );
-                    }
+                        ModelState.AddModelError($"Items[{i}].CantidadFaltante", "La cantidad faltante no puede superar la cantidad alquilada.");
 
-                    // 3️⃣ La suma total debe igualar la cantidad alquilada
                     int suma = buenas + danadas + faltantes;
                     if (suma != total)
                     {
-                        ModelState.AddModelError(
-                            $"Items[{i}].CantidadBuenas",
-                            "La suma de buenas, dañadas y faltantes debe ser igual a la cantidad alquilada."
-                        );
+                        ModelState.AddModelError($"Items[{i}].CantidadBuenas",
+                            "La suma de buenas, dañadas y faltantes debe ser igual a la cantidad alquilada.");
                     }
                 }
             }
 
             if (!ModelState.IsValid)
-                return View(model);
+            {
+                var re = RehidratarModel(model.OrderId, model);
+                if (re == null) return HttpNotFound();
+                return View(re);
+            }
 
             try
             {
@@ -235,7 +280,7 @@ namespace SetLight.UI.Controllers
 
                 foreach (var item in model.Items)
                 {
-                    // ✅ 1️⃣ Equipos en buen estado
+                    // ✅ 1️⃣ Buen estado
                     if (item.CantidadBuenas > 0)
                     {
                         var dtoBueno = new ReturnDetailsDto
@@ -251,19 +296,18 @@ namespace SetLight.UI.Controllers
                         for (int i = 0; i < item.CantidadBuenas; i++)
                             await ln.Guardar(dtoBueno);
 
-                        // Actualizar stock de equipos devueltos en buen estado
-                        using (var contextoStock = new Contexto())
+                        using (var ctxStock = new Contexto())
                         {
-                            var equipo = contextoStock.Equipment.FirstOrDefault(e => e.EquipmentId == item.EquipmentId);
+                            var equipo = ctxStock.Equipment.FirstOrDefault(e => e.EquipmentId == item.EquipmentId);
                             if (equipo != null)
                             {
                                 equipo.Stock += item.CantidadBuenas;
-                                contextoStock.SaveChanges();
+                                ctxStock.SaveChanges();
                             }
                         }
                     }
 
-                    // ✅ 2️⃣ Equipos dañados → generan mantenimiento
+                    // ✅ 2️⃣ Dañados -> mantenimiento
                     if (item.CantidadDañadas > 0)
                     {
                         var dtoDañado = new ReturnDetailsDto
@@ -281,26 +325,20 @@ namespace SetLight.UI.Controllers
 
                         using (var contexto = new Contexto())
                         {
-                            // 🔎 Obtenemos el empleado (técnico) a partir del usuario logueado
-                            var emailUsuario = User.Identity.Name;   // normalmente es el correo del AspNetUser
-                            var empleado = contexto.Empleado
-                                .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+                            var emailUsuario = User.Identity.Name;
+                            var empleado = contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
 
-                            // 🔧 Creamos el mantenimiento en estado pendiente
                             var mantenimiento = new Maintenance
                             {
                                 StartDate = DateTime.Now,
-                                MaintenanceType = item.MaintenanceType.Value, // ya validado
-                                MaintenanceStatus = 0, // 0 = Pendiente
+                                MaintenanceType = item.MaintenanceType.Value,
+                                MaintenanceStatus = 0,
                                 EquipmentId = item.EquipmentId,
-
-                                // 👇 AQUÍ ligamos el mantenimiento con la orden que originó la devolución
                                 OrderId = model.OrderId,
-
                                 Comments = item.Observaciones ?? "Pendiente de revisión",
                                 Cost = null,
                                 EvidencePath = null,
-                                IdEmpleado = empleado?.IdEmpleado   // técnico responsable
+                                IdEmpleado = empleado?.IdEmpleado
                             };
 
                             contexto.Maintenance.Add(mantenimiento);
@@ -308,7 +346,7 @@ namespace SetLight.UI.Controllers
                         }
                     }
 
-                    // ✅ 3️⃣ Equipos faltantes / no devueltos
+                    // ✅ 3️⃣ Faltantes
                     if (item.CantidadFaltante > 0)
                     {
                         var dtoFaltante = new ReturnDetailsDto
@@ -324,21 +362,19 @@ namespace SetLight.UI.Controllers
                         for (int i = 0; i < item.CantidadFaltante; i++)
                             await ln.Guardar(dtoFaltante);
 
-                        // 🔹 Crear un mantenimiento tipo "faltante" para ESTA orden y ESTE equipo
                         using (var contexto = new Contexto())
                         {
                             var emailUsuario = User.Identity.Name;
-                            var empleado = contexto.Empleado
-                                .FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
+                            var empleado = contexto.Empleado.FirstOrDefault(e => e.CorreoElectronico == emailUsuario);
 
                             var mantenimientoFaltante = new Maintenance
                             {
                                 StartDate = DateTime.Now,
                                 EndDate = null,
-                                MaintenanceType = 4,                 // 4 = Faltante / no devuelto
-                                MaintenanceStatus = 0,                 // 0 = Pendiente
+                                MaintenanceType = 4,
+                                MaintenanceStatus = 0,
                                 EquipmentId = item.EquipmentId,
-                                OrderId = model.OrderId,     // 👈 AQUÍ LIGAMOS A LA ORDEN
+                                OrderId = model.OrderId,
                                 Comments = item.Observaciones ?? "Equipo no devuelto / perdido",
                                 Cost = null,
                                 EvidencePath = null,
@@ -349,13 +385,9 @@ namespace SetLight.UI.Controllers
                             contexto.SaveChanges();
                         }
                     }
-
                 }
 
-
-            
-
-                // ✅ 4️⃣ Verificar si la orden quedó completamente gestionada
+                // ✅ 4️⃣ Completar orden si ya se gestionó todo (devuelto o marcado faltante)
                 using (var contexto = new Contexto())
                 {
                     var orderDetails = contexto.OrderDetails
@@ -384,7 +416,7 @@ namespace SetLight.UI.Controllers
                         var orden = contexto.RentalOrders.FirstOrDefault(o => o.OrderId == model.OrderId);
                         if (orden != null)
                         {
-                            orden.StatusOrder = 2; // 2 = Finalizada
+                            orden.StatusOrder = 2; // Completada
                             contexto.SaveChanges();
                         }
                     }
@@ -396,15 +428,17 @@ namespace SetLight.UI.Controllers
             catch (Exception ex)
             {
                 var mensaje = ex.Message;
-                if (ex.InnerException != null)
-                    mensaje += " - " + ex.InnerException.Message;
-                if (ex.InnerException?.InnerException != null)
-                    mensaje += " - " + ex.InnerException.InnerException.Message;
+                if (ex.InnerException != null) mensaje += " - " + ex.InnerException.Message;
+                if (ex.InnerException?.InnerException != null) mensaje += " - " + ex.InnerException.InnerException.Message;
 
                 ModelState.AddModelError("", "Error al guardar devoluciones: " + mensaje);
-                return View(model);
+
+                var re = RehidratarModel(model.OrderId, model);
+                if (re == null) return HttpNotFound();
+                return View(re);
             }
         }
+
 
         // GET: ReturnDetails/Edit/5
         public ActionResult Edit(int id)
@@ -521,9 +555,24 @@ namespace SetLight.UI.Controllers
                 if (mantenimiento == null)
                     return HttpNotFound();
 
+                // 🔒 BLINDAJE: solo se puede finalizar si está Pendiente (0)
+                if (mantenimiento.MaintenanceStatus != 0)
+                {
+                    TempData["Error"] = "Este mantenimiento ya fue finalizado o no está disponible para finalizar.";
+                    return RedirectToAction("Mantenimientos");
+                }
+
+                // 🔒 (opcional) si NO querés permitir finalizar faltantes aquí (tipo 4)
+                if (mantenimiento.MaintenanceType == 4)
+                {
+                    TempData["Error"] = "Este registro corresponde a un faltante y no se finaliza desde este flujo.";
+                    return RedirectToAction("Mantenimientos");
+                }
+
                 return View(mantenimiento);
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -535,14 +584,33 @@ namespace SetLight.UI.Controllers
                 if (mantenimiento == null)
                     return HttpNotFound();
 
+                // 🔒 BLINDAJE CRÍTICO: si ya no está pendiente, NO permitir finalizar (anti POST manual + anti doble click)
+                if (mantenimiento.MaintenanceStatus != 0)
+                {
+                    TempData["Error"] = "No se puede finalizar: este mantenimiento ya fue procesado.";
+                    return RedirectToAction("Mantenimientos");
+                }
+
+                // 🔒 (opcional) bloquear faltantes aquí
+                if (mantenimiento.MaintenanceType == 4)
+                {
+                    TempData["Error"] = "No se puede finalizar un faltante desde este flujo.";
+                    return RedirectToAction("Mantenimientos");
+                }
+
                 // Guardar evidencia si hay archivo nuevo
                 if (evidenceFile != null && evidenceFile.ContentLength > 0)
                 {
                     var evidenciasRoot = Server.MapPath("~/Evidencias/");
                     Directory.CreateDirectory(evidenciasRoot);
 
-                    var originalName = System.IO.Path.GetFileName(evidenceFile.FileName);
-                    var extension = System.IO.Path.GetExtension(originalName);
+                    var originalName = Path.GetFileName(evidenceFile.FileName);
+                    var extension = Path.GetExtension(originalName);
+
+                    // (opcional) validar extensión
+                    // var allowed = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+                    // if (!allowed.Contains(extension.ToLower())) { ... }
+
                     var fileName = $"{Guid.NewGuid():N}{extension}";
                     var fullPath = Path.Combine(evidenciasRoot, fileName);
 
@@ -552,7 +620,7 @@ namespace SetLight.UI.Controllers
 
                 mantenimiento.Comments = comments;
                 mantenimiento.Cost = cost;
-                mantenimiento.MaintenanceStatus = 1;         // 1 = Finalizado
+                mantenimiento.MaintenanceStatus = 1; // 1 = Finalizado
                 mantenimiento.EndDate = DateTime.Now;
 
                 mantenimiento.FinalizadoPor = Session["NombreUsuario"]?.ToString()
@@ -563,6 +631,10 @@ namespace SetLight.UI.Controllers
                 if (equipo != null)
                 {
                     equipo.Stock += 1;
+
+                    // si tu lógica usa Status 2 = agotado, reactivarlo si ahora hay stock
+                    if (equipo.Stock > 0 && equipo.Status == 2)
+                        equipo.Status = 1;
                 }
 
                 contexto.SaveChanges();
