@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SetLight.Abstracciones.AccesoADatos.Client.EditClient;
+﻿using SetLight.Abstracciones.AccesoADatos.Client.EditClient;
 using SetLight.Abstracciones.LogicaDeNegocio.Client.EditClient;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Client.EditClient;
 
 namespace SetLight.LogicaDeNegocio.Client.EditClient
 {
-    public class EditClientLN:IEditClientLN
+    public class EditClientLN : IEditClientLN
     {
         private IEditClientAD _actualizarClient;
 

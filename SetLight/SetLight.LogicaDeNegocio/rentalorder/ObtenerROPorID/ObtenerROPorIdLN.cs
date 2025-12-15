@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SetLight.Abstracciones.AccesoADatos.RentalOrder.ObtenerROPorID;
+﻿using SetLight.Abstracciones.AccesoADatos.RentalOrder.ObtenerROPorID;
 using SetLight.Abstracciones.LogicaDeNegocio.rentalorder.ObtenerROPorID;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.rentalorder.ObtenerROPorId;
