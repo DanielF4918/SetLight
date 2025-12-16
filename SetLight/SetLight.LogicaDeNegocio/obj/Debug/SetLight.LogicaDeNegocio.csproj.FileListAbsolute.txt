@@ -284,3 +284,6 @@ C:\Users\kenca\OneDrive\Escritorio\7 de diciembre\SetLight\SetLight\SetLight.Log
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.LogicaDeNegocio.dll.config
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.SqlServer.dll
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\SetLight.LogicaDeNegocio.dll.config
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.LogicaDeNegocio\bin\Debug\EntityFramework.SqlServer.xml

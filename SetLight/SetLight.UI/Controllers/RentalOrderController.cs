@@ -87,7 +87,7 @@ namespace SetLight.UI.Controllers
             if (desde.HasValue) historial = historial.Where(o => o.OrderDate >= desde.Value);
             if (hasta.HasValue) historial = historial.Where(o => o.OrderDate <= hasta.Value);
 
-            int pageSize = 7;
+            int pageSize = 12;
             int pageNumber = page ?? 1;
             var historialPaginado = historial
                 .OrderByDescending(x => x.OrderId)
