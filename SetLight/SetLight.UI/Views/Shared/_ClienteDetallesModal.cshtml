@@ -1,0 +1,43 @@
+﻿@model SetLight.Abstracciones.ModelosParaUI.ClientDto
+
+@{
+    var nombreCompleto = (Model.FirstName + " " + Model.LastName).Trim();
+    var empresaNombre = string.IsNullOrWhiteSpace(Model.EmpresaNombre)
+        ? "—"
+        : Model.EmpresaNombre;
+    var telPersonal = string.IsNullOrWhiteSpace(Model.Phone)
+        ? "—"
+        : Model.Phone;
+    var telEmpresa = string.IsNullOrWhiteSpace(Model.EmpresaTelefono)
+        ? "—"
+        : Model.EmpresaTelefono;
+}
+
+<div class="modal fade" id="cltModal_@Model.ClientId" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles de cliente</h5>
+
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-2"><strong>Nombre:</strong> @nombreCompleto</div>
+                <div class="mb-2"><strong>Correo:</strong> @Model.Email</div>
+                <div class="mb-2"><strong>Teléfono personal:</strong> @telPersonal</div>
+                <div class="mb-2"><strong>Nombre de la empresa:</strong> @empresaNombre</div>
+                <div class="mb-2"><strong>Teléfono de la empresa:</strong> @telEmpresa</div>
+                <div class="mb-2"><strong>Estado:</strong> @Model.EstadoEnTexto</div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

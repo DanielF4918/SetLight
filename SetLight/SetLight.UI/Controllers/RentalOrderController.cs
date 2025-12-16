@@ -87,7 +87,7 @@ namespace SetLight.UI.Controllers
             if (desde.HasValue) historial = historial.Where(o => o.OrderDate >= desde.Value);
             if (hasta.HasValue) historial = historial.Where(o => o.OrderDate <= hasta.Value);
 
-            int pageSize = 7;
+            int pageSize = 12;
             int pageNumber = page ?? 1;
             var historialPaginado = historial
                 .OrderByDescending(x => x.OrderId)
@@ -190,14 +190,18 @@ namespace SetLight.UI.Controllers
         // =======================
         public ActionResult Create()
         {
+            // Solo clientes ACTIVOS (Status == 1)
             var clientes = _contexto.Clients
                 .Where(c => c.Status == 1)
+                .OrderBy(c => c.FirstName)
+                .ThenBy(c => c.LastName)
                 .Select(c => new ClientDto
                 {
                     ClientId = c.ClientId,
                     FirstName = c.FirstName,
                     LastName = c.LastName
-                }).ToList();
+                })
+                .ToList();
 
             var equipos = _contexto.Equipment
                 .Where(e => e.Status == 1 && e.Stock > 0)
@@ -210,7 +214,8 @@ namespace SetLight.UI.Controllers
                     RentalValue = e.RentalValue,
                     Quantity = 0,
                     Stock = e.Stock
-                }).ToList();
+                })
+                .ToList();
 
             var model = new CrearRentalOrderViewModel
             {
@@ -224,16 +229,19 @@ namespace SetLight.UI.Controllers
             return View(model);
         }
 
-        // =======================
+
+        // ======================= 
         // CREATE POST
         // =======================
         [HttpPost]
         public async Task<ActionResult> Create(CrearRentalOrderViewModel model)
         {
-            if (!ModelState.IsValid)
+            // =======================
+            // Helper: recargar combos y rehidratar equipos
+            // =======================
+            void RecargarCombos(CrearRentalOrderViewModel m, List<OrderDetailDto> equiposSel = null)
             {
-                // Recargar combos básicos
-                model.Clientes = _contexto.Clients
+                m.Clientes = _contexto.Clients
                     .Where(c => c.Status == 1)
                     .Select(c => new ClientDto
                     {
@@ -242,7 +250,7 @@ namespace SetLight.UI.Controllers
                         LastName = c.LastName
                     }).ToList();
 
-                model.EquiposDisponibles = _contexto.Equipment
+                m.EquiposDisponibles = _contexto.Equipment
                     .Where(e => e.Status == 1 && e.Stock > 0)
                     .Select(e => new OrderDetailDto
                     {
@@ -255,6 +263,27 @@ namespace SetLight.UI.Controllers
                         Stock = e.Stock
                     }).ToList();
 
+                // 🔁 Rehidratar cantidades seleccionadas
+                if (equiposSel != null && equiposSel.Any())
+                {
+                    var map = equiposSel.ToDictionary(x => x.EquipmentId, x => x.Quantity);
+
+                    foreach (var eq in m.EquiposDisponibles)
+                    {
+                        if (map.TryGetValue(eq.EquipmentId, out var qty))
+                            eq.Quantity = qty;
+                    }
+
+                    m.EquiposSeleccionados = equiposSel;
+                }
+            }
+
+            // =======================
+            // Validación básica del modelo
+            // =======================
+            if (!ModelState.IsValid)
+            {
+                RecargarCombos(model, model.EquiposSeleccionados);
                 return View(model);
             }
 
@@ -265,44 +294,55 @@ namespace SetLight.UI.Controllers
             if (equiposSeleccionados == null || !equiposSeleccionados.Any())
             {
                 ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
-
-                model.Clientes = _contexto.Clients
-                    .Where(c => c.Status == 1)
-                    .Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
-
-                model.EquiposDisponibles = _contexto.Equipment
-                    .Where(e => e.Status == 1 && e.Stock > 0)
-                    .Select(e => new OrderDetailDto
-                    {
-                        EquipmentId = e.EquipmentId,
-                        EquipmentName = e.EquipmentName,
-                        Brand = e.Brand,
-                        Model = e.Model,
-                        RentalValue = e.RentalValue,
-                        Quantity = 0,
-                        Stock = e.Stock
-                    }).ToList();
-
+                RecargarCombos(model, model.EquiposSeleccionados);
                 return View(model);
             }
 
-            string correoUsuario = User.Identity?.Name ?? "";
-            var empleado = _contexto.Empleado
-                .FirstOrDefault(e => e.CorreoElectronico == correoUsuario && e.Estado);
-            int? idEmpleado = empleado?.IdEmpleado;
+            // =======================
+            // Validación crítica: Cliente activo
+            // =======================
+            var clienteDb = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
+            if (clienteDb == null || clienteDb.Status != 1)
+            {
+                ModelState.AddModelError("",
+                    "No se puede finalizar: el cliente está inactivo o fue desactivado. Refresque y seleccione otro cliente.");
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
 
+            // =======================
+            // Validación crítica: Empleado activo
+            // =======================
+            string correoUsuario = User.Identity?.Name ?? "";
+            var empleadoDb = _contexto.Empleado
+                .FirstOrDefault(e => e.CorreoElectronico == correoUsuario);
+
+            if (empleadoDb == null)
+            {
+                ModelState.AddModelError("",
+                    "No se pudo identificar el empleado autenticado. Inicie sesión nuevamente.");
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
+
+            if (!empleadoDb.Estado)
+            {
+                ModelState.AddModelError("",
+                    "No se puede finalizar: su usuario fue desactivado mientras realizaba la orden.");
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
+
+            // =======================
+            // Construcción de la orden
+            // =======================
             var nuevaOrden = new RentalOrderDto
             {
                 ClientId = model.ClientId,
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 StatusOrder = model.StatusOrder,
-                EmpleadoId = idEmpleado,
+                EmpleadoId = empleadoDb.IdEmpleado,
                 DescuentoManual = model.DescuentoManual,
                 Details = equiposSeleccionados.Select(e => new OrderDetailDto
                 {
@@ -315,6 +355,9 @@ namespace SetLight.UI.Controllers
                 }).ToList()
             };
 
+            // =======================
+            // Guardado
+            // =======================
             try
             {
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
@@ -326,15 +369,13 @@ namespace SetLight.UI.Controllers
 
                 if (ordenGuardada != null && (ordenGuardada.StatusOrder == 1 || ordenGuardada.StatusOrder == 2))
                 {
-                    var cliente = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
-
                     var ordenParaPDF = new RentalOrderDto
                     {
                         OrderId = ordenGuardada.OrderId,
                         OrderDate = ordenGuardada.OrderDate,
                         StartDate = ordenGuardada.StartDate,
                         EndDate = ordenGuardada.EndDate,
-                        ClientName = cliente.FirstName + " " + cliente.LastName,
+                        ClientName = clienteDb.FirstName + " " + clienteDb.LastName,
                         Details = equiposSeleccionados
                     };
 
@@ -349,31 +390,7 @@ namespace SetLight.UI.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-
-                model.Clientes = _contexto.Clients
-                    .Where(c => c.Status == 1)
-                    .Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
-
-                model.EquiposDisponibles = _contexto.Equipment
-                    .Where(e => e.Status == 1 && e.Stock > 0)
-                    .Select(e => new OrderDetailDto
-                    {
-                        EquipmentId = e.EquipmentId,
-                        EquipmentName = e.EquipmentName,
-                        Brand = e.Brand,
-                        Model = e.Model,
-                        RentalValue = e.RentalValue,
-                        Quantity = 0,
-                        Stock = e.Stock
-                    }).ToList();
-
-                model.EquiposSeleccionados = equiposSeleccionados;
-
+                RecargarCombos(model, equiposSeleccionados);
                 return View(model);
             }
             catch (Exception)
@@ -381,33 +398,12 @@ namespace SetLight.UI.Controllers
                 ModelState.AddModelError(string.Empty,
                     "Ocurrió un error al guardar la orden. Por favor, intente de nuevo.");
 
-                model.Clientes = _contexto.Clients
-                    .Where(c => c.Status == 1)
-                    .Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
-
-                model.EquiposDisponibles = _contexto.Equipment
-                    .Where(e => e.Status == 1 && e.Stock > 0)
-                    .Select(e => new OrderDetailDto
-                    {
-                        EquipmentId = e.EquipmentId,
-                        EquipmentName = e.EquipmentName,
-                        Brand = e.Brand,
-                        Model = e.Model,
-                        RentalValue = e.RentalValue,
-                        Quantity = 0,
-                        Stock = e.Stock
-                    }).ToList();
-
-                model.EquiposSeleccionados = equiposSeleccionados;
-
+                RecargarCombos(model, equiposSeleccionados);
                 return View(model);
             }
         }
+
+
 
         // =======================
         // EDIT GET
@@ -418,6 +414,14 @@ namespace SetLight.UI.Controllers
             if (orden == null)
                 return HttpNotFound();
 
+            // 🔒 Bloqueo por estado (solo Activa = 1)
+            if (orden.StatusOrder != 1)
+            {
+                TempData["Error"] = "No se puede editar una orden que ya está completada o cancelada.";
+                return RedirectToAction("Index");
+            }
+
+            // Detalles seleccionados (equipos ya en la orden)
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
@@ -436,6 +440,7 @@ namespace SetLight.UI.Controllers
             var cantidadesPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.Quantity);
             var idsSeleccionados = cantidadesPorEquipo.Keys.ToList();
 
+            // Equipos: activos o que ya están en la orden (aunque estén inactivos)
             var equiposBase = _contexto.Equipment
                 .Where(e => e.Status == 1 || idsSeleccionados.Contains(e.EquipmentId))
                 .ToList();
@@ -457,6 +462,24 @@ namespace SetLight.UI.Controllers
                 })
                 .ToList();
 
+            // Clientes: activos + cliente actual (aunque esté inactivo)
+            var clientes = _contexto.Clients
+                .Where(c => c.Status == 1 || c.ClientId == orden.ClientId)
+                .OrderBy(c => c.FirstName)
+                .ThenBy(c => c.LastName)
+                .Select(c => new ClientDto
+                {
+                    ClientId = c.ClientId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName
+                })
+                .ToList();
+
+            var clienteActual = clientes.FirstOrDefault(c => c.ClientId == orden.ClientId);
+            string nombreClienteActual = clienteActual != null
+                ? $"{clienteActual.FirstName} {clienteActual.LastName}"
+                : "Cliente no disponible";
+
             var viewModel = new CrearRentalOrderViewModel
             {
                 OrderId = orden.OrderId,
@@ -467,17 +490,15 @@ namespace SetLight.UI.Controllers
                 DescuentoManual = orden.DescuentoManual,
                 EquiposSeleccionados = detalles,
                 EquiposDisponibles = equiposParaModal,
-                Clientes = _contexto.Clients
-                    .Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList()
+                Clientes = clientes
             };
+
+            ViewBag.ClientNameSeleccionado = nombreClienteActual;
 
             return View("Edit", viewModel);
         }
+
+
 
         // =======================
         // EDIT POST
@@ -486,26 +507,26 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, CrearRentalOrderViewModel model)
         {
-            var equiposSeleccionados = model.EquiposSeleccionados?
-                .Where(e => e.Quantity > 0)
-                .ToList() ?? new List<OrderDetailDto>();
-
-            if (!ModelState.IsValid || !equiposSeleccionados.Any())
+            // Helper: recargar combos + rehidratar cantidades
+            void RecargarCombos(CrearRentalOrderViewModel m, List<OrderDetailDto> equiposSel = null)
             {
-                if (!equiposSeleccionados.Any())
-                {
-                    ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
-                }
+                // Clientes: activos + cliente actual (por si el actual quedó inactivo)
+                m.Clientes = _contexto.Clients
+                    .Where(c => c.Status == 1 || c.ClientId == m.ClientId)
+                    .OrderBy(c => c.FirstName)
+                    .ThenBy(c => c.LastName)
+                    .Select(c => new ClientDto
+                    {
+                        ClientId = c.ClientId,
+                        FirstName = c.FirstName,
+                        LastName = c.LastName
+                    }).ToList();
 
-                model.Clientes = _contexto.Clients.Select(c => new ClientDto
-                {
-                    ClientId = c.ClientId,
-                    FirstName = c.FirstName,
-                    LastName = c.LastName
-                }).ToList();
+                // Equipos: activos + equipos seleccionados (aunque inactivos)
+                var idsSel = equiposSel?.Select(x => x.EquipmentId).Distinct().ToList() ?? new List<int>();
 
-                model.EquiposDisponibles = _contexto.Equipment
-                    .Where(e => e.Status == 1 && e.Stock > 0)
+                m.EquiposDisponibles = _contexto.Equipment
+                    .Where(e => e.Status == 1 || idsSel.Contains(e.EquipmentId))
                     .Select(e => new OrderDetailDto
                     {
                         EquipmentId = e.EquipmentId,
@@ -513,11 +534,54 @@ namespace SetLight.UI.Controllers
                         Brand = e.Brand,
                         Model = e.Model,
                         RentalValue = e.RentalValue,
-                        Stock = e.Stock
+                        Stock = e.Stock,
+                        Quantity = 0
                     }).ToList();
 
-                model.EquiposSeleccionados = equiposSeleccionados;
+                // Rehidratar cantidades
+                if (equiposSel != null && equiposSel.Any())
+                {
+                    var map = equiposSel.ToDictionary(x => x.EquipmentId, x => x.Quantity);
+                    foreach (var eq in m.EquiposDisponibles)
+                    {
+                        if (map.TryGetValue(eq.EquipmentId, out var qty))
+                            eq.Quantity = qty;
+                    }
+                    m.EquiposSeleccionados = equiposSel;
+                }
+            }
 
+            // 🔒 Validar que la orden exista y sea editable (anti URL / anti POST manual)
+            var ordenDb = await _contexto.RentalOrders.FindAsync(id);
+            if (ordenDb == null)
+                return HttpNotFound();
+
+            if (ordenDb.StatusOrder != 1)
+            {
+                TempData["Error"] = "No se puede guardar cambios: la orden ya no está activa.";
+                return RedirectToAction("Index");
+            }
+
+            // Equipos seleccionados
+            var equiposSeleccionados = model.EquiposSeleccionados?
+                .Where(e => e.Quantity > 0)
+                .ToList() ?? new List<OrderDetailDto>();
+
+            if (!ModelState.IsValid || !equiposSeleccionados.Any())
+            {
+                if (!equiposSeleccionados.Any())
+                    ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
+
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
+
+            // ✅ Cliente debe seguir activo (o si cambió, el nuevo debe estar activo)
+            var clienteDb = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
+            if (clienteDb == null || clienteDb.Status != 1)
+            {
+                ModelState.AddModelError("", "No se puede finalizar: el cliente está inactivo o fue desactivado. Seleccione otro cliente.");
+                RecargarCombos(model, equiposSeleccionados);
                 return View(model);
             }
 
@@ -525,16 +589,17 @@ namespace SetLight.UI.Controllers
             {
                 try
                 {
-                    var orden = await _contexto.RentalOrders.FindAsync(id);
-                    if (orden == null)
-                        return HttpNotFound();
+                    // Actualizar cabecera
+                    ordenDb.ClientId = model.ClientId;
+                    ordenDb.StartDate = model.StartDate;
+                    ordenDb.EndDate = model.EndDate;
+                    ordenDb.DescuentoManual = model.DescuentoManual;
 
-                    orden.ClientId = model.ClientId;
-                    orden.StartDate = model.StartDate;
-                    orden.EndDate = model.EndDate;
-                    orden.OrderDate = DateTime.Now;
-                    orden.DescuentoManual = model.DescuentoManual;
+                    // OJO: No sobrescribimos OrderDate (debe ser la fecha original)
+                    // Si querés fecha de modificación, mejor agregar campo ModifiedDate.
+                    // ordenDb.OrderDate = DateTime.Now;  <-- quitado
 
+                    // Restaurar stock anterior
                     var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
 
                     foreach (var detalle in detallesAnteriores)
@@ -552,33 +617,34 @@ namespace SetLight.UI.Controllers
                     _contexto.OrderDetails.RemoveRange(detallesAnteriores);
                     await _contexto.SaveChangesAsync();
 
+                    // Aplicar nuevos detalles + descontar stock
                     foreach (var item in equiposSeleccionados)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(item.EquipmentId);
-                        if (equipo != null)
+                        if (equipo == null)
+                            throw new InvalidOperationException("El equipo seleccionado no existe.");
+
+                        if (equipo.Stock < item.Quantity)
                         {
-                            if (equipo.Stock < item.Quantity)
-                            {
-                                throw new InvalidOperationException(
-                                    $"No hay suficiente stock para el equipo: {equipo.EquipmentName}. " +
-                                    $"Disponibles: {equipo.Stock}, seleccionados: {item.Quantity}."
-                                );
-                            }
+                            throw new InvalidOperationException(
+                                $"No hay suficiente stock para el equipo: {equipo.EquipmentName}. " +
+                                $"Disponibles: {equipo.Stock}, seleccionados: {item.Quantity}."
+                            );
+                        }
 
-                            _contexto.OrderDetails.Add(new OrderDetailDA
-                            {
-                                OrderId = id,
-                                EquipmentId = item.EquipmentId,
-                                Quantity = item.Quantity
-                            });
+                        _contexto.OrderDetails.Add(new OrderDetailDA
+                        {
+                            OrderId = id,
+                            EquipmentId = item.EquipmentId,
+                            Quantity = item.Quantity
+                        });
 
-                            equipo.Stock -= item.Quantity;
+                        equipo.Stock -= item.Quantity;
 
-                            if (equipo.Stock <= 0)
-                            {
-                                equipo.Stock = 0;
-                                equipo.Status = 2;
-                            }
+                        if (equipo.Stock <= 0)
+                        {
+                            equipo.Stock = 0;
+                            equipo.Status = 2;
                         }
                     }
 
@@ -590,30 +656,9 @@ namespace SetLight.UI.Controllers
                 catch (InvalidOperationException ex)
                 {
                     transaction.Rollback();
-
                     ModelState.AddModelError(string.Empty, ex.Message);
 
-                    model.Clientes = _contexto.Clients.Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
-
-                    model.EquiposDisponibles = _contexto.Equipment
-                        .Where(e => e.Status == 1)
-                        .Select(e => new OrderDetailDto
-                        {
-                            EquipmentId = e.EquipmentId,
-                            EquipmentName = e.EquipmentName,
-                            Brand = e.Brand,
-                            Model = e.Model,
-                            RentalValue = e.RentalValue,
-                            Stock = e.Stock
-                        }).ToList();
-
-                    model.EquiposSeleccionados = equiposSeleccionados;
-
+                    RecargarCombos(model, equiposSeleccionados);
                     return View(model);
                 }
                 catch (Exception)
@@ -621,27 +666,7 @@ namespace SetLight.UI.Controllers
                     transaction.Rollback();
                     ModelState.AddModelError("", "Error al guardar los cambios.");
 
-                    model.Clientes = _contexto.Clients.Select(c => new ClientDto
-                    {
-                        ClientId = c.ClientId,
-                        FirstName = c.FirstName,
-                        LastName = c.LastName
-                    }).ToList();
-
-                    model.EquiposDisponibles = _contexto.Equipment
-                        .Where(e => e.Status == 1 && e.Stock > 0)
-                        .Select(e => new OrderDetailDto
-                        {
-                            EquipmentId = e.EquipmentId,
-                            EquipmentName = e.EquipmentName,
-                            Brand = e.Brand,
-                            Model = e.Model,
-                            RentalValue = e.RentalValue,
-                            Stock = e.Stock
-                        }).ToList();
-
-                    model.EquiposSeleccionados = equiposSeleccionados;
-
+                    RecargarCombos(model, equiposSeleccionados);
                     return View(model);
                 }
             }

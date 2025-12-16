@@ -115,19 +115,31 @@
         string estadoTexto = orden.StatusOrder == 1 ? "Activa"
                             : orden.StatusOrder == 2 ? "Completada"
                             : "Cancelada";
+
         string estadoColor = orden.StatusOrder == 1 ? "badge bg-warning"
                             : orden.StatusOrder == 2 ? "bg-success"
                             : "bg-danger";
 
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card h-100 border-0 shadow-sm hover-card js-order-card"
+                 data-end="@orden.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")"
+                 data-status="@orden.StatusOrder">
+
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
-                        <h5 class="fw-bold text-dark mb-2">
-                            Orden #@orden.OrderId
-                        </h5>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                Orden #@orden.OrderId
+                            </h5>
+
+                            <!-- Aquí el JS inyecta la alerta -->
+                            <div class="js-order-alert mt-1"></div>
+                        </div>
+
                         <span class="badge @estadoColor text-white">@estadoTexto</span>
                     </div>
+
+                    <hr class="my-2" />
 
                     <p class="mb-1"><strong>Cliente:</strong> @orden.ClientName</p>
                     <p class="mb-1"><strong>Colaborador:</strong> @orden.EmpleadoNombreCompleto</p>
@@ -220,6 +232,7 @@
                             }
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -320,48 +333,69 @@
         font-size: 0.8rem;
         padding: 6px 10px;
     }
+
+    /* Opcional: asegura que el badge de alerta no se "estire" */
+    .js-order-alert .badge {
+        display: inline-block;
+    }
 </style>
 
 @* Modales de equipos *@
 @foreach (var orden in Model)
 {
+    var totalUnidades = orden.Details.Sum(d => d.Quantity);
+    var totalMonto = orden.Details.Sum(d => d.RentalValue * d.Quantity);
+
     <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
                 </div>
+
                 <div class="modal-body">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Equipo</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Cantidad</th>
-                                <th>Valor Unitario</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body-@orden.OrderId">
-                            @foreach (var detalle in orden.Details)
-                            {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center align-middle">
+                            <thead class="table-dark text-white">
                                 <tr>
-                                    <td>@detalle.EquipmentName</td>
-                                    <td>@detalle.Brand</td>
-                                    <td>@detalle.Model</td>
-                                    <td>@detalle.Quantity</td>
-                                    <td>$@detalle.RentalValue</td>
-                                    <td>$@(detalle.RentalValue * detalle.Quantity)</td>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Cantidad</th>
+                                    <th>Valor unitario</th>
+                                    <th>Subtotal</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="d-flex justify-content-center mt-2">
-                    <nav>
-                        <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
-                    </nav>
+                            </thead>
+                            <tbody id="table-body-@orden.OrderId">
+                                @foreach (var detalle in orden.Details)
+                                {
+                                    var subtotalItem = detalle.RentalValue * detalle.Quantity;
+                                    <tr>
+                                        <td>@detalle.EquipmentName</td>
+                                        <td>@detalle.Brand</td>
+                                        <td>@detalle.Model</td>
+                                        <td>@detalle.Quantity</td>
+                                        <td>$@detalle.RentalValue.ToString("N2")</td>
+                                        <td>$@subtotalItem.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold bg-light">
+                                    <td colspan="3" class="text-end">Total de unidades:</td>
+                                    <td>@totalUnidades</td>
+                                    <td class="text-end">Total equipos:</td>
+                                    <td>$@totalMonto.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-2">
+                        <nav>
+                            <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
+                        </nav>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -379,6 +413,7 @@
             modal.show();
         }
     </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
@@ -459,4 +494,6 @@
 
         });
     </script>
+
+    <script src="~/Scripts/RentalOrder/alertas-vencimiento.js"></script>
 }

@@ -12,7 +12,7 @@ using SetLight.LogicaDeNegocio.EqCategory.EditarEqcategory;
 
 namespace SetLight.UI.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Colaborador,Tecnico")]
     public class EqCategoryController : Controller
     {
         private ICrearEqCategoryLN _crearEqCategoryLN;

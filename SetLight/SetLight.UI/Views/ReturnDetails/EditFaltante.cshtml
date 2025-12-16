@@ -4,77 +4,118 @@
     ViewBag.Title = "Editar equipo faltante";
 }
 
-<div class="container mt-4 mb-5 p-4 bg-white shadow rounded" style="max-width: 800px;">
-    <h2 class="text-center mb-4 text-dark">Editar equipo faltante / no devuelto</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-    @using (Html.BeginForm("EditFaltante", "ReturnDetails", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.MaintenanceId)
-        @Html.HiddenFor(m => m.EquipmentId)
+            <div class="card shadow p-4 border-dark rounded-3 bg-white">
+                <h2 class="text-center fw-bold text-dark mb-4">
+                    Editar equipo faltante / no devuelto
+                </h2>
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Orden</label><br />
-            @if (Model.OrderId.HasValue)
-            {
-                @Html.ActionLink(
-                    "#" + Model.OrderId.Value,
-                    "DetallesDevolucion",
-                    "ReturnDetails",
-                    new { orderId = Model.OrderId.Value },
-                    new { @class = "link-primary text-decoration-none" }
-                )
-            }
-            else
-            {
-                <span class="text-muted">N/D</span>
-            }
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Cliente</label>
-            <input type="text" class="form-control" value="@Model.ClientName" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Equipo</label>
-            <input type="text" class="form-control" value="@Model.EquipmentName" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Cantidad faltante</label>
-            <input type="number" class="form-control" value="@Model.Cantidad" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Estado</label>
-            @Html.DropDownListFor(
-                m => m.MaintenanceStatus,
-                new List<SelectListItem>
+                @using (Html.BeginForm("EditFaltante", "ReturnDetails", FormMethod.Post))
                 {
-                    new SelectListItem { Text = "Pendiente", Value = "0", Selected = Model.MaintenanceStatus == 0 },
-                    new SelectListItem { Text = "Finalizado", Value = "1", Selected = Model.MaintenanceStatus == 1 }
-                },
-                new { @class = "form-control" }
-            )
-        </div>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.MaintenanceId)
+                    @Html.HiddenFor(m => m.EquipmentId)
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Costo de reposición ($)</label>
-            @Html.TextBoxFor(m => m.Cost, new { @class = "form-control", type = "number", step = "0.01", min = "0" })
-        </div>
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Comentarios</label>
-            @Html.TextAreaFor(m => m.Comments,
-                new { @class = "form-control", rows = "4", placeholder = "Detalle cómo se gestionó el faltante: pago del cliente, reposición, nota interna, etc." })
-        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Orden</label><br />
+                        @if (Model.OrderId.HasValue)
+                        {
+                            @Html.ActionLink(
+                                "#" + Model.OrderId.Value,
+                                "DetallesDevolucion",
+                                "ReturnDetails",
+                                new { orderId = Model.OrderId.Value },
+                                new { @class = "link-primary text-decoration-none fw-semibold" }
+                            )
+                        }
+                        else
+                        {
+                            <span class="text-muted">N/D</span>
+                        }
+                    </div>
 
-        <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-success px-4 fw-semibold">Guardar cambios</button>
-            @Html.ActionLink("Cancelar", "Faltantes", "ReturnDetails", null, new { @class = "btn btn-secondary ms-3" })
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Cliente</label>
+                        <input type="text"
+                               class="form-control border-dark"
+                               value="@Model.ClientName"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Equipo</label>
+                        <input type="text"
+                               class="form-control border-dark"
+                               value="@Model.EquipmentName"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Cantidad faltante</label>
+                        <input type="number"
+                               class="form-control border-dark"
+                               value="@Model.Cantidad"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Estado</label>
+                        @Html.DropDownListFor(
+                            m => m.MaintenanceStatus,
+                            new List<SelectListItem>
+                            {
+                                new SelectListItem { Text = "Pendiente",  Value = "0", Selected = Model.MaintenanceStatus == 0 },
+                                new SelectListItem { Text = "Finalizado", Value = "1", Selected = Model.MaintenanceStatus == 1 }
+                            },
+                            new { @class = "form-select border-dark" }
+                        )
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Costo de reposición ($)</label>
+                        @Html.TextBoxFor(
+                            m => m.Cost,
+                            new
+                            {
+                                @class = "form-control border-dark",
+                                type = "number",
+                                step = "0.01",
+                                min = "0"
+                            })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Comentarios</label>
+                        @Html.TextAreaFor(
+                            m => m.Comments,
+                            new
+                            {
+                                @class = "form-control border-dark",
+                                rows = "4",
+                                placeholder = "Detalle cómo se gestionó el faltante: pago del cliente, reposición, nota interna, etc."
+                            })
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-success px-4 fw-semibold me-2">
+                            Guardar cambios
+                        </button>
+                        @Html.ActionLink(
+                            "Cancelar",
+                            "Faltantes",
+                            "ReturnDetails",
+                            null,
+                            new { @class = "btn btn-dark fw-semibold text-white" }
+                        )
+                    </div>
+                }
+            </div>
+
         </div>
-    }
+    </div>
 </div>

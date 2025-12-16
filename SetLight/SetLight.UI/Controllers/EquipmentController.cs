@@ -182,6 +182,10 @@ namespace SetLight.UI.Controllers
             ViewBag.NombreBuscado = Nombre;
             ViewBag.PlaceholderImagen = Url.Content("~/content/img/placeholder-equipment.png");
 
+            lista = lista
+    .OrderBy(e => (e.EquipmentName ?? "").Trim().ToLower())
+    .ToList();
+
             int pageNumber = page ?? 1;
             int pageSize = 12;
 

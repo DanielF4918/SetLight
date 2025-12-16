@@ -4,68 +4,84 @@
     ViewBag.Title = "Finalizar mantenimiento";
 }
 
-<div class="container mt-5 mb-5 p-4 bg-white shadow rounded" style="max-width: 900px;">
-    <h2 class="text-center mb-4 text-dark">Finalizar mantenimiento</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
 
-    @using (Html.BeginForm("FinalizarMantenimiento", "ReturnDetails",
-                           FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
-        @Html.AntiForgeryToken()
+            <div class="card shadow p-4 border-dark rounded-3 bg-white">
+                <h2 class="text-center mb-4 text-dark fw-bold">Finalizar mantenimiento</h2>
 
-        @* Id del mantenimiento *@
-        @Html.Hidden("id", Model.MaintenanceId)
-        @Html.HiddenFor(m => m.MaintenanceId)
+                @using (Html.BeginForm(
+                           "FinalizarMantenimiento",
+                           "ReturnDetails",
+                           FormMethod.Post,
+                           new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Equipo:</label>
-            <p class="form-control-plaintext fw-semibold">
-                @(Model.Equipment != null
-                    ? Model.Equipment.EquipmentName
-                    : "(Sin nombre de equipo)")
-            </p>
-        </div>
+                    @* Id del mantenimiento *@
+                    @Html.HiddenFor(m => m.MaintenanceId)
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Comentarios:</label>
-            @Html.TextArea(
-                "comments",
-                Model.Comments,@* muestra comentarios existentes si los hubiera *@
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Equipo</label>
+                        <p class="form-control-plaintext fw-semibold">
+                            @(Model.Equipment != null
+                                ? Model.Equipment.EquipmentName
+                                : "(Sin nombre de equipo)")
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Comentarios</label>
+                        @Html.TextArea(
+                            "comments",
+                            Model.Comments,@* muestra comentarios existentes si los hubiera *@
 new
 {
-@class = "form-control",
+@class = "form-control border-dark",
 rows = 3,
 placeholder = "Notas finales del mantenimiento, trabajos realizados, etc."
 })
-        </div>
+                    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Costo:</label>
-            @Html.TextBox(
-                "cost",
-                Model.Cost.HasValue ? Model.Cost.Value.ToString("0.##") : "",
-                new
-                {
-                    @class = "form-control",
-                    type = "number",
-                    step = "0.01",
-                    min = "0"
-                })
-        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Costo</label>
+                        @Html.TextBox(
+                            "cost",
+                            Model.Cost.HasValue ? Model.Cost.Value.ToString("0.##") : "",
+                            new
+                            {
+                                @class = "form-control border-dark",
+                                type = "number",
+                                step = "0.01",
+                                min = "0"
+                            })
+                        <small class="text-muted">Si no aplica, puedes dejarlo en blanco.</small>
+                    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Evidencia (opcional):</label>
-            <input type="file" name="evidenceFile" class="form-control" />
-            <small class="text-muted">
-                Puedes adjuntar una foto, PDF u otro archivo con la evidencia del trabajo realizado.
-            </small>
-        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-black">Evidencia (opcional)</label>
+                        <input type="file" name="evidenceFile" class="form-control border-dark" />
+                        <small class="text-muted">
+                            Puedes adjuntar una foto, PDF u otro archivo con la evidencia del trabajo realizado.
+                        </small>
+                    </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">
-                Guardar y Finalizar
-            </button>
-            @Html.ActionLink("Cancelar", "Mantenimientos", "ReturnDetails", null,
-                new { @class = "btn btn-secondary ms-2" })
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-success px-4 fw-semibold me-2">
+                            Guardar y finalizar
+                        </button>
+                        @Html.ActionLink(
+                            "Cancelar",
+                            "Mantenimientos",
+                            "ReturnDetails",
+                            null,
+                            new { @class = "btn btn-dark fw-semibold text-white" }
+                        )
+                    </div>
+                }
+            </div>
+
         </div>
-    }
+    </div>
 </div>

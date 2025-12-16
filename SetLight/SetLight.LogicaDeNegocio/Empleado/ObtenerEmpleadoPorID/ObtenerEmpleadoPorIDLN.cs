@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SetLight.Abstracciones.AccesoADatos.Empleado;
+﻿using SetLight.Abstracciones.AccesoADatos.Empleado;
 using SetLight.Abstracciones.LogicaDeNegocio.Empleado;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos.Empleado.ObtenerEmpleadoPorID;
 
 namespace SetLight.LogicaDeNegocio.Empleado.ObtenerEmpleadoPorID
 {
-    public class ObtenerEmpleadoPorIDLN: IObtenerEmpleadoPorIDLN
+    public class ObtenerEmpleadoPorIDLN : IObtenerEmpleadoPorIDLN
     {
         private IObtenerEmpleadoPorIDAD _obtenerEmpleadoPorIDAD;
 

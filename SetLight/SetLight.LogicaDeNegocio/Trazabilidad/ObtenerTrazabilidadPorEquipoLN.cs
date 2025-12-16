@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using SetLight.Abstracciones.AccesoADatos.Trazabilidad;
 using SetLight.Abstracciones.LogicaDeNegocio.Trazabilidad;

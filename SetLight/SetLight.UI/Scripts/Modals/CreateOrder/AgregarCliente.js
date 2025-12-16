@@ -7,7 +7,7 @@
             $('#contenedorClientes').html(data);
 
 
-            paginarClientes(5);
+            paginarClientes(9);
         });
     });
 
@@ -39,10 +39,10 @@
 
         if (filtro === "") {
             $('#clientesBody tr').show();
-            paginarClientes(5); 
+            paginarClientes(9); 
         } else {
 
-            paginarClientes(5);
+            paginarClientes(9);
         }
 
     });
