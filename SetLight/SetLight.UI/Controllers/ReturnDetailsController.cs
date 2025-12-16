@@ -19,7 +19,7 @@ using PagedList;
 
 namespace SetLight.UI.Controllers
 {
-    [Authorize(Roles = "Administrador,Tecnico")]
+    [Authorize(Roles = "Administrador,Colaborador,Tecnico")]
     public class ReturnDetailsController : Controller
     {
         private ICreateReturnDetailsAD _createReturnDetailsAD;
@@ -576,11 +576,14 @@ namespace SetLight.UI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult FinalizarMantenimiento(int id, string comments, decimal? cost, HttpPostedFileBase evidenceFile)
+        public ActionResult FinalizarMantenimiento(int MaintenanceId,
+    string comments,
+    decimal? cost,
+    HttpPostedFileBase evidenceFile)
         {
             using (var contexto = new Contexto())
             {
-                var mantenimiento = contexto.Maintenance.Find(id);
+                var mantenimiento = contexto.Maintenance.Find(MaintenanceId);
                 if (mantenimiento == null)
                     return HttpNotFound();
 
