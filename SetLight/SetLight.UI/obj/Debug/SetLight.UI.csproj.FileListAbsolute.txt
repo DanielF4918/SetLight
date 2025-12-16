@@ -1447,3 +1447,4 @@ C:\Users\kenca\OneDrive\Escritorio\7 de diciembre\SetLight\SetLight\SetLight.UI\
 C:\Users\kenca\OneDrive\Escritorio\7 de diciembre\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.dll
 C:\Users\kenca\OneDrive\Escritorio\7 de diciembre\SetLight\SetLight\SetLight.UI\obj\Debug\SetLight.UI.pdb
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.UI\bin\SetLight.LogicaDeNegocio.dll.config
+C:\Users\df773\OneDrive\Documentos\Github\SetLight\SetLight\SetLight.UI\bin\SetLight.LogicaDeNegocio.dll.config
