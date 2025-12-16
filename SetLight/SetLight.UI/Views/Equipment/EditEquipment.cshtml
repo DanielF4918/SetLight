@@ -189,6 +189,8 @@
     @Scripts.Render("~/bundles/jqueryval")
     @Scripts.Render("~/bundles/jqueryunobtrusive")
 
+    <script src="~/Scripts/Modals/EqCategory/EqCategoryModal.js"></script> <!-- 👈 Aquí agregás tu script -->
+
     <script>
         $(document).on('change', 'input[name="nuevaImagen"]', function () {
             const file = this.files && this.files[0];
@@ -209,3 +211,4 @@
         });
     </script>
 }
+
