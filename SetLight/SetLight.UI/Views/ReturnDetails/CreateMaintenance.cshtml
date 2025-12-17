@@ -47,12 +47,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-black" for="Cantidad">Cantidad de equipos</label>
                         @Html.TextBoxFor(m => m.Cantidad, new
-                        {
-                            @class = "form-control border-dark",
-                            type = "number",
-                            min = "1",
-                            id = "Cantidad"
-                        })
+                   {
+                       @class = "form-control border-dark",
+                       type = "number",
+                       id = "Cantidad",
+                       @readonly = "readonly"
+                   })
                         <small class="text-muted">
                             Número de unidades del mismo equipo que se enviarán a mantenimiento.
                         </small>

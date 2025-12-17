@@ -217,6 +217,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Properties\PublishProfiles\SetLight - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\setlightapp - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\setlightapp - Web Deploy1.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
