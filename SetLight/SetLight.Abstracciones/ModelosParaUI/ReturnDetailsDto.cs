@@ -29,5 +29,7 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public int ClientId { get; set; }
         public string ClientName { get; set; }
 
+        // ✅ Precio pactado (snapshot) para esa orden/equipo
+        public decimal UnitRentalPrice { get; set; }
     }
 }

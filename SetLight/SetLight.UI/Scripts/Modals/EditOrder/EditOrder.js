@@ -5,8 +5,11 @@
     btnAgregar.onclick = function () {
         const tablaResumen = document
             .getElementById("tablaResumenEquipos")
-            .querySelector("tbody");
+            ?.querySelector("tbody");
+
         const inputsContainer = document.getElementById("inputsEquiposContainer");
+
+        if (!tablaResumen || !inputsContainer) return;
 
         // Limpiamos tabla y hidden inputs antes de reconstruir
         tablaResumen.innerHTML = "";
@@ -23,9 +26,9 @@
         }
 
         cantidades.forEach(input => {
-            const qty = parseInt(input.value);
-            const stock = parseInt(input.dataset.stock);
-            const seleccionado = parseInt(input.dataset.selected || "0");
+            const qty = parseInt(input.value, 10) || 0;
+            const stock = parseInt(input.dataset.stock, 10) || 0;
+            const seleccionado = parseInt(input.dataset.selected || "0", 10) || 0;
             const max = stock + seleccionado;
 
             if (qty > 0) {
@@ -39,7 +42,9 @@
                 const name = input.dataset.name;
                 const brand = input.dataset.brand;
                 const model = input.dataset.model;
-                const val = parseFloat(input.dataset.value);
+
+                // OJO: dataset.value ya fue "pisado" por el precio pactado si existía (ver aplicarSnapshotEnModal)
+                const val = parseFloat(input.dataset.value) || 0;
                 const subItem = qty * val * dias;
 
                 // Fila con data-valor y data-cantidad para el cálculo
@@ -48,9 +53,9 @@
                         <td>${name}</td>
                         <td>${brand}</td>
                         <td>${model}</td>
-                        <td>$${val.toLocaleString('es-CR')}</td>
+                        <td>$${val.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         <td>${qty}</td>
-                        <td>$${subItem.toLocaleString('es-CR')}</td>
+                        <td>$${subItem.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                 `;
 
@@ -61,7 +66,13 @@
                     <input type="hidden" name="EquiposSeleccionados[${index}].EquipmentName" value="${name}" />
                     <input type="hidden" name="EquiposSeleccionados[${index}].Brand" value="${brand}" />
                     <input type="hidden" name="EquiposSeleccionados[${index}].Model" value="${model}" />
+
+                    <!-- Compatibilidad actual -->
                     <input type="hidden" name="EquiposSeleccionados[${index}].RentalValue" value="${val}" />
+
+                    <!-- ✅ NUEVO: precio pactado (snapshot) -->
+                    <input type="hidden" name="EquiposSeleccionados[${index}].UnitRentalPrice" value="${val}" />
+
                     <input type="hidden" name="EquiposSeleccionados[${index}].Quantity" value="${qty}" />
                 `;
                 inputsContainer.appendChild(container);
@@ -117,10 +128,10 @@ function actualizarResumen() {
     // Usar las filas de la tabla de equipos seleccionados
     const filas = document.querySelectorAll("#tablaResumenEquipos tbody tr");
     filas.forEach(row => {
-        const val = parseFloat(row.dataset.valor);
-        const qty = parseInt(row.dataset.cantidad);
+        const val = parseFloat(row.dataset.valor) || 0;
+        const qty = parseInt(row.dataset.cantidad, 10) || 0;
 
-        if (!isNaN(val) && !isNaN(qty) && qty > 0 && dias > 0) {
+        if (qty > 0 && dias > 0) {
             subtotal += qty * val * dias;
         }
     });
@@ -137,13 +148,13 @@ function actualizarResumen() {
     const totalFinal = +(totalBruto - montoDescuento).toFixed(2);
 
     if (subtotalEl)
-        subtotalEl.textContent = subtotal.toLocaleString("es-CR", { minimumFractionDigits: 2 });
+        subtotalEl.textContent = subtotal.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (ivaEl)
-        ivaEl.textContent = iva.toLocaleString("es-CR", { minimumFractionDigits: 2 });
+        ivaEl.textContent = iva.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (descuentoEl)
-        descuentoEl.textContent = montoDescuento.toLocaleString("es-CR", { minimumFractionDigits: 2 });
+        descuentoEl.textContent = montoDescuento.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (totalEl)
-        totalEl.textContent = totalFinal.toLocaleString("es-CR", { minimumFractionDigits: 2 });
+        totalEl.textContent = totalFinal.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function aplicarFiltroEquipos() {
@@ -172,17 +183,88 @@ function aplicarFiltroEquipos() {
     });
 }
 
+/**
+ * ✅ Lee los hidden inputs que vienen del servidor (Edit) para saber:
+ * - qué equipos ya estaban seleccionados
+ * - con qué cantidad
+ * - y con qué precio pactado (UnitRentalPrice o RentalValue)
+ */
+function leerSeleccionadosDesdeHidden() {
+    const map = {}; // { equipmentId: { qty, price } }
+
+    const container = document.getElementById("inputsEquiposContainer");
+    if (!container) return map;
+
+    const idInputs = container.querySelectorAll('input[name$=".EquipmentId"]');
+
+    idInputs.forEach(idInput => {
+        const nameBase = idInput.name.replace(".EquipmentId", ""); // EquiposSeleccionados[0]
+        const id = parseInt(idInput.value, 10);
+
+        const qtyInput = container.querySelector(`input[name="${nameBase}.Quantity"]`);
+        const priceInput =
+            container.querySelector(`input[name="${nameBase}.UnitRentalPrice"]`) ||
+            container.querySelector(`input[name="${nameBase}.RentalValue"]`);
+
+        const qty = qtyInput ? (parseInt(qtyInput.value, 10) || 0) : 0;
+        const price = priceInput ? (parseFloat(priceInput.value) || 0) : 0;
+
+        if (!isNaN(id) && id > 0) {
+            map[id] = { qty: qty, price: price };
+        }
+    });
+
+    return map;
+}
+
+/**
+ * ✅ Aplica el "precio pactado" al modal:
+ * PISA input.dataset.value con el precio snapshot, y rehidrata cantidad.
+ * Esto evita que se use el precio actual del inventario al recalcular.
+ */
+function aplicarSnapshotEnModal() {
+    const selectedMap = leerSeleccionadosDesdeHidden();
+
+    document.querySelectorAll(".cantidad-equipo").forEach(input => {
+        const id = parseInt(input.dataset.id, 10);
+        if (selectedMap[id]) {
+            input.dataset.value = selectedMap[id].price;  // 🔒 precio pactado
+            input.value = selectedMap[id].qty;            // 🔁 cantidad pactada
+
+            // Si querés, también refrescamos el stock display de inmediato
+            const stock = parseInt(input.dataset.stock, 10) || 0;
+            const seleccionado = parseInt(input.dataset.selected || "0", 10) || 0;
+            const stockCell = document.getElementById("stock-display-" + id);
+            if (stockCell) {
+                const nuevoStock = stock + seleccionado - (parseInt(input.value, 10) || 0);
+                stockCell.innerHTML = `<strong>${nuevoStock}</strong>`;
+            }
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // Configuramos el botón del modal
     setupSeleccionarEquiposEvent();
+
+    // ✅ Aplicar snapshot al cargar la página (antes de que el user abra el modal)
+    aplicarSnapshotEnModal();
+
+    // ✅ Aplicar snapshot cada vez que se abre el modal (por si el DOM se rehidrata)
+    const modalEl = document.getElementById("modalSeleccionarEquipos");
+    if (modalEl) {
+        modalEl.addEventListener("shown.bs.modal", function () {
+            aplicarSnapshotEnModal();
+        });
+    }
 
     // Validación y actualización visual de stock al cambiar cantidades en el modal
     document.addEventListener("input", function (e) {
         if (e.target && e.target.classList.contains("cantidad-equipo")) {
             const input = e.target;
-            const qty = parseInt(input.value) || 0;
-            const stock = parseInt(input.dataset.stock);
-            const seleccionado = parseInt(input.dataset.selected || "0");
+            const qty = parseInt(input.value, 10) || 0;
+            const stock = parseInt(input.dataset.stock, 10) || 0;
+            const seleccionado = parseInt(input.dataset.selected || "0", 10) || 0;
             const id = input.dataset.id;
             const max = stock + seleccionado;
 
@@ -197,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // 👉 Enganchamos el filtro UNA sola vez
+    // Enganchamos el filtro UNA sola vez
     const filtroEquiposInput = document.getElementById("filtroEquipos");
     if (filtroEquiposInput) {
         filtroEquiposInput.addEventListener("input", aplicarFiltroEquipos);

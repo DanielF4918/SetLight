@@ -16,9 +16,6 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
         {
             try
             {
-                // (Opcional defensivo) si EmpleadoId es obligatorio, bloquea aquí:
-                // if (!orden.EmpleadoId.HasValue) throw new InvalidOperationException("Empleado inválido.");
-
                 var entidad = new RentalOrderDA
                 {
                     OrderDate = DateTime.Now,
@@ -51,11 +48,21 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                         );
                     }
 
+                    // ✅ Precio pactado (snapshot)
+                    // Preferimos el valor que viene en el DTO (ya congelado desde BD en el controller),
+                    // y si viene en 0, caemos al RentalValue actual como respaldo defensivo.
+                    var precioPactado = (detalle.RentalValue > 0m)
+                        ? detalle.RentalValue
+                        : equipo.RentalValue;
+
                     db.OrderDetails.Add(new OrderDetailDA
                     {
                         OrderId = entidad.OrderId,
                         EquipmentId = detalle.EquipmentId,
-                        Quantity = detalle.Quantity
+                        Quantity = detalle.Quantity,
+
+                        // ✅ NUEVO: guardar el precio pactado en la columna nueva
+                        UnitRentalPrice = precioPactado
                     });
 
                     equipo.Stock -= detalle.Quantity;
@@ -79,4 +86,5 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
             }
         }
     }
+
 }

@@ -343,14 +343,19 @@
 @* Modales de equipos *@
 @foreach (var orden in Model)
 {
-    var totalUnidades = orden.Details.Sum(d => d.Quantity);
-    var totalMonto = orden.Details.Sum(d => d.RentalValue * d.Quantity);
+    // ✅ Total unidades y total monto (cantidad * precio)
+    var totalUnidades = (orden.Details ?? new List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>())
+        .Sum(d => d.Quantity);
+
+    var totalMonto = (orden.Details ?? new List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>())
+        .Sum(d => d.RentalValue * d.Quantity);
 
     <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
 
                 <div class="modal-body">
@@ -366,20 +371,31 @@
                                     <th>Subtotal</th>
                                 </tr>
                             </thead>
+
                             <tbody id="table-body-@orden.OrderId">
-                                @foreach (var detalle in orden.Details)
+                                @if (orden.Details != null && orden.Details.Any())
                                 {
-                                    var subtotalItem = detalle.RentalValue * detalle.Quantity;
+                                    foreach (var detalle in orden.Details)
+                                    {
+                                        var subtotalItem = detalle.RentalValue * detalle.Quantity; // ✅ cantidad * precio
+                                        <tr>
+                                            <td>@detalle.EquipmentName</td>
+                                            <td>@detalle.Brand</td>
+                                            <td>@detalle.Model</td>
+                                            <td>@detalle.Quantity</td>
+                                            <td>$@detalle.RentalValue.ToString("N2")</td>
+                                            <td>$@subtotalItem.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
                                     <tr>
-                                        <td>@detalle.EquipmentName</td>
-                                        <td>@detalle.Brand</td>
-                                        <td>@detalle.Model</td>
-                                        <td>@detalle.Quantity</td>
-                                        <td>$@detalle.RentalValue.ToString("N2")</td>
-                                        <td>$@subtotalItem.ToString("N2")</td>
+                                        <td colspan="6">Sin equipos registrados en esta orden.</td>
                                     </tr>
                                 }
                             </tbody>
+
                             <tfoot>
                                 <tr class="fw-bold bg-light">
                                     <td colspan="3" class="text-end">Total de unidades:</td>
@@ -405,6 +421,7 @@
         </div>
     </div>
 }
+
 
 @section Scripts {
     <script>
