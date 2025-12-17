@@ -264,11 +264,15 @@
 </div>
 
 <style>
+    /* =========================
+       Paginación (la tuya)
+    ========================== */
     .pagination {
         display: flex !important;
         justify-content: center !important;
         padding-left: 0;
         list-style: none;
+        gap: 6px;
     }
 
         .pagination li a,
@@ -278,25 +282,33 @@
             border-radius: 4px;
             padding: 5px 10px;
             display: inline-block;
+            text-decoration: none;
         }
 
         .pagination li.active span {
             background-color: #e9ecef !important;
             color: black !important;
+            font-weight: bold;
         }
 
         .pagination li a:hover {
             background-color: #f0f0f0;
             color: black !important;
         }
+
+    /* =========================
+       Botones pill (los tuyos)
+    ========================== */
     .btn-pill-light {
-        background-color: #e5e7eb; 
-        border: 1px solid #d1d5db; 
+        background-color: #e5e7eb;
+        border: 1px solid #d1d5db;
         color: #111827;
         padding: 0.45rem 1.4rem;
         border-radius: 6px;
         font-weight: 600;
         box-shadow: 0 2px 4px rgba(0,0,0,.04);
+        text-decoration: none;
+        display: inline-block;
     }
 
         .btn-pill-light:hover {
@@ -310,9 +322,11 @@
         border: 1px solid #15803d;
         color: #ffffff;
         padding: 0.45rem 1.7rem;
-        border-radius: 6px; 
+        border-radius: 6px;
         font-weight: 600;
         box-shadow: 0 2px 4px rgba(0,0,0,.08);
+        text-decoration: none;
+        display: inline-block;
     }
 
         .btn-pill-success:hover {
@@ -321,4 +335,140 @@
             color: #ffffff;
         }
 
+    /* =========================
+       GRID + CARDS (FALTABA)
+       Estilo tipo "Faltantes"
+    ========================== */
+    .maint-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+        align-items: stretch;
+        margin-top: 10px;
+    }
+
+    @@media (max-width: 1200px) {
+        .maint-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .maint-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .maint-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 12px 25px rgba(15,23,42,.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+        .maint-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px rgba(15,23,42,.12);
+        }
+
+    /* 👇 Imagen igual a "Faltantes": altura fija y se ve completa sin recorte raro */
+    .maint-photo {
+        width: 100%;
+        height: 260px;            /* igual que faltantes */
+        object-fit: cover;        /* si querés CERO recorte: cambia a contain */
+        object-position: center;
+        background: #f3f4f6;
+        display: block;
+    }
+
+    .maint-info {
+        padding: 16px 20px 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .maint-name {
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.3;
+        min-height: 2.6em;
+    }
+
+    .maint-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .chip {
+        border-radius: 999px;
+        padding: .22rem .55rem;
+        font-size: .78rem;
+        font-weight: 600;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #4b5563;
+        white-space: nowrap;
+    }
+
+    /* Estados */
+    .mant-status-pendiente {
+        background: #ffedd5 !important;
+        border-color: #fb923c !important;
+        color: #9a3412 !important;
+    }
+
+    .mant-status-finalizado {
+        background: #dcfce7 !important;
+        border-color: #22c55e !important;
+        color: #166534 !important;
+    }
+
+    .mant-status-cancelado {
+        background: #e5e7eb !important;
+        border-color: #9ca3af !important;
+        color: #111827 !important;
+    }
+
+    .mant-status-desconocido {
+        background: #f3f4f6 !important;
+        border-color: #e5e7eb !important;
+        color: #374151 !important;
+    }
+
+    .maint-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .maint-cost {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    /* Botones redondos consistentes */
+    .btn-group .btn.rounded-circle {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .btn-group .btn i {
+        pointer-events: none;
+        font-size: 1.05rem;
+    }
 </style>
