@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnAdminCat = document.getElementById("btnAdministrarCategorias");
     const modalCategoriasEl = document.getElementById("modalCategorias");
     const modalEditarCatEl = document.getElementById("modalEditarCategoria");
-    const modalEqCategoryEl = document.getElementById("modalEqCategory"); // 👈 tu modal de crear
+    const modalEqCategoryEl = document.getElementById("modalEqCategory"); // modal crear
 
     if (!btnAdminCat || !modalCategoriasEl || !modalEditarCatEl) return;
 
@@ -15,40 +15,65 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const contenedorLista = document.getElementById("contenedorListaCategorias");
     const contenedorEditar = document.getElementById("contenedorEditarCategoria");
-
     const btnNuevaCatDesdeLista = document.getElementById("btnAbrirCrearCategoriaDesdeLista");
 
-    // Cargar lista de categorías dentro del modal
-    function cargarListaCategorias() {
-        fetch("/EqCategory/ListarCategoriasPartial")
+    // =========================
+    // Cargar lista (con paginación)
+    // =========================
+    function cargarListaCategorias(page = 1) {
+        fetch("/EqCategory/ListarCategoriasPartial?page=" + page)
             .then(r => r.text())
             .then(html => {
                 contenedorLista.innerHTML = html;
+            })
+            .catch(() => {
+                contenedorLista.innerHTML = "<p class='text-danger'>Error al cargar categorías</p>";
             });
     }
 
+    // =========================
     // Abrir modal de categorías
+    // =========================
     btnAdminCat.addEventListener("click", function () {
-        cargarListaCategorias();
+        cargarListaCategorias(1);
         modalCategorias.show();
     });
 
-    // Delegación: botón Editar en la tabla
+    // =========================
+    // Delegación: editar + paginación
+    // =========================
     contenedorLista.addEventListener("click", function (e) {
-        const btn = e.target.closest(".btn-editar-cat");
-        if (!btn) return;
 
-        const id = btn.dataset.id;
+        // 🟢 Editar categoría
+        const btnEditar = e.target.closest(".btn-editar-cat");
+        if (btnEditar) {
+            const id = btnEditar.dataset.id;
 
-        fetch("/EqCategory/EditarCategoriaPartial?id=" + encodeURIComponent(id))
-            .then(r => r.text())
-            .then(html => {
-                contenedorEditar.innerHTML = html;
-                modalEditarCategoria.show();
-            });
+            fetch("/EqCategory/EditarCategoriaPartial?id=" + encodeURIComponent(id))
+                .then(r => r.text())
+                .then(html => {
+                    contenedorEditar.innerHTML = html;
+                    modalEditarCategoria.show();
+                });
+
+            return; // ⛔ corta aquí
+        }
+
+        // 🔵 Paginación
+        const link = e.target.closest(".pagination a");
+        if (!link) return;
+
+        e.preventDefault();
+
+        const url = new URL(link.href);
+        const page = url.searchParams.get("page") || 1;
+
+        cargarListaCategorias(page);
     });
 
-    // Submit del form de edición (AJAX)
+    // =========================
+    // Submit edición (AJAX)
+    // =========================
     modalEditarCatEl.addEventListener("submit", function (e) {
         const form = e.target;
         if (form.id !== "formEditarCategoria") return;
@@ -65,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 if (data.success) {
                     modalEditarCategoria.hide();
-                    cargarListaCategorias(); // refrescar tabla
+                    cargarListaCategorias(1); // refresca lista
                 } else {
                     alert(data.mensaje || "Ocurrió un error al actualizar la categoría.");
                 }
@@ -75,12 +100,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // 👉 Abrir modal de crear categoría desde la lista
+    // =========================
+    // Abrir modal crear categoría
+    // =========================
     if (btnNuevaCatDesdeLista && modalEqCategory) {
         btnNuevaCatDesdeLista.addEventListener("click", function () {
             modalCategorias.hide();
-            // Esto dispara el show.bs.modal que tenés en EqCategoryModal.js
             modalEqCategory.show();
         });
     }
+
 });

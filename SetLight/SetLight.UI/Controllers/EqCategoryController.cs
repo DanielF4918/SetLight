@@ -95,19 +95,31 @@ namespace SetLight.UI.Controllers
 
 
         // Lista de categorías en un PartialView (tabla)
-        public ActionResult ListarCategoriasPartial()
+        public ActionResult ListarCategoriasPartial(int page = 1)
         {
-            var categorias = _contexto.EqCategory
+            int pageSize = 5; // 👈 cantidad por página
+
+            var query = _contexto.EqCategory
                 .Select(c => new EqCategoryDto
                 {
                     CategoryId = c.CategoryId,
                     CategoryName = c.CategoryName
                 })
-                .OrderBy(c => c.CategoryName)
+                .OrderBy(c => c.CategoryName);
+
+            int totalRegistros = query.Count();
+
+            var categorias = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalRegistros / pageSize);
 
             return PartialView("_ListaCategorias", categorias);
         }
+
 
         // Formulario de edición en un PartialView
         public ActionResult EditarCategoriaPartial(int id)
