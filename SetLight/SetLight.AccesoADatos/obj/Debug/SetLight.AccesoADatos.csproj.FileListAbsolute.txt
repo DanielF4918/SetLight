@@ -331,3 +331,4 @@ C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.31911824.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
+C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_UnitRentalPrice_Manual.resources

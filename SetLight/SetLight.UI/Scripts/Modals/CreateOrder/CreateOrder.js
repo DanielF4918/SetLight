@@ -1,6 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
 
-    const tablaResumen = document.getElementById("tablaResumenEquipos").querySelector("tbody");
+    const tablaResumen = document.getElementById("tablaResumenEquipos")?.querySelector("tbody");
     const inputsContainer = document.getElementById("inputsEquiposContainer");
 
     const startDateInput = document.getElementById("StartDate");
@@ -14,8 +14,8 @@
     const descuentoEl = document.getElementById("descuentoAplicado");
 
     function calcularDias() {
-        const start = new Date(startDateInput.value);
-        const end = new Date(endDateInput.value);
+        const start = new Date(startDateInput?.value);
+        const end = new Date(endDateInput?.value);
         const diffMs = end - start;
         const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1;
         return isNaN(diffDays) || diffDays <= 0 ? 0 : diffDays;
@@ -23,13 +23,15 @@
 
     function actualizarResumen() {
         const dias = calcularDias();
-        diasAlquilerEl.textContent = dias;
+        if (diasAlquilerEl) diasAlquilerEl.textContent = dias;
 
         let subtotal = 0;
+
         document.querySelectorAll(".cantidad-equipo").forEach(input => {
-            const qty = parseInt(input.value);
-            const val = parseFloat(input.dataset.value);
-            if (!isNaN(qty) && qty > 0 && dias > 0) {
+            const qty = parseInt(input.value, 10) || 0;
+            const val = parseFloat(input.dataset.value) || 0;
+
+            if (qty > 0 && dias > 0) {
                 subtotal += qty * val * dias;
             }
         });
@@ -37,35 +39,36 @@
         const iva = +(subtotal * 0.13).toFixed(2);
         const totalBruto = +(subtotal + iva).toFixed(2);
 
-
-        const descuentoPct = parseFloat(descuentoInput.value) || 0;
+        const descuentoPct = parseFloat(descuentoInput?.value) || 0;
         const montoDescuento = +(totalBruto * (descuentoPct / 100)).toFixed(2);
         const totalFinal = +(totalBruto - montoDescuento).toFixed(2);
 
-        subtotalEl.textContent = subtotal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-        ivaEl.textContent = iva.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-        descuentoEl.textContent = montoDescuento.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-        totalEl.textContent = totalFinal.toLocaleString('es-CR', { minimumFractionDigits: 2 });
-
+        if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (ivaEl) ivaEl.textContent = iva.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (descuentoEl) descuentoEl.textContent = montoDescuento.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (totalEl) totalEl.textContent = totalFinal.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-
 
     if (startDateInput) startDateInput.addEventListener("change", actualizarResumen);
     if (endDateInput) endDateInput.addEventListener("change", actualizarResumen);
+
     if (descuentoInput) {
         descuentoInput.addEventListener("input", actualizarResumen);
         descuentoInput.addEventListener("change", actualizarResumen);
     }
 
-
     document.addEventListener("click", function (e) {
         if (e.target && e.target.id === "btnAgregarEquipos") {
+
+            if (!tablaResumen || !inputsContainer) return;
+
             tablaResumen.innerHTML = "";
             inputsContainer.innerHTML = "";
 
             const cantidades = document.querySelectorAll(".cantidad-equipo");
             let index = 0;
             let hayError = false;
+
             const dias = calcularDias();
             if (dias === 0) {
                 alert("Debe seleccionar un rango de fechas válido.");
@@ -73,8 +76,9 @@
             }
 
             cantidades.forEach(input => {
-                const qty = parseInt(input.value);
-                const stock = parseInt(input.dataset.stock);
+                const qty = parseInt(input.value, 10) || 0;
+                const stock = parseInt(input.dataset.stock, 10) || 0;
+
                 if (qty > 0) {
                     if (qty > stock) {
                         alert(`No puede seleccionar más de ${stock} unidades de "${input.dataset.name}".`);
@@ -86,7 +90,8 @@
                     const name = input.dataset.name;
                     const brand = input.dataset.brand;
                     const model = input.dataset.model;
-                    const val = parseFloat(input.dataset.value);
+
+                    const val = parseFloat(input.dataset.value) || 0; // precio mostrado actualmente
                     const subItem = qty * val * dias;
 
                     tablaResumen.innerHTML += `
@@ -94,9 +99,9 @@
                             <td>${name}</td>
                             <td>${brand}</td>
                             <td>${model}</td>
-                            <td>$${val.toLocaleString('es-CR')}</td>
+                            <td>$${val.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td>${qty}</td>
-                            <td>$${subItem.toLocaleString('es-CR')}</td>
+                            <td>$${subItem.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         </tr>
                     `;
 
@@ -106,7 +111,13 @@
                         <input type="hidden" name="EquiposSeleccionados[${index}].EquipmentName" value="${name}" />
                         <input type="hidden" name="EquiposSeleccionados[${index}].Brand" value="${brand}" />
                         <input type="hidden" name="EquiposSeleccionados[${index}].Model" value="${model}" />
+
+                        <!-- Compatibilidad con lo actual -->
                         <input type="hidden" name="EquiposSeleccionados[${index}].RentalValue" value="${val}" />
+
+                        <!-- ✅ NUEVO: nombre semántico para precio pactado -->
+                        <input type="hidden" name="EquiposSeleccionados[${index}].UnitRentalPrice" value="${val}" />
+
                         <input type="hidden" name="EquiposSeleccionados[${index}].Quantity" value="${qty}" />
                     `;
                     inputsContainer.appendChild(container);
@@ -117,12 +128,12 @@
             actualizarResumen();
 
             if (!hayError) {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalSeleccionarEquipos'));
+                const modalEl = document.getElementById('modalSeleccionarEquipos');
+                const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
                 if (modal) modal.hide();
             }
         }
     });
-
 
     actualizarResumen();
 });

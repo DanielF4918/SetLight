@@ -78,7 +78,7 @@ namespace SetLight.UI.Controllers
                                                 EquipmentName = equipo.EquipmentName,
                                                 Brand = equipo.Brand,
                                                 Model = equipo.Model,
-                                                RentalValue = equipo.RentalValue,
+                                                RentalValue = detalle.UnitRentalPrice,
                                                 Quantity = detalle.Quantity
                                             }).ToList()
                              });
@@ -106,14 +106,14 @@ namespace SetLight.UI.Controllers
         // =======================
         // GET: /RentalOrder
         public ActionResult Index(
-            int? page,
-            int? orderId,
-            int? estado,            // 1=Activa, 2=Completada, 3=Cancelada
-            string cliente,         // parte del nombre
-            int? empleadoId,        // opcional
-            DateTime? desde,        // StartDate >=
-            DateTime? hasta         // EndDate   <=
-        )
+     int? page,
+     int? orderId,
+     int? estado,
+     string cliente,
+     int? empleadoId,
+     DateTime? desde,
+     DateTime? hasta
+ )
         {
             var q = from orden in _contexto.RentalOrders
                     join clienteTbl in _contexto.Clients on orden.ClientId equals clienteTbl.ClientId
@@ -133,17 +133,20 @@ namespace SetLight.UI.Controllers
                             ? empleado.Nombre + " " + empleado.Apellido
                             : "No asignado",
                         RutaComprobante = orden.RutaComprobante,
+
                         Details = (from detalle in _contexto.OrderDetails
                                    join equipo in _contexto.Equipment on detalle.EquipmentId equals equipo.EquipmentId
                                    where detalle.OrderId == orden.OrderId
                                    select new OrderDetailDto
                                    {
+                                       EquipmentId = detalle.EquipmentId,
                                        EquipmentName = equipo.EquipmentName,
                                        Brand = equipo.Brand,
                                        Model = equipo.Model,
-                                       RentalValue = equipo.RentalValue,
+                                       RentalValue = detalle.UnitRentalPrice, // ✅ snapshot
                                        Quantity = detalle.Quantity
                                    }).ToList()
+
                     };
 
             // Filtros condicionales
@@ -158,13 +161,11 @@ namespace SetLight.UI.Controllers
             if (desde.HasValue) q = q.Where(o => o.StartDate >= desde.Value);
             if (hasta.HasValue) q = q.Where(o => o.EndDate <= hasta.Value);
 
-            // Orden descendente por ID
             int pageSize = 10;
             int pageNumber = page ?? 1;
             var ordenesPaged = q.OrderByDescending(o => o.OrderId)
                      .ToPagedList(pageNumber, pageSize);
 
-            // Para valores en la vista
             ViewBag.FiltroOrderId = orderId;
             ViewBag.FiltroEstado = estado;
             ViewBag.FiltroCliente = cliente;
@@ -172,7 +173,6 @@ namespace SetLight.UI.Controllers
             ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
             ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
 
-            // Dropdown de empleados
             ViewBag.Empleados = _contexto.Empleado
                 .Select(e => new SelectListItem
                 {
@@ -184,6 +184,7 @@ namespace SetLight.UI.Controllers
 
             return View(ordenesPaged);
         }
+
 
         // =======================
         // CREATE GET
@@ -334,6 +335,39 @@ namespace SetLight.UI.Controllers
             }
 
             // =======================
+            // ✅ Congelar precios desde BD (snapshot)
+            // =======================
+            var idsEquipos = equiposSeleccionados
+                .Select(x => x.EquipmentId)
+                .Distinct()
+                .ToList();
+
+            // Traemos los equipos desde BD para tomar el RentalValue real actual (no confiar en UI)
+            var equiposDb = _contexto.Equipment
+                .Where(x => idsEquipos.Contains(x.EquipmentId))
+                .Select(x => new
+                {
+                    x.EquipmentId,
+                    x.Status,
+                    x.EquipmentName,
+                    x.Brand,
+                    x.Model,
+                    x.RentalValue
+                })
+                .ToList();
+
+            // Validación: que existan todos y estén activos
+            if (equiposDb.Count != idsEquipos.Count || equiposDb.Any(x => x.Status != 1))
+            {
+                ModelState.AddModelError("",
+                    "No se puede finalizar: uno o más equipos seleccionados ya no existen o fueron desactivados. Refresque la lista e intente nuevamente.");
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
+
+            var mapEquiposDb = equiposDb.ToDictionary(x => x.EquipmentId, x => x);
+
+            // =======================
             // Construcción de la orden
             // =======================
             var nuevaOrden = new RentalOrderDto
@@ -344,14 +378,23 @@ namespace SetLight.UI.Controllers
                 StatusOrder = model.StatusOrder,
                 EmpleadoId = empleadoDb.IdEmpleado,
                 DescuentoManual = model.DescuentoManual,
-                Details = equiposSeleccionados.Select(e => new OrderDetailDto
+
+                // ✅ Details con RentalValue tomado desde BD (precio pactado / snapshot)
+                Details = equiposSeleccionados.Select(e =>
                 {
-                    EquipmentId = e.EquipmentId,
-                    EquipmentName = e.EquipmentName,
-                    Brand = e.Brand,
-                    Model = e.Model,
-                    Quantity = e.Quantity,
-                    RentalValue = e.RentalValue
+                    var eqDb = mapEquiposDb[e.EquipmentId];
+
+                    return new OrderDetailDto
+                    {
+                        EquipmentId = e.EquipmentId,
+                        EquipmentName = eqDb.EquipmentName,
+                        Brand = eqDb.Brand,
+                        Model = eqDb.Model,
+                        Quantity = e.Quantity,
+
+                        // Este es el precio que debe guardarse luego en OrderDetails.UnitRentalPrice
+                        RentalValue = eqDb.RentalValue
+                    };
                 }).ToList()
             };
 
@@ -405,6 +448,7 @@ namespace SetLight.UI.Controllers
 
 
 
+
         // =======================
         // EDIT GET
         // =======================
@@ -422,6 +466,7 @@ namespace SetLight.UI.Controllers
             }
 
             // Detalles seleccionados (equipos ya en la orden)
+            // ✅ IMPORTANTE: RentalValue debe venir del snapshot (OrderDetails.UnitRentalPrice)
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
@@ -432,12 +477,17 @@ namespace SetLight.UI.Controllers
                                 EquipmentName = equipo.EquipmentName,
                                 Brand = equipo.Brand,
                                 Model = equipo.Model,
-                                RentalValue = equipo.RentalValue,
+
+                                // ✅ precio pactado (snapshot)
+                                RentalValue = detalle.UnitRentalPrice,
+
                                 Quantity = detalle.Quantity,
                                 Stock = equipo.Stock
                             }).ToList();
 
             var cantidadesPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.Quantity);
+            var precioPactadoPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.RentalValue);
+
             var idsSeleccionados = cantidadesPorEquipo.Keys.ToList();
 
             // Equipos: activos o que ya están en la orden (aunque estén inactivos)
@@ -449,13 +499,20 @@ namespace SetLight.UI.Controllers
                 .Select(e =>
                 {
                     cantidadesPorEquipo.TryGetValue(e.EquipmentId, out int qty);
+
+                    // ✅ Si el equipo ya estaba en la orden, usar el precio pactado (snapshot)
+                    // Si es un equipo nuevo (no estaba en la orden), usar precio actual del inventario
+                    decimal precioParaMostrar = e.RentalValue;
+                    if (precioPactadoPorEquipo.TryGetValue(e.EquipmentId, out var pactado))
+                        precioParaMostrar = pactado;
+
                     return new OrderDetailDto
                     {
                         EquipmentId = e.EquipmentId,
                         EquipmentName = e.EquipmentName,
                         Brand = e.Brand,
                         Model = e.Model,
-                        RentalValue = e.RentalValue,
+                        RentalValue = precioParaMostrar, // ✅ aquí va el pactado si aplica
                         Stock = e.Stock,
                         Quantity = qty
                     };
@@ -488,8 +545,9 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 StatusOrder = orden.StatusOrder,
                 DescuentoManual = orden.DescuentoManual,
-                EquiposSeleccionados = detalles,
-                EquiposDisponibles = equiposParaModal,
+
+                EquiposSeleccionados = detalles,       // ✅ ya trae UnitRentalPrice
+                EquiposDisponibles = equiposParaModal, // ✅ respeta pactado para seleccionados
                 Clientes = clientes
             };
 
@@ -497,6 +555,7 @@ namespace SetLight.UI.Controllers
 
             return View("Edit", viewModel);
         }
+
 
 
 
@@ -589,19 +648,27 @@ namespace SetLight.UI.Controllers
             {
                 try
                 {
+                    // =======================
+                    // ✅ Guardar snapshot previo (antes de borrar)
+                    // =======================
+                    var detallesAnteriores = _contexto.OrderDetails
+                        .Where(d => d.OrderId == id)
+                        .ToList();
+
+                    // Mapa: EquipmentId -> UnitRentalPrice pactado anterior
+                    var precioPactadoAnterior = detallesAnteriores
+                        .GroupBy(d => d.EquipmentId)
+                        .ToDictionary(g => g.Key, g => g.First().UnitRentalPrice);
+
+                    // =======================
                     // Actualizar cabecera
+                    // =======================
                     ordenDb.ClientId = model.ClientId;
                     ordenDb.StartDate = model.StartDate;
                     ordenDb.EndDate = model.EndDate;
                     ordenDb.DescuentoManual = model.DescuentoManual;
 
-                    // OJO: No sobrescribimos OrderDate (debe ser la fecha original)
-                    // Si querés fecha de modificación, mejor agregar campo ModifiedDate.
-                    // ordenDb.OrderDate = DateTime.Now;  <-- quitado
-
                     // Restaurar stock anterior
-                    var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
-
                     foreach (var detalle in detallesAnteriores)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(detalle.EquipmentId);
@@ -617,7 +684,10 @@ namespace SetLight.UI.Controllers
                     _contexto.OrderDetails.RemoveRange(detallesAnteriores);
                     await _contexto.SaveChangesAsync();
 
+                    // =======================
                     // Aplicar nuevos detalles + descontar stock
+                    // ✅ Guardar UnitRentalPrice
+                    // =======================
                     foreach (var item in equiposSeleccionados)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(item.EquipmentId);
@@ -632,11 +702,28 @@ namespace SetLight.UI.Controllers
                             );
                         }
 
+                        // ✅ Precio pactado:
+                        // - si el equipo ya estaba antes, conservar el precio anterior
+                        // - si es nuevo, tomar el precio actual del inventario (o el que venga del model si lo querés)
+                        decimal unitPrice;
+                        if (precioPactadoAnterior.TryGetValue(item.EquipmentId, out var pactado))
+                        {
+                            unitPrice = pactado;
+                        }
+                        else
+                        {
+                            // Nuevo agregado en esta edición
+                            unitPrice = equipo.RentalValue;
+                        }
+
                         _contexto.OrderDetails.Add(new OrderDetailDA
                         {
                             OrderId = id,
                             EquipmentId = item.EquipmentId,
-                            Quantity = item.Quantity
+                            Quantity = item.Quantity,
+
+                            // ✅ NUEVO
+                            UnitRentalPrice = unitPrice
                         });
 
                         equipo.Stock -= item.Quantity;
@@ -671,6 +758,7 @@ namespace SetLight.UI.Controllers
                 }
             }
         }
+
 
         // =======================
         // CANCELAR ORDEN
@@ -733,6 +821,7 @@ namespace SetLight.UI.Controllers
             if (cliente == null)
                 return HttpNotFound("Cliente no encontrado");
 
+            // ✅ Detalles con precio pactado (snapshot)
             var detalles = (from detalle in _contexto.OrderDetails
                             join equipo in _contexto.Equipment
                                 on detalle.EquipmentId equals equipo.EquipmentId
@@ -742,7 +831,10 @@ namespace SetLight.UI.Controllers
                                 EquipmentName = equipo.EquipmentName,
                                 Brand = equipo.Brand,
                                 Model = equipo.Model,
-                                RentalValue = equipo.RentalValue,
+
+                                // ✅ usar UnitRentalPrice guardado en OrderDetails
+                                RentalValue = detalle.UnitRentalPrice,
+
                                 Quantity = detalle.Quantity
                             }).ToList();
 
@@ -780,5 +872,6 @@ namespace SetLight.UI.Controllers
             byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
             return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
         }
+
     }
 }

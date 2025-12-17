@@ -236,15 +236,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var detalle in order.Details)
+                                @if (order.Details != null && order.Details.Any())
+                                {
+                                    foreach (var detalle in order.Details)
+                                    {
+                                        var sub = detalle.RentalValue * detalle.Quantity;
+                                        <tr>
+                                            <td>@detalle.EquipmentName</td>
+                                            <td>@detalle.Brand</td>
+                                            <td>@detalle.Model</td>
+                                            <td>@detalle.Quantity</td>
+                                            <td>$@detalle.RentalValue.ToString("N2")</td>
+                                            <td>$@sub.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@detalle.EquipmentName</td>
-                                        <td>@detalle.Brand</td>
-                                        <td>@detalle.Model</td>
-                                        <td>@detalle.Quantity</td>
-                                        <td>$@detalle.RentalValue.ToString("N2")</td>
-                                        <td>$@((detalle.RentalValue * detalle.Quantity).ToString("N2"))</td>
+                                        <td colspan="6">Sin equipos registrados.</td>
                                     </tr>
                                 }
                             </tbody>
@@ -263,6 +273,7 @@
         </div>
     </div>
 }
+
 
 @section Scripts {
     <script src="~/Scripts/Modals/HistoryOrder/HistoryOrder.js"></script>

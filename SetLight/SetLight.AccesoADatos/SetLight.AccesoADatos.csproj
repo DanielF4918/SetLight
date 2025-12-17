@@ -92,6 +92,10 @@
     <Compile Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.Designer.cs">
       <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512172124257_Sync_UnitRentalPrice_Manual.cs" />
+    <Compile Include="Migrations\202512172124257_Sync_UnitRentalPrice_Manual.Designer.cs">
+      <DependentUpon>202512172124257_Sync_UnitRentalPrice_Manual.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Modelos\ClientDa.cs" />
     <Compile Include="Modelos\EmpleadoDA.cs" />
@@ -138,6 +142,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202511151945089_SincronizarModeloClientesEmpresa.resx">
       <DependentUpon>202511151945089_SincronizarModeloClientesEmpresa.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512172124257_Sync_UnitRentalPrice_Manual.resx">
+      <DependentUpon>202512172124257_Sync_UnitRentalPrice_Manual.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -97,7 +97,12 @@
                                     <input type="hidden" name="EquiposSeleccionados[@index].EquipmentName" value="@item.EquipmentName" />
                                     <input type="hidden" name="EquiposSeleccionados[@index].Brand" value="@item.Brand" />
                                     <input type="hidden" name="EquiposSeleccionados[@index].Model" value="@item.Model" />
+
+                                    <!-- ✅ Precio pactado (snapshot) -->
+                                    <!-- Mantengo RentalValue por compatibilidad y agrego UnitRentalPrice para claridad -->
                                     <input type="hidden" name="EquiposSeleccionados[@index].RentalValue" value="@item.RentalValue" />
+                                    <input type="hidden" name="EquiposSeleccionados[@index].UnitRentalPrice" value="@item.RentalValue" />
+
                                     <input type="hidden" name="EquiposSeleccionados[@index].Quantity" value="@item.Quantity" />
                                 </div>
                                 index++;
@@ -224,8 +229,6 @@
     <script src="~/Scripts/Modals/EditOrder/EditOrder.js"></script>
 
     <script>
-        // Si tu AgregarCliente.js depende de cargar clientes al abrir, esto ayuda a que
-        // el input venga precargado (ya lo estamos seteando en value, pero por si acaso).
         document.addEventListener("DOMContentLoaded", function () {
             // Si ocupas lógica extra para pre-selección, se hace aquí.
         });

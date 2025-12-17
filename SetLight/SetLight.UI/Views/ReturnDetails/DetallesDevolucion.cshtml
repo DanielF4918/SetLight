@@ -86,6 +86,10 @@
                             <thead class="table-dark text-white">
                                 <tr>
                                     <th>Equipo</th>
+
+                                    <!-- ✅ NUEVO -->
+                                    <th>Precio unitario</th>
+
                                     <th>Fecha de devolución</th>
                                     <th>¿Devuelto?</th>
                                     <th>¿Requiere mantenimiento?</th>
@@ -97,6 +101,10 @@
                                 {
                                     <tr>
                                         <td>@item.EquipmentName</td>
+
+                                        <!-- ✅ NUEVO -->
+                                        <td>$@item.UnitRentalPrice.ToString("N2")</td>
+
                                         <td>@item.ReturnDate.ToShortDateString()</td>
                                         <td>@(item.IsReturned ? "Sí" : "No")</td>
                                         <td>@(item.RequiresMaintenance ? "Sí" : "No")</td>
