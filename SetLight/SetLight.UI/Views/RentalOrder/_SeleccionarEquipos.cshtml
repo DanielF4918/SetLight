@@ -95,7 +95,7 @@
     
     document.addEventListener("DOMContentLoaded", () => {
         filasOriginales = Array.from(document.querySelectorAll("#equiposBody tr"));
-        paginarEquipos(6);
+        paginarEquipos(9);
     });
 
     document.getElementById("filtroEquipos").addEventListener("keyup", function () {
@@ -107,7 +107,7 @@
         if (filtro === "") {
             tbody.innerHTML = "";
             filasOriginales.forEach(f => tbody.appendChild(f));
-            paginarEquipos(6);
+            paginarEquipos(9);
             return;
         }
 
@@ -130,7 +130,7 @@
         filtradas.forEach(f => tbody.appendChild(f));
 
         
-        paginarEquipos(6);
+        paginarEquipos(9);
     });
 
 

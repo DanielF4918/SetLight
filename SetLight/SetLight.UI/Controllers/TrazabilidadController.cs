@@ -23,7 +23,7 @@ namespace SetLight.UI.Controllers
         public ActionResult VerTrazabilidad(int equipoId)
         {
             int pageNumber = 1;
-            int pageSize = 8;
+            int pageSize = 12;
 
             // Página
             var pageRaw = Request.QueryString["page"];
