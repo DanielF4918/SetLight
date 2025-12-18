@@ -1,5 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
+
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +52,7 @@
                         <li class="nav-item">
                             @Html.ActionLink("Clientes", "ListarClient", "Client", null, new { @class = "nav-link" })
                         </li>
-}
+                    }
                     @if (User.IsInRole("Administrador") || User.IsInRole("Colaborador") || User.IsInRole("Tecnico"))
                     {
                         <li class="nav-item">
@@ -74,6 +76,17 @@
             </div>
         </div>
     </nav>
+
+    <div class="container mt-5 pt-3">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="bi bi-shield-exclamation me-1"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        }
+    </div>
 
     <div class="container body-content mt-4">
         @RenderBody()
