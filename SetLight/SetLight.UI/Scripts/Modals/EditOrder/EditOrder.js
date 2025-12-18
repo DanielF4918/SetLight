@@ -70,7 +70,7 @@
                     <!-- Compatibilidad actual -->
                     <input type="hidden" name="EquiposSeleccionados[${index}].RentalValue" value="${val}" />
 
-                    <!-- ✅ NUEVO: precio pactado (snapshot) -->
+                    <!-- ✅ precio pactado (snapshot) -->
                     <input type="hidden" name="EquiposSeleccionados[${index}].UnitRentalPrice" value="${val}" />
 
                     <input type="hidden" name="EquiposSeleccionados[${index}].Quantity" value="${qty}" />
@@ -112,6 +112,24 @@ function calcularDias() {
     return isNaN(diffDays) || diffDays <= 0 ? 0 : diffDays;
 }
 
+// =======================
+// ✅ Helpers Misión 2: entrega
+// =======================
+function toNumber(v) {
+    const n = parseFloat((v ?? "").toString().replace(",", "."));
+    return isNaN(n) ? 0 : n;
+}
+function formatearCRC(n) {
+    return (n || 0).toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function obtenerTransporte() {
+    const isDelivery = !!(document.getElementById("IsDelivery")?.checked);
+    if (!isDelivery) return 0;
+
+    const tc = toNumber(document.getElementById("TransportCost")?.value);
+    return tc < 0 ? 0 : tc;
+}
+
 function actualizarResumen() {
     const diasAlquilerEl = document.getElementById("diasAlquiler");
     const subtotalEl = document.getElementById("subtotalAlquiler");
@@ -119,6 +137,9 @@ function actualizarResumen() {
     const totalEl = document.getElementById("totalAlquiler");
     const descuentoEl = document.getElementById("descuentoAplicado");
     const descuentoInput = document.getElementById("DescuentoManual");
+
+    // ✅ Misión 2
+    const transporteEl = document.getElementById("transporteAlquiler");
 
     const dias = calcularDias();
     if (diasAlquilerEl) diasAlquilerEl.textContent = dias;
@@ -136,25 +157,27 @@ function actualizarResumen() {
         }
     });
 
-    const iva = +(subtotal * 0.13).toFixed(2);
-    const totalBruto = +(subtotal + iva).toFixed(2);
+    // ✅ Transporte (solo si IsDelivery)
+    const transporte = obtenerTransporte();
+    if (transporteEl) transporteEl.textContent = formatearCRC(transporte);
+
+    // ✅ Regla consistente con Create:
+    // Base = subtotal + transporte
+    // IVA = 13% de base
+    const base = +(subtotal + transporte).toFixed(2);
+    const iva = +(base * 0.13).toFixed(2);
+    const totalBruto = +(base + iva).toFixed(2);
 
     // Descuento manual en porcentaje
-    const descuentoPct = parseFloat(
-        descuentoInput ? (descuentoInput.value || "0").replace(",", ".") : "0"
-    ) || 0;
+    const descuentoPct = toNumber(descuentoInput ? (descuentoInput.value || "0") : "0") || 0;
 
     const montoDescuento = +(totalBruto * (descuentoPct / 100)).toFixed(2);
     const totalFinal = +(totalBruto - montoDescuento).toFixed(2);
 
-    if (subtotalEl)
-        subtotalEl.textContent = subtotal.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (ivaEl)
-        ivaEl.textContent = iva.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (descuentoEl)
-        descuentoEl.textContent = montoDescuento.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (totalEl)
-        totalEl.textContent = totalFinal.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (subtotalEl) subtotalEl.textContent = formatearCRC(subtotal);
+    if (ivaEl) ivaEl.textContent = formatearCRC(iva);
+    if (descuentoEl) descuentoEl.textContent = formatearCRC(montoDescuento);
+    if (totalEl) totalEl.textContent = formatearCRC(totalFinal);
 }
 
 function aplicarFiltroEquipos() {
@@ -220,7 +243,6 @@ function leerSeleccionadosDesdeHidden() {
 /**
  * ✅ Aplica el "precio pactado" al modal:
  * PISA input.dataset.value con el precio snapshot, y rehidrata cantidad.
- * Esto evita que se use el precio actual del inventario al recalcular.
  */
 function aplicarSnapshotEnModal() {
     const selectedMap = leerSeleccionadosDesdeHidden();
@@ -231,7 +253,6 @@ function aplicarSnapshotEnModal() {
             input.dataset.value = selectedMap[id].price;  // 🔒 precio pactado
             input.value = selectedMap[id].qty;            // 🔁 cantidad pactada
 
-            // Si querés, también refrescamos el stock display de inmediato
             const stock = parseInt(input.dataset.stock, 10) || 0;
             const seleccionado = parseInt(input.dataset.selected || "0", 10) || 0;
             const stockCell = document.getElementById("stock-display-" + id);
@@ -250,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ✅ Aplicar snapshot al cargar la página (antes de que el user abra el modal)
     aplicarSnapshotEnModal();
 
-    // ✅ Aplicar snapshot cada vez que se abre el modal (por si el DOM se rehidrata)
+    // ✅ Aplicar snapshot cada vez que se abre el modal
     const modalEl = document.getElementById("modalSeleccionarEquipos");
     if (modalEl) {
         modalEl.addEventListener("shown.bs.modal", function () {
@@ -297,6 +318,29 @@ document.addEventListener("DOMContentLoaded", function () {
         descuentoInput.addEventListener("change", actualizarResumen);
     }
 
-    // Recalcular una vez al cargar, usando los equipos que vienen del servidor
+    // ✅ Misión 2: listeners entrega
+    const isDeliveryInput = document.getElementById("IsDelivery");
+    const transportCostInput = document.getElementById("TransportCost");
+
+    if (isDeliveryInput) {
+        isDeliveryInput.addEventListener("change", function () {
+            // Si quita entrega, forzamos transporte a 0 (y el controller también limpia)
+            if (!isDeliveryInput.checked && transportCostInput) {
+                transportCostInput.value = "0";
+            }
+            actualizarResumen();
+        });
+    }
+
+    if (transportCostInput) {
+        transportCostInput.addEventListener("input", function () {
+            const v = toNumber(transportCostInput.value);
+            if (v < 0) transportCostInput.value = "0";
+            actualizarResumen();
+        });
+        transportCostInput.addEventListener("change", actualizarResumen);
+    }
+
+    // Recalcular una vez al cargar
     actualizarResumen();
 });

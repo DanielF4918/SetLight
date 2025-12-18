@@ -75,6 +75,49 @@
                                    : "")" />
                     </div>
 
+                    <!-- =======================
+                         ✅ Misión 2: Entrega
+                         ======================= -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.IsDelivery, new { @class = "form-check-input", id = "IsDelivery" })
+                            <label class="form-check-label fw-semibold text-black" for="IsDelivery">
+                                ¿Con entrega?
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="deliveryFields" class="mb-3" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-black">Dirección de entrega</label>
+                            @Html.TextAreaFor(m => m.DeliveryAddress,
+                                new
+                                {
+                                    @class = "form-control border-dark",
+                                    rows = "3",
+                                    maxlength = "300",
+                                    id = "DeliveryAddress",
+                                    placeholder = "Escriba la dirección exacta (máx. 300 caracteres)"
+                                })
+                            @Html.ValidationMessageFor(m => m.DeliveryAddress, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-black">Costo de transporte</label>
+                            @Html.TextBoxFor(m => m.TransportCost,
+                                new
+                                {
+                                    @class = "form-control border-dark",
+                                    type = "number",
+                                    min = "0",
+                                    step = "0.01",
+                                    id = "TransportCost",
+                                    value = Model.TransportCost.ToString(CultureInfo.InvariantCulture)
+                                })
+                            @Html.ValidationMessageFor(m => m.TransportCost, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-black">Equipos</label><br />
                         <button type="button"
@@ -99,7 +142,6 @@
                                     <input type="hidden" name="EquiposSeleccionados[@index].Model" value="@item.Model" />
 
                                     <!-- ✅ Precio pactado (snapshot) -->
-                                    <!-- Mantengo RentalValue por compatibilidad y agrego UnitRentalPrice para claridad -->
                                     <input type="hidden" name="EquiposSeleccionados[@index].RentalValue" value="@item.RentalValue" />
                                     <input type="hidden" name="EquiposSeleccionados[@index].UnitRentalPrice" value="@item.RentalValue" />
 
@@ -164,6 +206,13 @@
                                     <th>Descuento manual</th>
                                     <td>$<span id="descuentoAplicado">0</span></td>
                                 </tr>
+
+                                <!-- ✅ Misión 2 -->
+                                <tr>
+                                    <th>Transporte</th>
+                                    <td>$<span id="transporteAlquiler">0</span></td>
+                                </tr>
+
                                 <tr>
                                     <th>IVA (13%)</th>
                                     <td>$<span id="ivaAlquiler">0</span></td>
@@ -222,15 +271,27 @@
 </div>
 
 @section Scripts {
-    <!-- Reutilizamos el mismo JS del Create para modal de clientes -->
     <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
-
-    <!-- Tu JS específico de editar (equipos + totales, etc.) -->
     <script src="~/Scripts/Modals/EditOrder/EditOrder.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Si ocupas lógica extra para pre-selección, se hace aquí.
+            const chkDelivery = document.getElementById("IsDelivery");
+            const deliveryFields = document.getElementById("deliveryFields");
+            const txtTransport = document.getElementById("TransportCost");
+
+            function toggleDelivery() {
+                const isOn = chkDelivery && chkDelivery.checked;
+                if (deliveryFields) deliveryFields.style.display = isOn ? "block" : "none";
+                if (!isOn && txtTransport) txtTransport.value = "0";
+
+                // si tu EditOrder.js expone una función de recálculo
+                if (typeof window.actualizarResumen === "function") window.actualizarResumen();
+                if (typeof window.recalcularResumenAlquiler === "function") window.recalcularResumenAlquiler();
+            }
+
+            if (chkDelivery) chkDelivery.addEventListener("change", toggleDelivery);
+            toggleDelivery();
         });
     </script>
 }

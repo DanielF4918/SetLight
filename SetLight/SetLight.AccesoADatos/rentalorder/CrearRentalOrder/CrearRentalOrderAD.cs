@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using SetLight.Abstracciones.AccesoADatos.RentalOrder.CrearRentalOrder;
 using SetLight.Abstracciones.ModelosParaUI;
 using SetLight.AccesoADatos;
 using SetLight.AccesoADatos.Modelos;
-using System.Linq;
-using System.Data.Entity; // si usas EF6
+using System.Data.Entity; // EF6
 
 public class CrearRentalOrderAD : ICrearRentalOrderAD
 {
@@ -16,6 +16,28 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
         {
             try
             {
+                // =======================
+                // ✅ Normalización defensiva (Misión 2)
+                // =======================
+                bool isDelivery = orden.IsDelivery;
+
+                // Si no hay entrega: limpiamos valores para evitar basura
+                string deliveryAddress = isDelivery
+                    ? (orden.DeliveryAddress ?? "").Trim()
+                    : null;
+
+                decimal transportCost = isDelivery
+                    ? orden.TransportCost
+                    : 0m;
+
+                if (transportCost < 0) transportCost = 0m; // blindaje extra
+
+                if (isDelivery && string.IsNullOrWhiteSpace(deliveryAddress))
+                    throw new InvalidOperationException("La dirección de entrega es obligatoria cuando la orden es con entrega.");
+
+                // =======================
+                // Crear entidad Order
+                // =======================
                 var entidad = new RentalOrderDA
                 {
                     OrderDate = DateTime.Now,
@@ -25,7 +47,14 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                     StatusOrder = orden.StatusOrder,
                     EmpleadoId = orden.EmpleadoId,
                     DescuentoManual = orden.DescuentoManual,
-                    RutaComprobante = orden.RutaComprobante
+                    RutaComprobante = orden.RutaComprobante,
+
+                    // =======================
+                    // ✅ Misión 2: mapear columnas nuevas
+                    // =======================
+                    IsDelivery = isDelivery,
+                    DeliveryAddress = deliveryAddress,
+                    TransportCost = transportCost
                 };
 
                 db.RentalOrders.Add(entidad);
@@ -61,7 +90,7 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
                         EquipmentId = detalle.EquipmentId,
                         Quantity = detalle.Quantity,
 
-                        // ✅ NUEVO: guardar el precio pactado en la columna nueva
+                        // ✅ Guardar precio pactado
                         UnitRentalPrice = precioPactado
                     });
 
@@ -86,5 +115,4 @@ public class CrearRentalOrderAD : ICrearRentalOrderAD
             }
         }
     }
-
 }

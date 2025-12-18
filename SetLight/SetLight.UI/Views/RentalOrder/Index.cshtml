@@ -343,22 +343,43 @@
 @* Modales de equipos *@
 @foreach (var orden in Model)
 {
-    // ✅ Total unidades y total monto (cantidad * precio)
-    var totalUnidades = (orden.Details ?? new List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>())
-        .Sum(d => d.Quantity);
+    var dias = (orden.EndDate - orden.StartDate).Days + 1;
+    if (dias < 1) { dias = 1; }
 
-    var totalMonto = (orden.Details ?? new List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>())
-        .Sum(d => d.RentalValue * d.Quantity);
+    var detalles = (orden.Details ?? new List<SetLight.Abstracciones.ModelosParaUI.OrderDetailDto>());
 
-    <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-labelledby="modalLabel-@orden.OrderId" aria-hidden="true">
+    var totalUnidades = detalles.Sum(d => d.Quantity);
+
+    // ✅ Subtotal correcto por días
+    var subtotalEquipos = detalles.Sum(d => d.RentalValue * d.Quantity * dias);
+
+    // ✅ Transporte (solo si es entrega)
+    var transporte = (orden.IsDelivery ? orden.TransportCost : 0m);
+
+    var subtotalConTransporte = subtotalEquipos + transporte;
+
+    var iva = subtotalConTransporte * 0.13m;
+    var totalBruto = subtotalConTransporte + iva;
+
+    var descuentoPct = orden.DescuentoManual ?? 0m;
+    if (descuentoPct < 0m) { descuentoPct = 0m; }
+    if (descuentoPct > 100m) { descuentoPct = 100m; }
+
+    var montoDescuento = totalBruto * (descuentoPct / 100m);
+    var totalFinal = totalBruto - montoDescuento;
+
+    <div class="modal fade" id="modalEquipos-@orden.OrderId" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Equipos de la orden #@orden.OrderId</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <h5 class="modal-title">Detalle de la orden #@orden.OrderId</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
+
+                    <!-- 1) TABLA DE EQUIPOS -->
+                    <h6 class="fw-bold mb-2">Equipos</h6>
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover text-center align-middle">
                             <thead class="table-dark text-white">
@@ -368,50 +389,114 @@
                                     <th>Modelo</th>
                                     <th>Cantidad</th>
                                     <th>Valor unitario</th>
+                                    <th>Días</th>
                                     <th>Subtotal</th>
                                 </tr>
                             </thead>
-
                             <tbody id="table-body-@orden.OrderId">
-                                @if (orden.Details != null && orden.Details.Any())
+                                @if (detalles.Any())
                                 {
-                                    foreach (var detalle in orden.Details)
+                                    foreach (var d in detalles)
                                     {
-                                        var subtotalItem = detalle.RentalValue * detalle.Quantity; // ✅ cantidad * precio
+                                        var subItem = d.RentalValue * d.Quantity * dias;
                                         <tr>
-                                            <td>@detalle.EquipmentName</td>
-                                            <td>@detalle.Brand</td>
-                                            <td>@detalle.Model</td>
-                                            <td>@detalle.Quantity</td>
-                                            <td>$@detalle.RentalValue.ToString("N2")</td>
-                                            <td>$@subtotalItem.ToString("N2")</td>
+                                            <td>@d.EquipmentName</td>
+                                            <td>@d.Brand</td>
+                                            <td>@d.Model</td>
+                                            <td>@d.Quantity</td>
+                                            <td>$@d.RentalValue.ToString("N2")</td>
+                                            <td>@dias</td>
+                                            <td>$@subItem.ToString("N2")</td>
                                         </tr>
                                     }
                                 }
                                 else
                                 {
                                     <tr>
-                                        <td colspan="6">Sin equipos registrados en esta orden.</td>
+                                        <td colspan="7">Sin equipos registrados en esta orden.</td>
                                     </tr>
                                 }
                             </tbody>
 
                             <tfoot>
                                 <tr class="fw-bold bg-light">
-                                    <td colspan="3" class="text-end">Total de unidades:</td>
+                                    <td colspan="3" class="text-end">Total unidades:</td>
                                     <td>@totalUnidades</td>
-                                    <td class="text-end">Total equipos:</td>
-                                    <td>$@totalMonto.ToString("N2")</td>
+                                    <td colspan="2" class="text-end">Subtotal equipos:</td>
+                                    <td>$@subtotalEquipos.ToString("N2")</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
 
+                    <!-- 2) DIRECCIÓN / ENTREGA -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2">Entrega</h6>
+                        <div class="card border-dark">
+                            <div class="card-body p-3">
+                                <p class="mb-1">
+                                    <strong>¿Entrega a domicilio?</strong>
+                                    @if (orden.IsDelivery)
+                                    {<span class="badge bg-warning text-dark">Sí</span> }
+                                    else
+                                    { <span class="badge bg-light text-dark border">No</span>}
+                                </p>
+
+                                @if (orden.IsDelivery)
+                                {
+                                    <p class="mb-1"><strong>Dirección:</strong> @(string.IsNullOrWhiteSpace(orden.DeliveryAddress) ? "No indicada" : orden.DeliveryAddress)</p>
+                                    <p class="mb-0"><strong>Costo transporte:</strong> $@transporte.ToString("N2")</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 text-muted">No aplica dirección ni transporte.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3) COSTOS -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2">Costos</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mx-auto" style="max-width: 520px;">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:60%;">Días de alquiler</th>
+                                        <td>@dias</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Subtotal equipos</th>
+                                        <td>$@subtotalEquipos.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Transporte</th>
+                                        <td>$@transporte.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>IVA (13%)</th>
+                                        <td>$@iva.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Descuento (@descuentoPct.ToString("N2")%)</th>
+                                        <td>-$@montoDescuento.ToString("N2")</td>
+                                    </tr>
+                                    <tr class="fw-bold bg-light">
+                                        <th>Total</th>
+                                        <td>$@totalFinal.ToString("N2")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- paginación opcional (si querés mantenerla) -->
                     <div class="d-flex justify-content-center mt-2">
                         <nav>
                             <ul class="pagination pagination-sm gap-1" id="pagination-@orden.OrderId"></ul>
                         </nav>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">
