@@ -150,3 +150,11 @@ C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.AssemblyReference.cache
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.A32EC6A4.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.Abstracciones\obj\Debug\SetLight.Abstracciones.pdb

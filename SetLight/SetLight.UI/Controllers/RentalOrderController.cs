@@ -20,7 +20,7 @@ using X.PagedList;
 
 namespace SetLight.UI.Controllers
 {
-    [Authorize(Roles = "Administrador,Colaborador")]
+    [Authorize(Roles = "Administrador,Colaborador,Tecnico")]
     public class RentalOrderController : Controller
     {
         private Contexto _contexto;
