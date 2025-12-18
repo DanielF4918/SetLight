@@ -31,13 +31,13 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-black">Fecha de inicio</label>
                         @Html.TextBoxFor(m => m.StartDate,
-                            new { type = "date", @class = "form-control border-dark" })
+                            new { type = "date", @class = "form-control border-dark", id = "StartDate" })
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-black">Fecha de fin</label>
                         @Html.TextBoxFor(m => m.EndDate,
-                            new { type = "date", @class = "form-control border-dark" })
+                            new { type = "date", @class = "form-control border-dark", id = "EndDate" })
                     </div>
 
                     @Html.HiddenFor(m => m.StatusOrder)
@@ -54,6 +54,48 @@
                                 step = "0.01",
                                 id = "DescuentoManual"
                             })
+                    </div>
+
+                    <!-- =======================
+                         ✅ Misión 2: Entrega
+                         ======================= -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.IsDelivery, new { @class = "form-check-input", id = "IsDelivery" })
+                            <label class="form-check-label fw-semibold text-black" for="IsDelivery">
+                                ¿Con entrega?
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="deliveryFields" class="mb-3" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-black">Dirección de entrega</label>
+                            @Html.TextAreaFor(m => m.DeliveryAddress,
+                                new
+                                {
+                                    @class = "form-control border-dark",
+                                    rows = "3",
+                                    maxlength = "300",
+                                    id = "DeliveryAddress",
+                                    placeholder = "Escriba la dirección exacta (máx. 300 caracteres)"
+                                })
+                            @Html.ValidationMessageFor(m => m.DeliveryAddress, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-black">Costo de transporte</label>
+                            @Html.TextBoxFor(m => m.TransportCost,
+                                new
+                                {
+                                    @class = "form-control border-dark",
+                                    type = "number",
+                                    min = "0",
+                                    step = "0.01",
+                                    id = "TransportCost"
+                                })
+                            @Html.ValidationMessageFor(m => m.TransportCost, "", new { @class = "text-danger" })
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -100,6 +142,13 @@
                                         <th>Descuento aplicado</th>
                                         <td>$<span id="descuentoAplicado">0</span></td>
                                     </tr>
+
+                                    <!-- ✅ Misión 2 -->
+                                    <tr>
+                                        <th>Transporte</th>
+                                        <td>$<span id="transporteAlquiler">0</span></td>
+                                    </tr>
+
                                     <tr>
                                         <th>IVA (13%)</th>
                                         <td>$<span id="ivaAlquiler">0</span></td>
@@ -171,6 +220,7 @@
 @section Scripts {
     <script src="~/Scripts/Modals/CreateOrder/CreateOrder.js"></script>
     <script src="~/Scripts/Modals/CreateOrder/AgregarCliente.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const modalEquipos = document.getElementById("modalSeleccionarEquipos");
@@ -178,6 +228,52 @@
             modalEquipos.addEventListener("shown.bs.modal", function () {
                 paginarEquipos(5);
             });
+
+            // =======================
+            // ✅ Misión 2: UI Entrega
+            // =======================
+            const chkDelivery = document.getElementById("IsDelivery");
+            const deliveryFields = document.getElementById("deliveryFields");
+            const txtAddress = document.getElementById("DeliveryAddress");
+            const txtTransport = document.getElementById("TransportCost");
+            const spanTransport = document.getElementById("transporteAlquiler");
+
+            function toNumber(v) {
+                const n = parseFloat((v ?? "").toString().replace(",", "."));
+                return isNaN(n) ? 0 : n;
+            }
+
+            function refrescarEntregaUI() {
+                const isOn = chkDelivery && chkDelivery.checked;
+
+                if (deliveryFields) deliveryFields.style.display = isOn ? "block" : "none";
+
+                if (!isOn) {
+                    if (txtAddress) txtAddress.value = "";
+                    if (txtTransport) txtTransport.value = "0";
+                    if (spanTransport) spanTransport.textContent = "0";
+                } else {
+                    const tc = toNumber(txtTransport ? txtTransport.value : 0);
+                    if (spanTransport) spanTransport.textContent = tc.toFixed(2).replace(/\.00$/, "");
+                }
+
+                // Intentar recalcular total si tu JS ya tiene una función
+                if (typeof window.recalcularResumenAlquiler === "function") {
+                    window.recalcularResumenAlquiler();
+                } else if (typeof window.calcularResumen === "function") {
+                    window.calcularResumen();
+                } else {
+                    // fallback mínimo: solo actualizar transporte en resumen
+                    const tc = toNumber(txtTransport ? txtTransport.value : 0);
+                    if (spanTransport) spanTransport.textContent = tc.toFixed(2).replace(/\.00$/, "");
+                }
+            }
+
+            if (chkDelivery) chkDelivery.addEventListener("change", refrescarEntregaUI);
+            if (txtTransport) txtTransport.addEventListener("input", refrescarEntregaUI);
+
+            // Estado inicial
+            refrescarEntregaUI();
         });
     </script>
 }

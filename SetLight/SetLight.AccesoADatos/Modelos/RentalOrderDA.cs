@@ -30,7 +30,7 @@ namespace SetLight.AccesoADatos.Modelos
         public virtual ClientDa Client { get; set; }
 
         [Column("EmpleadoId")]
-        [ForeignKey("Empleado")] 
+        [ForeignKey("Empleado")]
         public int? EmpleadoId { get; set; }
 
         public virtual EmpleadoDA Empleado { get; set; }
@@ -43,5 +43,14 @@ namespace SetLight.AccesoADatos.Modelos
 
 
 
+        [Column("IsDelivery")]
+        public bool IsDelivery { get; set; } // BIT NOT NULL DEFAULT(0)
+
+        [Column("DeliveryAddress")]
+        [StringLength(300)]
+        public string DeliveryAddress { get; set; } // VARCHAR(300) NULL
+
+        [Column("TransportCost")]
+        public decimal TransportCost { get; set; } // DECIMAL(18,2) NOT NULL DEFAULT(0)
     }
 }
