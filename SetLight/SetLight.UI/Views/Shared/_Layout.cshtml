@@ -50,6 +50,9 @@
                         <li class="nav-item">
                             @Html.ActionLink("Clientes", "ListarClient", "Client", null, new { @class = "nav-link" })
                         </li>
+}
+                    @if (User.IsInRole("Administrador") || User.IsInRole("Colaborador") || User.IsInRole("Tecnico"))
+                    {
                         <li class="nav-item">
                             @Html.ActionLink("Ordenes", "Index", "RentalOrder", null, new { @class = "nav-link" })
                         </li>

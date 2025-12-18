@@ -332,3 +332,25 @@ C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
 C:\Users\kenca\OneDrive\Escritorio\Nueva carpeta (5)\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
 C:\Users\AMD\Documents\GitHub\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_UnitRentalPrice_Manual.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll.config
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.AccesoADatos.pdb
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\SetLight.Abstracciones.pdb
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.xml
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.AssemblyReference.cache
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Baseline.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.AgregarCampoFotoEmpleado.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.ActualizarMaintenance.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SyncSchema.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_Maintenance_IdEmpleado.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.SincronizarModeloClientesEmpresa.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.Migrations.Sync_UnitRentalPrice_Manual.resources
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.GenerateResource.cache
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.csproj.CoreCompileInputs.cache
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.31911824.Up2Date
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.dll
+C:\Users\kenca\OneDrive\Escritorio\7\SetLight\SetLight\SetLight.AccesoADatos\obj\Debug\SetLight.AccesoADatos.pdb
