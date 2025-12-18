@@ -1,4 +1,5 @@
-﻿using System.Globalization; // USD
+﻿using System;
+using System.Globalization; // USD
 using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -56,7 +57,44 @@ namespace SetLight.LogicaDeNegocio.Services
 
                 doc.Add(new Paragraph("\n"));
 
-                // Tabla de equipos
+                // =========================
+                // ✅ SECCIÓN ENTREGA
+                // =========================
+                PdfPTable entregaTable = new PdfPTable(2)
+                {
+                    WidthPercentage = 100,
+                    SpacingAfter = 10
+                };
+                entregaTable.SetWidths(new float[] { 1, 2 });
+
+                void AddEntregaRow(string label, string value)
+                {
+                    entregaTable.AddCell(new PdfPCell(new Phrase(label, tableHeaderFont))
+                    {
+                        Border = Rectangle.NO_BORDER
+                    });
+
+                    entregaTable.AddCell(new PdfPCell(new Phrase(value ?? "", tableBodyFont))
+                    {
+                        Border = Rectangle.NO_BORDER
+                    });
+                }
+
+                var esEntrega = orden.IsDelivery;
+                var direccion = string.IsNullOrWhiteSpace(orden.DeliveryAddress) ? "No aplica" : orden.DeliveryAddress;
+
+                // TransportCost en tu DB es NOT NULL, así que asumimos decimal válido
+                var costoTransporte = esEntrega ? orden.TransportCost : 0m;
+
+                AddEntregaRow("Entrega a domicilio:", esEntrega ? "Sí" : "No");
+                AddEntregaRow("Dirección:", esEntrega ? direccion : "No aplica");
+                AddEntregaRow("Costo transporte:", esEntrega ? costoTransporte.ToString("C2", us) : "No aplica");
+
+                doc.Add(entregaTable);
+
+                // =========================
+                // TABLA DE EQUIPOS
+                // =========================
                 PdfPTable equipoTable = new PdfPTable(6) { WidthPercentage = 100 };
                 equipoTable.SetWidths(new float[] { 3, 2, 2, 1, 2, 2 });
 
@@ -73,42 +111,60 @@ namespace SetLight.LogicaDeNegocio.Services
 
                 // Cálculo por días de alquiler
                 int cantidadDias = (orden.EndDate - orden.StartDate).Days + 1;
-                decimal total = 0;
+                if (cantidadDias < 1) cantidadDias = 1;
+
+                decimal subtotalEquipos = 0m;
+
                 foreach (var item in orden.Details)
                 {
-                    decimal subtotal = item.RentalValue * item.Quantity * cantidadDias;
-                    total += subtotal;
+                    decimal subtotalItem = item.RentalValue * item.Quantity * cantidadDias;
+                    subtotalEquipos += subtotalItem;
 
                     equipoTable.AddCell(new Phrase(item.EquipmentName, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Brand, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Model, tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.Quantity.ToString(), tableBodyFont));
                     equipoTable.AddCell(new Phrase(item.RentalValue.ToString("C2", us), tableBodyFont)); // USD
-                    equipoTable.AddCell(new Phrase(subtotal.ToString("C2", us), tableBodyFont));         // USD
+                    equipoTable.AddCell(new Phrase(subtotalItem.ToString("C2", us), tableBodyFont));      // USD
                 }
 
                 doc.Add(equipoTable);
                 doc.Add(new Paragraph("\n"));
 
-                // Cálculos con descuento como porcentaje
-                decimal porcentajeDescuento = orden.DescuentoManual ?? 0;
-                decimal montoDescuento = total * (porcentajeDescuento / 100m);
-                decimal totalConDescuento = total - montoDescuento;
-                decimal impuestos = totalConDescuento * 0.13m;
-                decimal totalFinal = totalConDescuento + impuestos;
+                // =========================
+                // ✅ CÁLCULOS (igual modal/JS):
+                // subtotal equipos + transporte => IVA => descuento => total
+                // =========================
+                decimal subtotalConTransporte = subtotalEquipos + costoTransporte;
 
-                // Resumen
+                decimal iva = Math.Round(subtotalConTransporte * 0.13m, 2);
+                decimal totalBruto = subtotalConTransporte + iva;
+
+                decimal porcentajeDescuento = orden.DescuentoManual ?? 0m;
+                if (porcentajeDescuento < 0m) porcentajeDescuento = 0m;
+                if (porcentajeDescuento > 100m) porcentajeDescuento = 100m;
+
+                decimal montoDescuento = Math.Round(totalBruto * (porcentajeDescuento / 100m), 2);
+                decimal totalFinal = totalBruto - montoDescuento;
+
+                // =========================
+                // RESUMEN
+                // =========================
                 PdfPTable resumen = new PdfPTable(2)
                 {
                     HorizontalAlignment = Element.ALIGN_RIGHT,
-                    WidthPercentage = 40,
+                    WidthPercentage = 45,
                     SpacingBefore = 10
                 };
                 resumen.SetWidths(new float[] { 1, 1 });
 
                 void AddResumenRow(string label, string value, bool bold = false)
                 {
-                    resumen.AddCell(new PdfPCell(new Phrase(label, bold ? tableHeaderFont : tableBodyFont)) { Border = Rectangle.NO_BORDER });
+                    resumen.AddCell(new PdfPCell(new Phrase(label, bold ? tableHeaderFont : tableBodyFont))
+                    {
+                        Border = Rectangle.NO_BORDER
+                    });
+
                     resumen.AddCell(new PdfPCell(new Phrase(value, bold ? tableHeaderFont : tableBodyFont))
                     {
                         Border = Rectangle.NO_BORDER,
@@ -116,16 +172,23 @@ namespace SetLight.LogicaDeNegocio.Services
                     });
                 }
 
-                resumen.AddCell(new PdfPCell(new Phrase("DÍAS DE ALQUILER", tableBodyFont)) { Border = Rectangle.NO_BORDER });
-                resumen.AddCell(new PdfPCell(new Phrase(cantidadDias.ToString(), tableBodyFont)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
+                AddResumenRow("DÍAS DE ALQUILER", cantidadDias.ToString());
+                AddResumenRow("SUBTOTAL EQUIPOS", subtotalEquipos.ToString("C2", us));
 
-                AddResumenRow("SUBTOTAL", total.ToString("C2", us));
-                AddResumenRow($"DESCUENTO ({porcentajeDescuento:N0}%)", "-" + montoDescuento.ToString("C2", us));
-                AddResumenRow("IVA (13%)", impuestos.ToString("C2", us));
+                // Transporte como línea siempre, pero en 0 si no aplica
+                AddResumenRow("TRANSPORTE", costoTransporte.ToString("C2", us));
+
+                AddResumenRow("SUBTOTAL (CON TRANSP.)", subtotalConTransporte.ToString("C2", us));
+                AddResumenRow("IVA (13%)", iva.ToString("C2", us));
+
+                // Mostrar % con 0-2 decimales
+                AddResumenRow($"DESCUENTO ({porcentajeDescuento.ToString("N2")}%)", "-" + montoDescuento.ToString("C2", us));
+
                 AddResumenRow("TOTAL A PAGAR", totalFinal.ToString("C2", us), true);
 
-                // Firma
                 doc.Add(resumen);
+
+                // Firma
                 doc.Add(new Paragraph("\n\nNotas: El cliente es responsable por el uso adecuado del equipo durante el periodo de alquiler.\n\n", valueFont));
                 doc.Add(new Paragraph("____________________________", valueFont));
                 doc.Add(new Paragraph("Firma de la Empresa", valueFont));

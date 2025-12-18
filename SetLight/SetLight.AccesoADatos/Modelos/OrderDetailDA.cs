@@ -19,7 +19,11 @@ namespace SetLight.AccesoADatos.Modelos
         [Column("Quantity")]
         public int Quantity { get; set; }
 
-        public virtual EquipmentDA Equipment { get; set; }
+        [Column("UnitRentalPrice")]
+        [DataType(DataType.Currency)]
+        public decimal UnitRentalPrice { get; set; }
 
+
+        public virtual EquipmentDA Equipment { get; set; }
     }
 }

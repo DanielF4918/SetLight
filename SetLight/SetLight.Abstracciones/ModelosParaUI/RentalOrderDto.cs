@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SetLight.Abstracciones.ModelosParaUI
 {
@@ -21,10 +18,14 @@ namespace SetLight.Abstracciones.ModelosParaUI
         public string EmpleadoNombreCompleto { get; set; }
         public decimal? DescuentoManual { get; set; }
 
+        public bool IsDelivery { get; set; }
+        public string DeliveryAddress { get; set; }
+        public decimal TransportCost { get; set; }
+
+        // Cálculos / resumen
         public int CantidadDias { get; set; }
         public decimal Subtotal { get; set; }
         public decimal Iva { get; set; }
         public decimal Total { get; set; }
     }
-
 }

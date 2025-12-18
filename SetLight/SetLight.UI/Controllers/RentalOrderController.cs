@@ -78,7 +78,7 @@ namespace SetLight.UI.Controllers
                                                 EquipmentName = equipo.EquipmentName,
                                                 Brand = equipo.Brand,
                                                 Model = equipo.Model,
-                                                RentalValue = equipo.RentalValue,
+                                                RentalValue = detalle.UnitRentalPrice,
                                                 Quantity = detalle.Quantity
                                             }).ToList()
                              });
@@ -106,14 +106,14 @@ namespace SetLight.UI.Controllers
         // =======================
         // GET: /RentalOrder
         public ActionResult Index(
-            int? page,
-            int? orderId,
-            int? estado,            // 1=Activa, 2=Completada, 3=Cancelada
-            string cliente,         // parte del nombre
-            int? empleadoId,        // opcional
-            DateTime? desde,        // StartDate >=
-            DateTime? hasta         // EndDate   <=
-        )
+     int? page,
+     int? orderId,
+     int? estado,
+     string cliente,
+     int? empleadoId,
+     DateTime? desde,
+     DateTime? hasta
+ )
         {
             var q = from orden in _contexto.RentalOrders
                     join clienteTbl in _contexto.Clients on orden.ClientId equals clienteTbl.ClientId
@@ -130,21 +130,31 @@ namespace SetLight.UI.Controllers
                         ClientName = clienteTbl.FirstName + " " + clienteTbl.LastName,
                         EmpleadoId = orden.EmpleadoId,
                         EmpleadoNombreCompleto = empleado != null
-                            ? empleado.Nombre + " " + empleado.Apellido
-                            : "No asignado",
+         ? empleado.Nombre + " " + empleado.Apellido
+         : "No asignado",
                         RutaComprobante = orden.RutaComprobante,
+
+                        // ✅ NUEVO: campos de entrega/costos
+                        IsDelivery = orden.IsDelivery,
+                        DeliveryAddress = orden.DeliveryAddress,
+                        TransportCost = orden.TransportCost,
+                        DescuentoManual = orden.DescuentoManual,
+
                         Details = (from detalle in _contexto.OrderDetails
                                    join equipo in _contexto.Equipment on detalle.EquipmentId equals equipo.EquipmentId
                                    where detalle.OrderId == orden.OrderId
                                    select new OrderDetailDto
                                    {
+                                       EquipmentId = detalle.EquipmentId,
                                        EquipmentName = equipo.EquipmentName,
                                        Brand = equipo.Brand,
                                        Model = equipo.Model,
-                                       RentalValue = equipo.RentalValue,
+                                       RentalValue = detalle.UnitRentalPrice, // ✅ snapshot
                                        Quantity = detalle.Quantity
                                    }).ToList()
                     };
+
+
 
             // Filtros condicionales
             if (orderId.HasValue) q = q.Where(o => o.OrderId == orderId.Value);
@@ -158,13 +168,11 @@ namespace SetLight.UI.Controllers
             if (desde.HasValue) q = q.Where(o => o.StartDate >= desde.Value);
             if (hasta.HasValue) q = q.Where(o => o.EndDate <= hasta.Value);
 
-            // Orden descendente por ID
             int pageSize = 10;
             int pageNumber = page ?? 1;
             var ordenesPaged = q.OrderByDescending(o => o.OrderId)
                      .ToPagedList(pageNumber, pageSize);
 
-            // Para valores en la vista
             ViewBag.FiltroOrderId = orderId;
             ViewBag.FiltroEstado = estado;
             ViewBag.FiltroCliente = cliente;
@@ -172,7 +180,6 @@ namespace SetLight.UI.Controllers
             ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
             ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
 
-            // Dropdown de empleados
             ViewBag.Empleados = _contexto.Empleado
                 .Select(e => new SelectListItem
                 {
@@ -184,6 +191,7 @@ namespace SetLight.UI.Controllers
 
             return View(ordenesPaged);
         }
+
 
         // =======================
         // CREATE GET
@@ -223,7 +231,11 @@ namespace SetLight.UI.Controllers
                 EquiposDisponibles = equipos,
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today.AddDays(1),
-                StatusOrder = 1
+                StatusOrder = 1,
+
+                IsDelivery = false,
+                DeliveryAddress = null,
+                TransportCost = 0m
             };
 
             return View(model);
@@ -299,6 +311,34 @@ namespace SetLight.UI.Controllers
             }
 
             // =======================
+            // ✅ Validaciones de entrega (Misión 2)
+            // =======================
+            if (model.IsDelivery)
+            {
+                if (string.IsNullOrWhiteSpace(model.DeliveryAddress))
+                {
+                    ModelState.AddModelError(nameof(model.DeliveryAddress), "Debe ingresar la dirección de entrega.");
+                    RecargarCombos(model, equiposSeleccionados);
+                    return View(model);
+                }
+
+                if (model.TransportCost < 0)
+                {
+                    ModelState.AddModelError(nameof(model.TransportCost), "El costo de transporte no puede ser negativo.");
+                    RecargarCombos(model, equiposSeleccionados);
+                    return View(model);
+                }
+
+                model.DeliveryAddress = model.DeliveryAddress.Trim();
+            }
+            else
+            {
+                // Si NO hay entrega, forzamos valores neutros para evitar basura en BD
+                model.DeliveryAddress = null;
+                model.TransportCost = 0m;
+            }
+
+            // =======================
             // Validación crítica: Cliente activo
             // =======================
             var clienteDb = _contexto.Clients.FirstOrDefault(c => c.ClientId == model.ClientId);
@@ -334,6 +374,39 @@ namespace SetLight.UI.Controllers
             }
 
             // =======================
+            // ✅ Congelar precios desde BD (snapshot)
+            // =======================
+            var idsEquipos = equiposSeleccionados
+                .Select(x => x.EquipmentId)
+                .Distinct()
+                .ToList();
+
+            // Traemos los equipos desde BD para tomar el RentalValue real actual (no confiar en UI)
+            var equiposDb = _contexto.Equipment
+                .Where(x => idsEquipos.Contains(x.EquipmentId))
+                .Select(x => new
+                {
+                    x.EquipmentId,
+                    x.Status,
+                    x.EquipmentName,
+                    x.Brand,
+                    x.Model,
+                    x.RentalValue
+                })
+                .ToList();
+
+            // Validación: que existan todos y estén activos
+            if (equiposDb.Count != idsEquipos.Count || equiposDb.Any(x => x.Status != 1))
+            {
+                ModelState.AddModelError("",
+                    "No se puede finalizar: uno o más equipos seleccionados ya no existen o fueron desactivados. Refresque la lista e intente nuevamente.");
+                RecargarCombos(model, equiposSeleccionados);
+                return View(model);
+            }
+
+            var mapEquiposDb = equiposDb.ToDictionary(x => x.EquipmentId, x => x);
+
+            // =======================
             // Construcción de la orden
             // =======================
             var nuevaOrden = new RentalOrderDto
@@ -344,14 +417,28 @@ namespace SetLight.UI.Controllers
                 StatusOrder = model.StatusOrder,
                 EmpleadoId = empleadoDb.IdEmpleado,
                 DescuentoManual = model.DescuentoManual,
-                Details = equiposSeleccionados.Select(e => new OrderDetailDto
+
+                // ✅ Misión 2
+                IsDelivery = model.IsDelivery,
+                DeliveryAddress = model.DeliveryAddress,
+                TransportCost = model.TransportCost,
+
+                // ✅ Details con RentalValue tomado desde BD (precio pactado / snapshot)
+                Details = equiposSeleccionados.Select(e =>
                 {
-                    EquipmentId = e.EquipmentId,
-                    EquipmentName = e.EquipmentName,
-                    Brand = e.Brand,
-                    Model = e.Model,
-                    Quantity = e.Quantity,
-                    RentalValue = e.RentalValue
+                    var eqDb = mapEquiposDb[e.EquipmentId];
+
+                    return new OrderDetailDto
+                    {
+                        EquipmentId = e.EquipmentId,
+                        EquipmentName = eqDb.EquipmentName,
+                        Brand = eqDb.Brand,
+                        Model = eqDb.Model,
+                        Quantity = e.Quantity,
+
+                        // Este es el precio que debe guardarse luego en OrderDetails.UnitRentalPrice
+                        RentalValue = eqDb.RentalValue
+                    };
                 }).ToList()
             };
 
@@ -363,9 +450,14 @@ namespace SetLight.UI.Controllers
                 var crearLN = new CrearRentalOrderLN(_crearOrdenAD);
                 await crearLN.Guardar(nuevaOrden);
 
+                // Buscar la última orden creada para ese cliente y fechas (más robusto)
                 var ordenGuardada = _contexto.RentalOrders
+                    .Where(o =>
+                        o.ClientId == model.ClientId &&
+                        o.StartDate == model.StartDate &&
+                        o.EndDate == model.EndDate)
                     .OrderByDescending(o => o.OrderId)
-                    .FirstOrDefault(o => o.ClientId == model.ClientId && o.StartDate == model.StartDate);
+                    .FirstOrDefault();
 
                 if (ordenGuardada != null && (ordenGuardada.StatusOrder == 1 || ordenGuardada.StatusOrder == 2))
                 {
@@ -376,11 +468,22 @@ namespace SetLight.UI.Controllers
                         StartDate = ordenGuardada.StartDate,
                         EndDate = ordenGuardada.EndDate,
                         ClientName = clienteDb.FirstName + " " + clienteDb.LastName,
-                        Details = equiposSeleccionados
+
+                        // ✅ usar los details con precio congelado (no los del form)
+                        Details = nuevaOrden.Details,
+
+                        // ✅ Misión 2
+                        IsDelivery = ordenGuardada.IsDelivery,
+                        DeliveryAddress = ordenGuardada.DeliveryAddress,
+                        TransportCost = ordenGuardada.TransportCost,
+
+                        // Si tu PDF ocupa el descuento, lo incluimos también
+                        DescuentoManual = ordenGuardada.DescuentoManual
                     };
 
                     byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(ordenParaPDF);
                     string fileName = $"Orden_{ordenParaPDF.OrderId}.pdf";
+
                     ordenGuardada.RutaComprobante = fileName;
                     await _contexto.SaveChangesAsync();
                 }
@@ -405,6 +508,8 @@ namespace SetLight.UI.Controllers
 
 
 
+
+
         // =======================
         // EDIT GET
         // =======================
@@ -422,6 +527,7 @@ namespace SetLight.UI.Controllers
             }
 
             // Detalles seleccionados (equipos ya en la orden)
+            // ✅ IMPORTANTE: RentalValue debe venir del snapshot (OrderDetails.UnitRentalPrice)
             var detalles = (from detalle in _contexto.OrderDetails
                             where detalle.OrderId == id && detalle.Quantity > 0
                             join equipo in _contexto.Equipment
@@ -432,12 +538,17 @@ namespace SetLight.UI.Controllers
                                 EquipmentName = equipo.EquipmentName,
                                 Brand = equipo.Brand,
                                 Model = equipo.Model,
-                                RentalValue = equipo.RentalValue,
+
+                                // ✅ precio pactado (snapshot)
+                                RentalValue = detalle.UnitRentalPrice,
+
                                 Quantity = detalle.Quantity,
                                 Stock = equipo.Stock
                             }).ToList();
 
             var cantidadesPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.Quantity);
+            var precioPactadoPorEquipo = detalles.ToDictionary(d => d.EquipmentId, d => d.RentalValue);
+
             var idsSeleccionados = cantidadesPorEquipo.Keys.ToList();
 
             // Equipos: activos o que ya están en la orden (aunque estén inactivos)
@@ -449,13 +560,20 @@ namespace SetLight.UI.Controllers
                 .Select(e =>
                 {
                     cantidadesPorEquipo.TryGetValue(e.EquipmentId, out int qty);
+
+                    // ✅ Si el equipo ya estaba en la orden, usar el precio pactado (snapshot)
+                    // Si es un equipo nuevo (no estaba en la orden), usar precio actual del inventario
+                    decimal precioParaMostrar = e.RentalValue;
+                    if (precioPactadoPorEquipo.TryGetValue(e.EquipmentId, out var pactado))
+                        precioParaMostrar = pactado;
+
                     return new OrderDetailDto
                     {
                         EquipmentId = e.EquipmentId,
                         EquipmentName = e.EquipmentName,
                         Brand = e.Brand,
                         Model = e.Model,
-                        RentalValue = e.RentalValue,
+                        RentalValue = precioParaMostrar,
                         Stock = e.Stock,
                         Quantity = qty
                     };
@@ -488,6 +606,12 @@ namespace SetLight.UI.Controllers
                 EndDate = orden.EndDate,
                 StatusOrder = orden.StatusOrder,
                 DescuentoManual = orden.DescuentoManual,
+
+                // ✅ Misión 2
+                IsDelivery = orden.IsDelivery,
+                DeliveryAddress = orden.DeliveryAddress,
+                TransportCost = orden.TransportCost,
+
                 EquiposSeleccionados = detalles,
                 EquiposDisponibles = equiposParaModal,
                 Clientes = clientes
@@ -500,6 +624,8 @@ namespace SetLight.UI.Controllers
 
 
 
+
+
         // =======================
         // EDIT POST
         // =======================
@@ -507,8 +633,15 @@ namespace SetLight.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, CrearRentalOrderViewModel model)
         {
-            // Helper: recargar combos + rehidratar cantidades
-            void RecargarCombos(CrearRentalOrderViewModel m, List<OrderDetailDto> equiposSel = null)
+            // Equipos seleccionados (desde el form)
+            var equiposSeleccionados = model.EquiposSeleccionados?
+                .Where(e => e.Quantity > 0)
+                .ToList() ?? new List<OrderDetailDto>();
+
+            // =======================
+            // Helper: recargar combos + rehidratar cantidades + respetar precio pactado
+            // =======================
+            void RecargarCombos(CrearRentalOrderViewModel m, List<OrderDetailDto> equiposSel = null, Dictionary<int, decimal> precioPactadoMap = null)
             {
                 // Clientes: activos + cliente actual (por si el actual quedó inactivo)
                 m.Clientes = _contexto.Clients
@@ -525,30 +658,40 @@ namespace SetLight.UI.Controllers
                 // Equipos: activos + equipos seleccionados (aunque inactivos)
                 var idsSel = equiposSel?.Select(x => x.EquipmentId).Distinct().ToList() ?? new List<int>();
 
-                m.EquiposDisponibles = _contexto.Equipment
+                var equiposBase = _contexto.Equipment
                     .Where(e => e.Status == 1 || idsSel.Contains(e.EquipmentId))
-                    .Select(e => new OrderDetailDto
-                    {
-                        EquipmentId = e.EquipmentId,
-                        EquipmentName = e.EquipmentName,
-                        Brand = e.Brand,
-                        Model = e.Model,
-                        RentalValue = e.RentalValue,
-                        Stock = e.Stock,
-                        Quantity = 0
-                    }).ToList();
+                    .ToList();
 
-                // Rehidratar cantidades
-                if (equiposSel != null && equiposSel.Any())
-                {
-                    var map = equiposSel.ToDictionary(x => x.EquipmentId, x => x.Quantity);
-                    foreach (var eq in m.EquiposDisponibles)
+                m.EquiposDisponibles = equiposBase
+                    .Select(e =>
                     {
-                        if (map.TryGetValue(eq.EquipmentId, out var qty))
-                            eq.Quantity = qty;
-                    }
+                        int qty = 0;
+                        if (equiposSel != null)
+                        {
+                            var found = equiposSel.FirstOrDefault(x => x.EquipmentId == e.EquipmentId);
+                            if (found != null) qty = found.Quantity;
+                        }
+
+                        // ✅ respetar precio pactado si está disponible
+                        decimal precioParaMostrar = e.RentalValue;
+                        if (precioPactadoMap != null && precioPactadoMap.TryGetValue(e.EquipmentId, out var pactado))
+                            precioParaMostrar = pactado;
+
+                        return new OrderDetailDto
+                        {
+                            EquipmentId = e.EquipmentId,
+                            EquipmentName = e.EquipmentName,
+                            Brand = e.Brand,
+                            Model = e.Model,
+                            RentalValue = precioParaMostrar,
+                            Stock = e.Stock,
+                            Quantity = qty
+                        };
+                    })
+                    .ToList();
+
+                if (equiposSel != null && equiposSel.Any())
                     m.EquiposSeleccionados = equiposSel;
-                }
             }
 
             // 🔒 Validar que la orden exista y sea editable (anti URL / anti POST manual)
@@ -562,18 +705,42 @@ namespace SetLight.UI.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Equipos seleccionados
-            var equiposSeleccionados = model.EquiposSeleccionados?
-                .Where(e => e.Quantity > 0)
-                .ToList() ?? new List<OrderDetailDto>();
+            // =======================
+            // ✅ Misión 2: Validaciones de entrega + normalización
+            // =======================
+            if (model.IsDelivery)
+            {
+                if (string.IsNullOrWhiteSpace(model.DeliveryAddress))
+                    ModelState.AddModelError(nameof(model.DeliveryAddress), "Debe ingresar la dirección de entrega.");
 
+                if (model.TransportCost < 0)
+                    ModelState.AddModelError(nameof(model.TransportCost), "El costo de transporte no puede ser negativo.");
+
+                if (!string.IsNullOrWhiteSpace(model.DeliveryAddress))
+                    model.DeliveryAddress = model.DeliveryAddress.Trim();
+            }
+            else
+            {
+                model.DeliveryAddress = null;
+                model.TransportCost = 0m;
+            }
+
+            // =======================
+            // Validación modelo + equipos
+            // =======================
             if (!ModelState.IsValid || !equiposSeleccionados.Any())
             {
                 if (!equiposSeleccionados.Any())
                     ModelState.AddModelError("", "Debe ingresar la cantidad de al menos un equipo.");
 
-                RecargarCombos(model, equiposSeleccionados);
-                return View(model);
+                // Mapa de precio pactado actual (para que el modal muestre pactado al recargar)
+                var precioPactadoActual = _contexto.OrderDetails
+                    .Where(d => d.OrderId == id)
+                    .GroupBy(d => d.EquipmentId)
+                    .ToDictionary(g => g.Key, g => g.FirstOrDefault().UnitRentalPrice);
+
+                RecargarCombos(model, equiposSeleccionados, precioPactadoActual);
+                return View("Edit", model);
             }
 
             // ✅ Cliente debe seguir activo (o si cambió, el nuevo debe estar activo)
@@ -581,27 +748,46 @@ namespace SetLight.UI.Controllers
             if (clienteDb == null || clienteDb.Status != 1)
             {
                 ModelState.AddModelError("", "No se puede finalizar: el cliente está inactivo o fue desactivado. Seleccione otro cliente.");
-                RecargarCombos(model, equiposSeleccionados);
-                return View(model);
+
+                var precioPactadoActual = _contexto.OrderDetails
+                    .Where(d => d.OrderId == id)
+                    .GroupBy(d => d.EquipmentId)
+                    .ToDictionary(g => g.Key, g => g.FirstOrDefault().UnitRentalPrice);
+
+                RecargarCombos(model, equiposSeleccionados, precioPactadoActual);
+                return View("Edit", model);
             }
 
             using (var transaction = _contexto.Database.BeginTransaction())
             {
                 try
                 {
+                    // =======================
+                    // ✅ Snapshot previo (antes de borrar)
+                    // =======================
+                    var detallesAnteriores = _contexto.OrderDetails
+                        .Where(d => d.OrderId == id)
+                        .ToList();
+
+                    // Mapa: EquipmentId -> UnitRentalPrice pactado anterior
+                    var precioPactadoAnterior = detallesAnteriores
+                        .GroupBy(d => d.EquipmentId)
+                        .ToDictionary(g => g.Key, g => g.First().UnitRentalPrice);
+
+                    // =======================
                     // Actualizar cabecera
+                    // =======================
                     ordenDb.ClientId = model.ClientId;
                     ordenDb.StartDate = model.StartDate;
                     ordenDb.EndDate = model.EndDate;
                     ordenDb.DescuentoManual = model.DescuentoManual;
 
-                    // OJO: No sobrescribimos OrderDate (debe ser la fecha original)
-                    // Si querés fecha de modificación, mejor agregar campo ModifiedDate.
-                    // ordenDb.OrderDate = DateTime.Now;  <-- quitado
+                    // ✅ Misión 2
+                    ordenDb.IsDelivery = model.IsDelivery;
+                    ordenDb.DeliveryAddress = model.DeliveryAddress;
+                    ordenDb.TransportCost = model.TransportCost;
 
                     // Restaurar stock anterior
-                    var detallesAnteriores = _contexto.OrderDetails.Where(d => d.OrderId == id).ToList();
-
                     foreach (var detalle in detallesAnteriores)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(detalle.EquipmentId);
@@ -617,7 +803,10 @@ namespace SetLight.UI.Controllers
                     _contexto.OrderDetails.RemoveRange(detallesAnteriores);
                     await _contexto.SaveChangesAsync();
 
+                    // =======================
                     // Aplicar nuevos detalles + descontar stock
+                    // ✅ Guardar UnitRentalPrice
+                    // =======================
                     foreach (var item in equiposSeleccionados)
                     {
                         var equipo = await _contexto.Equipment.FindAsync(item.EquipmentId);
@@ -632,11 +821,25 @@ namespace SetLight.UI.Controllers
                             );
                         }
 
+                        // ✅ Precio pactado:
+                        // - si el equipo ya estaba antes, conservar el precio anterior
+                        // - si es nuevo, tomar el precio actual del inventario
+                        decimal unitPrice;
+                        if (precioPactadoAnterior.TryGetValue(item.EquipmentId, out var pactado))
+                        {
+                            unitPrice = pactado;
+                        }
+                        else
+                        {
+                            unitPrice = equipo.RentalValue;
+                        }
+
                         _contexto.OrderDetails.Add(new OrderDetailDA
                         {
                             OrderId = id,
                             EquipmentId = item.EquipmentId,
-                            Quantity = item.Quantity
+                            Quantity = item.Quantity,
+                            UnitRentalPrice = unitPrice
                         });
 
                         equipo.Stock -= item.Quantity;
@@ -658,19 +861,31 @@ namespace SetLight.UI.Controllers
                     transaction.Rollback();
                     ModelState.AddModelError(string.Empty, ex.Message);
 
-                    RecargarCombos(model, equiposSeleccionados);
-                    return View(model);
+                    var precioPactadoActual = _contexto.OrderDetails
+                        .Where(d => d.OrderId == id)
+                        .GroupBy(d => d.EquipmentId)
+                        .ToDictionary(g => g.Key, g => g.FirstOrDefault().UnitRentalPrice);
+
+                    RecargarCombos(model, equiposSeleccionados, precioPactadoActual);
+                    return View("Edit", model);
                 }
                 catch (Exception)
                 {
                     transaction.Rollback();
                     ModelState.AddModelError("", "Error al guardar los cambios.");
 
-                    RecargarCombos(model, equiposSeleccionados);
-                    return View(model);
+                    var precioPactadoActual = _contexto.OrderDetails
+                        .Where(d => d.OrderId == id)
+                        .GroupBy(d => d.EquipmentId)
+                        .ToDictionary(g => g.Key, g => g.FirstOrDefault().UnitRentalPrice);
+
+                    RecargarCombos(model, equiposSeleccionados, precioPactadoActual);
+                    return View("Edit", model);
                 }
             }
         }
+
+
 
         // =======================
         // CANCELAR ORDEN
@@ -733,6 +948,7 @@ namespace SetLight.UI.Controllers
             if (cliente == null)
                 return HttpNotFound("Cliente no encontrado");
 
+            // ✅ Detalles con precio pactado (snapshot)
             var detalles = (from detalle in _contexto.OrderDetails
                             join equipo in _contexto.Equipment
                                 on detalle.EquipmentId equals equipo.EquipmentId
@@ -742,26 +958,41 @@ namespace SetLight.UI.Controllers
                                 EquipmentName = equipo.EquipmentName,
                                 Brand = equipo.Brand,
                                 Model = equipo.Model,
-                                RentalValue = equipo.RentalValue,
+
+                                // ✅ usar UnitRentalPrice guardado en OrderDetails
+                                RentalValue = detalle.UnitRentalPrice,
+
                                 Quantity = detalle.Quantity
                             }).ToList();
 
             var dias = (orden.EndDate - orden.StartDate).Days + 1;
             if (dias < 1) dias = 1;
 
-            decimal subtotal = 0m;
+            // =======================
+            // ✅ Cálculos (incluye transporte antes de IVA)
+            // =======================
+            decimal subtotalEquipos = 0m;
             foreach (var d in detalles)
-            {
-                subtotal += d.RentalValue * d.Quantity * dias;
-            }
+                subtotalEquipos += d.RentalValue * d.Quantity * dias;
 
-            var iva = Math.Round(subtotal * 0.13m, 2);
-            var totalBruto = subtotal + iva;
+            // ✅ Transporte solo si es entrega
+            var transporte = orden.IsDelivery ? orden.TransportCost : 0m;
+
+            var subtotalConTransporte = subtotalEquipos + transporte;
+
+            var iva = Math.Round(subtotalConTransporte * 0.13m, 2);
+            var totalBruto = subtotalConTransporte + iva;
 
             var descuentoPct = orden.DescuentoManual ?? 0m;
+            if (descuentoPct < 0m) descuentoPct = 0m;
+            if (descuentoPct > 100m) descuentoPct = 100m;
+
             var montoDescuento = Math.Round(totalBruto * (descuentoPct / 100m), 2);
             var total = totalBruto - montoDescuento;
 
+            // =======================
+            // DTO para el PDF
+            // =======================
             var dto = new RentalOrderDto
             {
                 OrderId = orden.OrderId,
@@ -769,10 +1000,20 @@ namespace SetLight.UI.Controllers
                 StartDate = orden.StartDate,
                 EndDate = orden.EndDate,
                 ClientName = $"{cliente.FirstName} {cliente.LastName}",
+
                 Details = detalles,
-                DescuentoManual = orden.DescuentoManual,
+
                 CantidadDias = dias,
-                Subtotal = subtotal,
+
+                // ✅ nuevos campos
+                IsDelivery = orden.IsDelivery,
+                DeliveryAddress = orden.DeliveryAddress,
+                TransportCost = orden.TransportCost,
+
+                DescuentoManual = orden.DescuentoManual,
+
+                // Totales
+                Subtotal = subtotalEquipos, // si preferís, también podés guardar subtotalConTransporte en otra prop
                 Iva = iva,
                 Total = total
             };
@@ -780,5 +1021,7 @@ namespace SetLight.UI.Controllers
             byte[] pdfBytes = ComprobantePdfService.GenerarEnMemoria(dto);
             return File(pdfBytes, "application/pdf", $"Comprobante_Orden_{dto.OrderId}.pdf");
         }
+
+
     }
 }

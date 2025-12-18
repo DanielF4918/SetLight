@@ -71,32 +71,51 @@ namespace SetLight.UI.Controllers
                 var cliente = contexto.Clients
                     .FirstOrDefault(c => c.ClientId == orden.ClientId);
 
-                // Nombre completo del cliente (si existe)
                 string clienteNombre = cliente != null
                     ? string.Format("{0} {1}", cliente.FirstName ?? "", cliente.LastName ?? "").Trim()
                     : "Sin cliente";
 
-                // 3. Cargar devoluciones de la orden
+                // ✅ 3. Precio pactado por equipo (snapshot)
+                var preciosPactados = contexto.OrderDetails
+                    .Where(od => od.OrderId == orderId)
+                    .Select(od => new { od.EquipmentId, od.UnitRentalPrice })
+                    .ToList()
+                    .GroupBy(x => x.EquipmentId)
+                    .ToDictionary(g => g.Key, g => g.First().UnitRentalPrice);
+
+                // 4. Cargar devoluciones de la orden
                 var devoluciones = contexto.ReturnDetails
                     .Include("Equipment")
                     .Where(d => d.OrderId == orderId)
                     .ToList();
 
-                // 4. Mapear a DTO (aunque no haya devoluciones, dejamos la lista vacía)
-                var viewModel = devoluciones.Select(d => new ReturnDetailsDto
+                // 5. Mapear a DTO
+                var viewModel = devoluciones.Select(d =>
                 {
-                    EquipmentName = d.Equipment.EquipmentName,
-                    ReturnDate = d.ReturnDate,
-                    ConditionReport = d.ConditionReport,
-                    IsReturned = d.IsReturned,
-                    RequiresMaintenance = d.RequiresMaintenance,
+                    preciosPactados.TryGetValue(d.EquipmentId, out var precioPactado);
 
-                    // 🔹 Coincide con el DTO: int ClientId, string ClientName
-                    ClientId = cliente != null ? cliente.ClientId : 0,
-                    ClientName = clienteNombre
+                    return new ReturnDetailsDto
+                    {
+                        ReturnDetailId = d.ReturnDetailId,
+                        OrderId = d.OrderId,
+                        EquipmentId = d.EquipmentId,
+
+                        EquipmentName = d.Equipment != null ? d.Equipment.EquipmentName : "",
+
+                        ReturnDate = d.ReturnDate,
+                        ConditionReport = d.ConditionReport,
+                        IsReturned = d.IsReturned,
+                        RequiresMaintenance = d.RequiresMaintenance,
+
+                        ClientId = cliente != null ? cliente.ClientId : 0,
+                        ClientName = clienteNombre,
+
+                        // ✅ aquí va el snapshot
+                        UnitRentalPrice = precioPactado
+                    };
                 }).ToList();
 
-                // 5. Datos para el resumen de la orden en la vista (cabecera)
+                // 6. Datos para el resumen de la orden en la vista (cabecera)
                 ViewBag.OrderId = orden.OrderId;
                 ViewBag.ClientName = clienteNombre;
                 ViewBag.ClientId = cliente != null ? (int?)cliente.ClientId : null;
@@ -113,6 +132,7 @@ namespace SetLight.UI.Controllers
                 return View(viewModel);
             }
         }
+
 
 
 
