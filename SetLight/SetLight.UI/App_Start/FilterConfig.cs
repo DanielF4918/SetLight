@@ -8,6 +8,7 @@ namespace SetLight.UI
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
+            filters.Add(new HandleAntiForgeryErrorAttribute());
             filters.Add(new HandleErrorAttribute());
             filters.Add(new VerificarEmpleadoActivoAttribute());
         }
